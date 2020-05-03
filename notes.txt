@@ -1,0 +1,99 @@
+music I listened to while working:
+-blue destination (cs2)
+-Such Great Heights
+-A cat relaxing in the sun (sky)
+-Shreksophone
+-Gandalf sax guy
+-Salvage
+-The district sleeps alone tonight
+-diggy diggy hole
+-shine on you crazy diamond
+
+usually a song with the opposite mood of whatever scene I'm in.
+
+==============================
+
+
+
+to get around mc having no name: if hes gets a nickname through events that happen in the story, then the player will have ownership of it. So that needs to happen.
+
+add in time skips and stuff. no need to go over everything in minute detail. Don't go back right now; we have to keep advancing.
+
+mirrors are cheating.
+
+i could draw the whole thing in black and white. startling white and deep black. there's a lot of wiggle room between them.
+
+Flashbacks: greyed over versus black and white. both are neat. black and white has some style.
+
+no cars. individual autonomy is not encouraged by the KBA. people take the f-trains, it's free, but slow. the rich take the m-train. costs money, but fast.
+
+on brainwashing: what's the point? find someone who will do it and thank you for it. worst of all, it takes away that creative viciousness that an exceptional fighter has.
+
+no pov switches. it may be tempting, but this should be a personal story. changing pov and giving the player access to more knowledge distances them from mc. Does it?
+
+#mc and ane are both white-haired
+
+#some argument: (mc is wrong here, obviously)
+#person: i couldnt help doing it, i-
+#mc: theres no such thing as that. distancing yourself from your actions does not absolve you of them.
+#person: [...] in that case i pity you. to think all this time you have never been drawn into an action you couldnt resist. thats hardly living.
+#mc: i like being in control.
+#person: you dont like anything at all, except possibly yourself.
+
+#mc is terrified of losing the watch and is therefore irrational and paranoid in matters that concern it. why though?
+#later he's terrified of losing all the final letters he's carrying for people. friends will try to convince him to share them around.
+#he refuses, saying he's the only one he knows for sure won't die. the rest of you are already dead.
+
+#menu: "bluff but prepare to fight":
+    smart villain "your stance betrays your true intentions. You're planning fighting."
+
+#a self-centered-beauty.
+
+##mc and nai are incapable of doing things simply.
+
+##self-centered: focus on yourself in relation to the rest of the world.
+##self-absorbed: focus on yourself with neglect to the rest of the world.
+
+#god is a show-off. think to that convo in fate zero
+
+#i want to be a non-conformist like everybody else
+
+#greeks trade with other greeks
+
+#####writing things to keep in mind#####
+#-gap: finding it cute when characters act in a way different from their usual character. is it cancer? you decide.
+^pretty sure its cancer.
+
+#-snow under snow: this is a writing technique, used to misdirect. named after yukino from oregairu. this is what it is:
+e.g.
+snow: you think a character is crying because of EVENT. mc goes to see what's wrong.
+under: they are crying because they're listening to sad music/audio book that mc couldn't see. Misdirection.
+snow: but why were they listening to something sad? Because of EVENT.
+^it's misdirection that ties back. mostly it's fun to say snow under snow and to explain it.
+
+#-central and sub antagonists:
+the central antagonist is the main conflict.
+the sub antagonist delivers the conflict to the protagonists. The central antagonist gives the sub antagonist agency.
+eg. Palp and Vader
+in our case:
+-central antagonist: the war?
+-sub antagonist: lots of different ones.
+
+####
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#eof

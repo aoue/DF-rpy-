@@ -1,0 +1,55 @@
+=-----heights------=
+how tall each character is/should be.
+20 pix ~= .5 cm
+
+
+format :
+char | height | y-pix | in universe
+
+--from tallest to shortest:
+(subject to change)
+
+YVE | tall | 700 | 6'00
+
+EMERY | tall | 690 | 5'11
+
+ANE | med-tall | 680 | 5'10
+
+NAI | med | 671 | 5'9
+
+MC | med | 670 | 5'9
+
+TORI | med | 665 | 5'7
+
+DG | short | 660 | 5'6
+
+*don't ever refer to the heights as a number in game. This is just for you.
+
+=-----------------=
+done:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##EOF

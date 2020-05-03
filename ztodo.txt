@@ -1,0 +1,56 @@
+------what needs doing-------
+
+combat system (5x5, use moves, take damage)
+ -create a unit and get it to display.
+ -test damage on the unit
+
+reposition battlefield information
+
+use moves on the battlefield (move the char and do damage). pick where the move lands.
+
+leveling up (increase stats + learn moves)
+
+moves (pick and choose before battle. adjust moves once you click the unit in deploy screen but before clicking the spot. show the changes options with show screen)
+
+stances (implement their effects)
+
+AI (so you can fight a mock battle)
+
+combat test (full on)
+
+inventory system (acquire and change gear. should be easy. make an inventory list and just whatever.)
+
+make the dungeon crawler interface (just images of interconnecting rooms, where each room is an image button and it shows up if you've explored it, and is clickable if you're adjacent. use a 2d array for this too.)
+
+make the glossary (cannibalize the letter viewport grid)
+
+make the map.
+
+figure out why my Unicode characters aren't working. ex: \u2603 should be a snowman
+
+blender grease pencil. can interpolate animations. I can make all my still images animated. both for in combat and out. even the backgrounds can be animated.
+---------------------------------
+combat thingies:
+
+some units might get stuck. <- fix this.
+^a swap phase after attacking, where you can move 1 unit 1 space. also helps with making tactical dodges/slight rearrangements.
+
+defeated allies stay on the board. they can be revived.
+
+defeated enemies go off the board.
+
+damage formula (there's a working one... quality undetermined.)
+
+move targeting and hovering over targeted area. (in progress, imperfect.)
+-some moves allow you to select where you want it to hit, some moves always hit in the same place.
+ -e.g. a heal might always affect squares adjacent to the user.
+ -e.g. a heroic attack might hit the enemy board with the cross shape.
+
+
+
+
+
+
+
+
+EOF

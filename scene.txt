@@ -1,0 +1,126 @@
+maintain a list of all the different scenes and identify overlap
+
+divided by geography
+DAY | DESCRIPTION
+
+=====OTHER=====
+-newslogo | the logo of the news show.
+-doorjam | a group gathering on the uniclass side of campus door. the door is jammed.
+-dg_glamour | a glamourous shot of dg. drawn to make her beautiful. it's for humourous purpose. takes up full screen.
+-worldmap | map of the known world. lots of dark or uncolored areas.
+    -worldmap_sarranais | same map, but with a stick pointing to the place
+    -worldmap_sineb | same map, but with a stick pointing to the place
+    -worldmap_larisse | same map, but with a stick pointing to the place
+    -worldmap_donnlier | same map, but with a stick pointing to the place
+
+=====FLASHBACKS=====
+-flashback0 | greyed out image of this from de2: y "Is that it? There's nothing besides this?"
+-flashback1 | greyed out image of dg at the door.
+-flashback2 | greyed out image of yve smiling/laughing or something.
+-flashback3 | greyed out image of emery
+-flashback4 | greyed out image from day 2: a "Speaking of money, how are you guys going to manage the extra cost of the place once I leave?" or similar
+-flashback5 | greyed out image from day 2: a "Extra sketchy, you always look it somewhat. Don't tell me you've never noticed?"
+
+=====HOMETOWN=====
+-fbpark | a park in mc's hometown. slide, monkeybars, trees, whatever. the ground has slush on it and puddles too.
+    -fbpark_birds | the same, but there are birds around.
+    -fbpark_rock | birds around and rocks being thrown through the air at them.
+    -fbpark_hit | no more birds or rocks. crumpled body of the dead bird at a distance. some blood on the ground next to it.
+
+
+=====APARTMENT=====
+-apartment | anne's apartment. tv(off), table, couch.
+    -apartment_tv |  tv is turned on
+    -apartment_evening | same, but evening.
+-apartment_hall | hallway in the apartment. three bedrooms along it. dead end.
+-kitchen | kitchen. stove, fridge, sink.
+-apartment_room_nai | Nai's room
+
+
+=====CAMPUS=====
+-campus | the main circle area in the campus. some grass, fountain, buildings.
+    -campus_busy | lots of people.
+-campus_library | inside the campus' library. three floors. reception desk, bathroom, stairs up.
+    -campus_library_2 | second floor.
+-campus_archives | the archives. a hallway, packed on either side with stacks of documents in boxes on wire shelves.
+    -campus_archives_room | a room in the archives. just a different set piece. a table, still stacks of documents along the walls.
+-campus_roof | the roof of the library. low wall around the edge.
+    -campus_roof_glamour | it's pretty. a lot of sunlight. the gang is standing on the middle of the roof. it's a far shot. mc is visible in his white-haired glory. the mountain is in the distance of the shot too. so is the town.
+-campus_door | door outside a classroom.
+-campus_hall | hallway outside classroom.
+-campus_class | a classroom with a semi circle of tiered seats.
+    -campus_class_profg | prof g at her desk. busy working.
+    -campus_class_front | in the front of the classroom.
+    -campus_class_hands | a few people have raised their hands.
+-campus_edge | it's the edge of campus. on a paved walkway. to the left: street. to the right: dorms.
+    -campus_edge_busy | lots of people.
+    -campus_edge_night | nighttime.
+    -campus_edge_parade | lots of people all standing around. the street going to the center of town is closed off. no guards or anything, just hurdles.
+-campus_dorm | the dorm's lobby
+-campus_dorm_yve | yve's room
+
+
+=====LARISSE=====
+-street | a street in larisse. houses, trees, mt pess in the distance.
+    -street_evening | evening.
+    -street_night | nighttime.
+-starry_sky | the night sky as seen from a Larisse. stars.
+    -starry_sky_planes | five planes blink across the starry sky.
+-field | the azalea field. snowed over. empty.
+    -field_dg | dg is sitting in the field like a fool.
+    -field_footprints | the field has footprints in it. dg left them.
+-infield | the normal view is from the sidewalk. this view is inside the field.
+    -infield_dg | dg sitting in the field.
+    -infield_dg_focus | dg focusing on mc/the camera
+-cafe | the cafe downtown. some people.
+    -cafe_full | pretty full.
+    -cafe_sparse | pretty empty.
+-town_convoy | the convoy preceeding through Larisse. POV should be in the sky at an angle. the convoy is a bunch of trucks and some flatbeds. on the flatbeds are tarps tied down over the bulk of different mechs.
+
+=====MOUNT PESSEVAINE=====
+-pessevaine | a far off shot seen from larisse.
+-
+
+
+
+
+=====LAFALAIS=====
+-
+
+
+
+
+
+
+=====FRONTLINES=====
+-sineb_bank | where the kba reporters broadcast the anniversary from. hill, grass, sineb in the background. Later | the gang will get to the sineb and recognize it.
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#eof
