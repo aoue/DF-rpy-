@@ -95,7 +95,7 @@ init python:
             return
 
         def reset_deployment(self):
-            self.set_deploycounter(0)
+            self.set_dc(0)
             for i in range(0, len(playerlist)):
                 playerlist[i].set_deployable(1)
                 renpy.hide(playerlist[i].icon)

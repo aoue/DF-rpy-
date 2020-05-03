@@ -1,3 +1,15 @@
+------the very next thing(s)------
+
+telling the grid where each unit is. grid class
+
+walk option: costs no stamina, but costs 1 able.
+(add to pick moves below stamina. move 1 in any direction.) The player might have to decide that its worth the stamina/able cost to move a gravely injured unit out of the way of an attack. However, it costs them their turn regardless, so the enemy is free to start another attack right away.
+
+clearance checks for moves
+
+dealing damage to the target. (instead of the square, pass in a list of targets? idk)
+
+
 ------what needs doing-------
 
 combat system (5x5, use moves, take damage)
@@ -31,6 +43,20 @@ figure out why my Unicode characters aren't working. ex: \u2603 should be a snow
 blender grease pencil. can interpolate animations. I can make all my still images animated. both for in combat and out. even the backgrounds can be animated.
 ---------------------------------
 combat thingies:
+
+instead of the whole: 1 unit gets 1 action per 1 round thing: stamina.
+-as many moves as you have able and stamina.
+-each move spends some combination of the unit's stamina and able. some may spend none of a certain type.
+-the round persists until all unit's able is 0.
+-units recover a portion of their stamina, and a new round begins.
+
+exhaustion stance. if a unit's stamina goes to 0, apply this stance.
+-the unit takes 50% more damage.
+-the unit's able is set immediately to 0.
+-the unit regains stamina at half the pace while the stance persists.
+
+each time a unit's acted this round, their next attack deals 10% more damage. 'combos'
+e.g. the unit has acted twice: damage = 1.2 * damage
 
 some units might get stuck. <- fix this.
 ^a swap phase after attacking, where you can move 1 unit 1 space. also helps with making tactical dodges/slight rearrangements.

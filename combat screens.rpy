@@ -36,138 +36,6 @@ label battle0:
 
     return
 
-screen show_units(pl, el):
-    for i in range(0, len(pl)):
-        add pl[i].get_icon() pos(275 + 125*pl[i].get_point().get_x(), 385 + 65*pl[i].get_point().get_y())
-
-    for i in range(0, len(el)):
-        add el[i].get_icon() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
-        text el[i].get_name() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
-
-screen order_unit(pl):
-    #select which unit to order from available units that have yet to act. returns rank of unit.
-    for i in range (0, len(pl)):
-        if pl[i].get_able() == 1:
-            button:
-                pos(275 + 125*pl[i].get_point().get_x(), 385 + 65*pl[i].get_point().get_y())
-                text pl[i].get_name()
-                action Return(pl[i])
-
-
-screen pick_move(unit):
-    #show moves. top left of box is 900, 175
-
-    #TODO. show move descrition/image on hover.
-
-    frame:
-        xpadding 5
-        ypadding 5
-        yalign 0.4
-        xalign 0.8
-        vbox:
-            text "Selected: " + unit.get_name()
-            spacing 10
-            for i in range(0, len(unit.get_moves())):
-                if (unit.get_point().get_y() in range(0, 3)) and unit.get_moves()[i].get_rank() == 1:
-                    textbutton unit.get_moves()[i].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y()), Return
-
-                elif (unit.get_point().get_y() in range(3, 5)) and unit.get_moves()[i].get_rank() == 2:
-                    textbutton unit.get_moves()[i].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y()), Return
-
-            if unit.get_evo() == 1:
-                textbutton unit.get_moves()[7].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y()), Return
-
-            textbutton "Pass" action Return
-
-
-screen enemy_highlight(unit):
-    #highlight some squares on enemy board relative to mouse pos and borders of the grid.
-    #when clicked, make a list of every affected square, and return it.
-    #if unit.get_displayhelper() == 1: enum
-
-    #$checkEvent()
-    #text "{}".format(store.mousePosition) #TODO
-    zorder 100 #for some reason, every unit is
-
-    #x = unit.get_point().
-
-    for column in range(0, 5): #column
-        for row in range(0, 5): #row
-            #if spot is empty, then:
-            imagebutton:
-                idle "images/combat/fx/tile.png"
-                hover "images/combat/fx/tile hover.png"
-                pos(275 + row*125, 5 + column*65)
-                action Return((row, column)) hovered Function(enemy_highlighter, unit, row, column) #unhovered Function(hide_highlighter)
-
-                #return tuple of top left corner
-
-
-#------ally side positions------#
-#px: 275 + 125*(point.get_x()), , 385 + 65*(point.get_y())
-
-#------enemy side positions------#
-#px: 275 + 125*(point.get_x()), , 5 + 65*(point.get_y())
-
-
-
-init python:
-
-    #stuff to fix. Should probably step through the programming necessary.
-    # -shows some areas out of bounds.
-    # -some other strange stuff.
-    # -is not highlighting the multi target areas like i want it to.
-
-    def enemy_highlighter(unit, row, column):
-        renpy.hide("tile_hovered")
-        #if unit.get_moves()[row].get_type() == 0:
-            #renpy.show("tile_hovered", at_list=[tile_hover(row, column)])
-        #    pass
-        if unit.get_moves()[row].get_type() == 1:
-            renpy.show("tile_hovered", at_list=[tile_hover(row, column-1)])
-
-        #if 2:
-
-        #etc
-
-    def hide_highlighter():
-        renpy.hide("tile_hovered")
-
-
-
-    #(x,y) are the grid coordinates of the highlighted square. the type tells you what other squares should be highlighted as well, so long as they don't exceed the edges.
-
-screen ally_highlight(unit):
-    #highlight some squares on allied board relative to mouse pos and borders of the grid.
-    #when clicked, make a list of every affected square, and return it.
-
-    pass
-
-screen pick_target_area(type):
-    #type: the type of target area.
-    # 1: single
-    # 2: horizontal pair
-    # 3: horizontal trio
-    # 4: horizontal quartet
-    # 5: horizontal line
-
-    # 5: vertical pair
-    # 6: vertical trio
-    # 7: vertical quarter
-    # 8: vertical line
-
-    # 9: 2x2 box
-    # 10: 3x3 box
-    # 11: 2x3 box
-    # 12: 3x2 box
-
-    # 13: 5x5 cross
-
-    #method:
-    #wherever the mouse is part of the shape. the rest of the shape is highlighted on squares for the player's benefit.
-    pass
-
-
 screen combatinfo(pl, el, pt, et, tl, rounds, ph):
     #display battle information: turns left for each, rounds, hp, positions, etc
     vbox:
@@ -184,13 +52,152 @@ screen combatinfo(pl, el, pt, et, tl, rounds, ph):
         yalign 0.9
         spacing 2
         for i in range(0, len(pl)):
-            text "{}'s hp = {} ({}) [[{}]".format(pl[i].get_name(), str(pl[i].get_hp()), str(pl[i].get_dodge()), pl[i].get_able())
+            text "{}'s hp = {} ({}) [[{}] stam={}".format(pl[i].get_name(), str(pl[i].get_hp()), str(pl[i].get_dodge()), pl[i].get_able(), pl[i].get_stamina())
     vbox:
         xalign 1.0
         yalign 0.9
         spacing 2
         for i in range(0, len(el)):
             text "{}'s hp = {} ({}) [[{}]".format(el[i].get_name(), str(el[i].get_hp()), str(el[i].get_dodge()), el[i].get_able())
+
+screen show_units(pl, el):
+    zorder 99
+    for i in range(0, len(pl)):
+        add pl[i].get_icon() pos(275 + 125*pl[i].get_point().get_x(), 385 + 65*pl[i].get_point().get_y())
+
+    for i in range(0, len(el)):
+        add el[i].get_icon() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
+        text el[i].get_name() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
+
+screen order_unit(pl):
+    #select which unit to order from available units that have yet to act. returns rank of unit.
+    zorder 100
+    for i in range (0, len(pl)):
+        if pl[i].get_able() > 0:
+            button:
+                pos(275 + 125*pl[i].get_point().get_x(), 385 + 65*pl[i].get_point().get_y())
+                text pl[i].get_name()
+                action Return(pl[i])
+
+
+screen pick_move(unit, battle):
+    #show moves. top left of box is 900, 175
+    #TODO. show move descrition/image on hover.
+    ##TODO clearance checks
+    #stamina checks
+
+    frame:
+        xpadding 5
+        ypadding 5
+        yalign 0.4
+        xalign 0.8
+        vbox:
+            text "Selected: " + unit.get_name()
+            spacing 10
+            for i in range(0, len(unit.get_moves())):
+                if (unit.get_point().get_y() in range(0, 3)) and unit.get_moves()[i].get_rank() == 1:
+                    textbutton unit.get_moves()[i].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
+
+                elif (unit.get_point().get_y() in range(3, 5)) and unit.get_moves()[i].get_rank() == 2:
+                    textbutton unit.get_moves()[i].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
+
+            if unit.get_evo() == 1:
+                textbutton unit.get_moves()[7].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
+
+            textbutton "Walk" action Function(unit.walk, unit), Return
+
+            textbutton "Pass" action Function(unit_pass, unit), Return
+
+
+
+screen enemy_highlight(unit, cmove):
+    zorder 101
+
+    for column in range(0, 5): #column
+        for row in range(0, 5): #row
+            imagebutton:
+                idle "images/combat/fx/tile.png"
+                hover "images/combat/fx/tile e hover.png"
+                pos(275 + row*125, 5 + column*65)
+                action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple of top left corner
+
+screen ally_highlight(unit, cmove):
+    zorder 101
+    for column in range(0, 5): #column
+        for row in range(0, 5): #row
+            imagebutton:
+                idle "images/combat/fx/tile.png"
+                hover "images/combat/fx/tile f hover.png"
+                pos(275 + row*125, 385 + column*65)
+                action Return((row, column)) hovered Function(ally_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple of top left corner
+
+
+
+#------ally side positions------#
+#px: 275 + 125*(point.get_x()), , 385 + 65*(point.get_y())
+
+#------enemy side positions------#
+#px: 275 + 125*(point.get_x()), , 5 + 65*(point.get_y())
+
+init python:
+    #---- TARGETING LEGEND ----
+    # 1: 1x1
+    # 2: 1x2
+    # 3: 1x3
+    # 4: 1x4
+    # 5: 1x5
+    # 6: 2x1
+    # 7: 2x2
+    # 8: 2x3
+    # 9: 2x4
+    #10: 2x5
+    #11: 3x1
+    #12: 3x2
+    #13: 3x3
+    #14: 3x4
+    #14: 3x5
+    #15: 4x1
+    #16: 4x2
+    #17: 4x3
+    #18: 4x4
+    #19: 4x5
+    #20: 5x1
+    #21: 5x2
+    #22: 5x3
+    #23: 5x4
+    #24: 5x5
+    #26: cross 3x3
+    #27: cross 5x5
+
+    def enemy_highlighter(unit, cmove, row, column):
+        if cmove.get_type() == 2:
+            renpy.show("tile_e_hovered", at_list=[e_tile_hover(row, column-1)], zorder = 102)
+
+        elif cmove.get_type() == 3:
+            pass
+
+    #highlighting allied grid
+    def ally_highlighter(unit, cmove, row, column):
+        if cmove.get_type == 2:
+            renpy.show("tile_f_hovered", at_list=[a_tile_hover(row, column-1)], zorder = 102)
+
+        elif cmove.get_type() == 3:
+            pass
+
+
+    def hide_highlighter():
+        renpy.hide("tile_hovered")
+
+    def unit_pass(unit):
+        unit.set_able(unit.get_able()-1)
+        unit.set_stamina(min(unit.get_stamina()+10, unit.get_staminamax()))
+
+
+
+
+
+
+
 
 
 

@@ -50,9 +50,11 @@ init -555:
         pos(x,y)
 
     #battle fx
-    transform tile_hover(row, column):
-        pos(275 + max(row+1, 4) *125, 5 + max(column, 4) * 65)
+    transform e_tile_hover(row, column):
+        pos(275 + min(row, 4) *125, 5 + min(column, 4) * 65)
 
+    transform a_tile_hover(row, column):
+        pos(275 + min(row, 4) *125, 385 + min(column, 4) * 65)
 
     #px: 320 + 120*(point.get_x()), 135 + 65*(point.get_y())
 
@@ -73,8 +75,11 @@ init -555:
 
 
     #battle fxs
-    image tile_hovered:
-        "images/combat/fx/tile hover.png"
+    image tile_e_hovered:
+        "images/combat/fx/tile e hover.png"
+    image tile_f_hovered:
+        "images/combat/fx/tile f hover.png"
+
 
     #unit imgs. dimensions are (82, 60). obv these are trash dimensions.
     image icon_grunt:

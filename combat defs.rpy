@@ -1,16 +1,10 @@
-
-#types of units: (combined arms)
-#-squad: a group of people with some type of weapons. varies depending on weapon.
-#-tank: a single or pair of tanks with some type of weapoms. varies depending on model
-#-artillery: varies on model
-#-mech: varies on model. tigers, dragonflys, hyenas, etc?
-
 #--LEGEND--#
 #self.name = "vile grunt"
 #self.point = point(0, 0) #instance of point class. coordinates for unit's position.
 #self.icon = "icon_grunt" #picture
 #self.deployable = 1 #whether you can field them
 #self.able = 1 #let's the unit act each round
+#self.stamina = 50 #basically mana. some recovers each round.
 #self.lvl = 0 #lvl, tracks stat increase and move learning. start at lvl 0.
 #self.exp = 0 #the unit's exp for leveling up
 #self.evo = 0 #whether the unit is in evo mode
@@ -30,7 +24,8 @@
 #self.stance = [0] * 5 #times however many stances there are
 
 #self.pattern = 3 #3/3
-#self.flavour = [""] * 7 # 7 of them. is set when moves are selected
+#self.move1 = fyaya #its a child object of the move class
+#self.moves = [] #its a list of every move.
 
 #--------------------------------
 #self.pattern = 0 #how many moves the unit has
@@ -54,7 +49,52 @@
 
 
 init python:
-    #https://lemmasoft.renai.us/forums/viewtopic.php?t=19572    <-- ripped from
+
+    #--- BATTLE ---
+    class map():
+        def __init__(self):
+            #self.map = [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4]] #the grid
+
+            self.map = [[None]*5, [None]*5] #the grid. fill a certain spot with a unit child object
+
+            self.ul = [] #unit list
+
+        #getters
+        def get_map(self):
+            return self.map
+        def get_ul(self):
+            return self.ul
+
+        def set_unit(self, unit):
+            #take in unit. plop it in ul
+
+            #or I could
+
+            pass
+
+        def move_unit(self, unit):
+            #move the unit from one map place to another
+            pass
+
+        def kill_unit(self, unit):
+            #enemy unit ooa. remove
+            pass
+
+        def search_allymap(self, row, col):
+            unit = self.get_allymap().index(row, col)
+            #
+            #look through allymap and find any unit that matches these coordinates
+            #For lists, there's also the index method that can sometimes be useful if you want to know where a certain element is in the list:
+            #list.index(int) -> returns
+
+            return unit
+
+        def search_enemymap(self, row, col):
+            #look through allymap and find any unit that matches these coordinates
+            unit = self.get_enemymap().index(row, col)
+
+            return unit
+
 
     class battle(): #battle class. runs all the battles nice and tidily.
         def __init__(self, rounds, pl, el, bg):
@@ -63,58 +103,68 @@ init python:
             self.phase = ""
             self.pl = pl
             self.el = el
-            self.allymap = [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4]]
-            self.enemymap = [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4]]
+            pable = 0
+            eable = 0
+            ableleft = 0
+            self.allymap = map()
+            self.enemymap = map()
 
         #getters
-        def get_pturns(self):
-            return self.pturns
-        def get_eturns(self):
-            return self.eturns
-        def get_bg(self):
-            return self.bg
         def get_rounds(self):
             return self.rounds
+        def get_bg(self):
+            return self.bg
+        def get_phase(self):
+            return self.phase
         def get_pl(self):
             return self.pl
         def get_el(self):
             return self.el
-
-        def get_phase(self):
-            return self.phase
+        def get_pable(self):
+            return self.pable
+        def get_eable(self):
+            return self.eable
+        def get_ableleft(self):
+            return self.ableleft
+        def get_allymap(self):
+            return self.allymap
+        def get_enemymap(self):
+            return self.enemymap
 
         #setters
-        def set_pturns(self, pturns):
-            self.pturns = pturns
-        def set_eturns(self, eturns):
-            self.eturns = eturns
-        def set_phase(self, phase):
-            self.phase = phase
-        def set_bg(self, bg):
-            self.bg = bg
         def set_rounds(self, rounds):
             self.rounds = rounds
+        def set_bg(self, bg):
+            self.bg = bg
+        def set_phase(self, phase):
+            self.phase = phase
+        def set_pable(self, pable):
+            self.pable = pable
+        def set_eable(self, eable):
+            self.eable = eable
+        def set_ableleft(self, ableleft):
+            self.ableleft = ableleft
 
         #--during battle
-        def calc_pturns(self):
-            pturns = 0
+        def calc_pable(self):
+            pable = 0
             for i in range(0, len(self.get_pl())):
-                if self.get_pl()[i].get_ooa() == 0:
-                    pturns += 1
-            return pturns
-        def calc_eturns(self):
-            eturns = 0
+                pable += self.get_pl()[i].get_able()
+            return pable
+        def calc_eable(self):
+            eable = 0
             for i in range(0, len(self.get_el())):
-                if self.get_el()[i].get_ooa() == 0:
-                    eturns += 1
-            return eturns
+                eable += self.get_el()[i].get_able()
+            return eable
         def reset_round(self):
+            renpy.say(None, "new round")
+            self.refresh_stamina()
             for i in range(0, len(self.get_pl())):
                 if self.get_pl()[i].get_ooa() == 0:
-                    self.get_pl()[i].set_able(1)
+                    self.get_pl()[i].set_able(self.get_pl()[i].get_ablemax())
             for i in range(0, len(self.get_el())):
                 if self.get_el()[i].get_ooa() == 0:
-                    self.get_el()[i].set_able(1)
+                    self.get_el()[i].set_able(self.get_el()[i].get_ablemax())
         def is_battle_over(self):
             if self.get_rounds() == 0:
                 renpy.say(None, "Time elapsed.")
@@ -124,9 +174,12 @@ init python:
                 return 1
             else:
                 return 0
-        def refresh_visuals(self, turnsleft):
-            renpy.show_screen("combatinfo", self.get_pl(), self.get_el(), self.get_pturns(), self.get_eturns(), turnsleft, self.get_rounds(), self.get_phase())
+        def refresh_visuals(self):
+            renpy.show_screen("combatinfo", self.get_pl(), self.get_el(), self.get_pable(), self.get_eable(), self.get_ableleft(), self.get_rounds(), self.get_phase())
             renpy.show_screen("show_units", self.get_pl(), self.get_el())
+        def refresh_stamina(self):
+            for i in range(0, len(self.get_pl())):
+                self.get_pl()[i].set_stamina(min(self.get_pl()[i].get_stamina() + self.get_pl()[i].get_restam(), self.get_pl()[i].get_staminamax()))
 
         #--settings
         def prebattle_settings(self):
@@ -144,47 +197,44 @@ init python:
             #click on move. pick target location.
             #resolve damage, etc.
             chosen = renpy.call_screen("order_unit", self.get_pl())
-            renpy.call_screen("pick_move", chosen)
+            renpy.call_screen("pick_move", chosen, self)
 
         def enemy_turn(self):
-            renpy.say(None, "Dieee")
+            renpy.say(None, "enemy turn")
+
 
         def combat_round(self):
             self.prebattle_settings()
 
             while self.get_rounds > 0: #for the whole fight
-                self.set_pturns(self.calc_pturns())
-                self.set_eturns(self.calc_eturns())
-                turnsleft = self.get_pturns() + self.get_eturns()
+                self.set_pable(self.calc_pable())
+                self.set_eable(self.calc_eable())
+                self.set_ableleft(self.get_pable() + self.get_eable())
 
-                while turnsleft > 0: #for one round
+                while self.get_ableleft() > 0: #for one round
 
-                    if self.get_pturns() > 0: #player turn
+                    if self.get_pable() > 0: #player turn
                         self.set_phase("act")
-                        self.refresh_visuals(turnsleft)
+                        self.refresh_visuals()
 
-                        #keep separate to help handle extra turns and whatnot.
-                        #select unit. (using a screen)
-                        #show unit's moves (using another screen)
-                        #activate the selected move.
                         self.player_turn()
 
-                        self.set_pturns(self.get_pturns()-1)
-                        self.refresh_visuals(turnsleft)
+                        self.set_pable(self.calc_pable())
+                        self.refresh_visuals()
 
-                    turnsleft = self.get_pturns() + self.get_eturns()
+                    self.set_ableleft(self.get_pable() + self.get_eable())
 
-                    if self.get_eturns() > 0: #enemy turn
+                    if self.get_eable() > 0: #enemy turn
                         self.set_phase("vile")
-                        self.refresh_visuals(turnsleft)
+                        self.refresh_visuals()
 
-                        #enemy thinks
                         self.enemy_turn()
 
-                        self.set_eturns(self.get_eturns()-1)
-                        self.refresh_visuals(turnsleft)
+                        #self.set_eable(self.calc_eable())
+                        self.set_eable(self.get_eable()-1) #Temporary measure until you do enemy's turn
+                        self.refresh_visuals()
 
-                    turnsleft = self.get_pturns() + self.get_eturns()
+                    self.set_ableleft(self.get_pable() + self.get_eable())
 
                 if self.is_battle_over() == 1:
                     return
@@ -194,6 +244,8 @@ init python:
 
             self.postbattle_settings()
 
+
+    #--- POINT ---
     class point():
         def __init__(self, x, y):
             self.x = x
@@ -206,61 +258,120 @@ init python:
             return self.x
         def get_y(self):
             return self.y
+        def get_tuple(self):
+            return (self.x, self.y)
 
+
+    #--- MOVES ---
     class move():
         def __init__(self):
             self.flavour = "{i}hit hard and fast{/i}"
             self.title = "move"
             self.rank = 0 #can be 0, 1, or 2. determines where the move can be used
-            self.displayer = 0 #int in some range. tells what kind of display to be.
-            self.type = 0 #for targeting. 1 through 13? each one means a different shape.
+            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
             self.iff = 0 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
+            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
+            self.clearance_type = 0 #0 for needs total clear path. 1 for needs only clear destination.
+            self.stamina_drain = 0 #the amount of stamina the unit loses using this move
+            self.able_drain = 0 #the amount of able the unit loses using this move
+            self.power = 0 #affects damage
 
+        #getters
         def get_flavour(self):
             return self.flavour
         def get_title(self):
             return self.title
         def get_rank(self):
             return self.rank
-        def get_displayer(self):
-            return self.displayer
         def get_type(self):
             return self.type
         def get_iff(self):
             return self.iff
+        def get_clearance(self):
+            return self.clearance
+        def get_clearance_type(self):
+            return self.clearance_type
+        def get_stamina_drain(self):
+            return self.stamina_drain
+        def get_able_drain(self):
+            return self.able_drain
+        def get_power(self):
+            return self.power
 
-        def effect(self):
-            pass
+        #useful functions
+        def translate(self, unit):
+            #we do not have to worry about borders, because the player cannot click on the move if its out of bounds.
+            unit.set_point(unit.get_point().get_x() + self.get_clearance()[0], unit.get_point().get_y() + self.get_clearance()[1])
+        def drain(self, unit):
+            unit.set_stamina(max(unit.get_stamina()-self.get_stamina_drain(), 0))
+            unit.set_able(max(unit.get_able()-self.get_able_drain(), 0))
 
     class hit(move):
         def __init__(self):
             self.flavour = "{i}A hit, hard and fast.{/i}"
             self.title = "Hit"
             self.rank = 1
-            self.displayer = 0
-            self.type = 0
+            self.type = 1
             self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 0
+            self.stamina_drain = 15
+            self.able_drain = 1
+            self.power = 0
+
+        def exert(self, unit, sq, battle):
+            #unit: the unit doing the attack
+            #sq: the clicked square
+
+            #moves cost stamina and able
+            self.drain(unit)
+
+            self.translate(unit)
+
+            #for each affected unit:
+            #get total. split damage by total.
+            #deal split damage to each of them.
 
     class jumpkick(move):
         def __init__(self):
             self.flavour = "{i}Fly in from the back.{/i}"
             self.title = "Jump Kick"
             self.rank = 2
-            self.displayer = 0
-            self.type = 1
+            self.type = 2
             self.iff = 0
+            self.clearance = (0,-2)
+            self.clearance_type = 1
+            self.stamina_drain = 20
+            self.able_drain = 2
+            self.power = 0
+
+        def exert(self, unit, sq, battle):
+            #unit: the unit doing the attack
+            #sq: the clicked square
+            self.drain(unit)
+
+            self.translate(unit)
 
     class evo_storm(move):
         def __init__(self):
             self.flavour = "{i}Storm on the horizon.{/i}"
             self.title = "Storm"
             self.rank = 0
-            self.displayer = 0
-            self.type = 0
-            self.iff = 0
+            self.type = 1
+            self.iff = 2
+            self.clearance = (0,0)
+            self.clearance_type = 0
+            self.stamina_drain = 0
+            self.able_drain = 0
+            self.power = 0
+
+        def exert(self, unit, sq, battle):
+            #unit: the unit doing the attack
+            #sq: the clicked square
+            pass
 
 
-    #unit parent class
+    #--- UNITS ---
     class unit:
         #constructor:
         def __init__(self):
@@ -268,7 +379,11 @@ init python:
             self.point = point(0,0) #instance of point class. coordinates for unit's position.
             self.icon = "mechicon_mc" #picture
             self.deployable = 1 #whether you can field them
-            self.able = 1 #let's the unit act each round
+            self.ablemax = 2 #max of able
+            self.able = 2 #let's the unit act each round
+            self.staminamax = 50 #stamina max
+            self.stamina = 50 #basically mana. some recovers each round.
+            self.restam = 15 #the amount of stamina that recovers each round
             self.lvl = 0 #what level the unit's at.
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
@@ -306,8 +421,16 @@ init python:
             return self.icon
         def get_deployable(self):
             return self.deployable
+        def get_ablemax(self):
+            return self.ablemax
         def get_able(self):
             return self.able
+        def get_staminamax(self):
+            return self.staminamax
+        def get_stamina(self):
+            return self.stamina
+        def get_restam(self):
+            return self.restam
         def get_lvl(self):
             return self.lvl
         def get_exp(self):
@@ -354,8 +477,16 @@ init python:
             self.icon = icon
         def set_deployable(self, deployable):
             self.deployable = deployable
+        def set_ablemax(self, ablemax):
+            self.ablemax = ablemax
         def set_able(self, able):
             self.able = able
+        def set_staminamax(self, staminamax):
+            self.staminamax = staminamax
+        def set_stamina(self, stamina):
+            self.stamina = stamina
+        def set_restam(self, restam):
+            self.restam = restam
         def set_lvl(self, lvl):
             self.lvl = lvl
         def set_exp(self, exp):
@@ -393,6 +524,13 @@ init python:
         def set_flavour(self, i, flavour):
             self.flavour[i] = flavour
         #useful functions
+        def walk(self, grid):
+            #move 1 square in any direction. respect borders, respect collision.
+            #this means i need to pass in the grid, yeah
+
+            unit.set_able(unit.get_able()-1)
+
+
         def get_aff_mod(self, target, ele):
             #used in calc damage.
             #ele = affinity of the move
@@ -585,6 +723,8 @@ init python:
             #type: physical or magical damage
             #element: affinity of the damage
 
+            #there is no way to differentiate the power of a certain move. add that in to the damage formula.
+
             aff_mod = self.get_aff_mod(target, ele)
             variance = randint(230, 255) / 255 #10 % damage variance
 
@@ -598,7 +738,7 @@ init python:
             #look through damage mod stances. they affect the stats.
             #[...]
 
-            dmg = int(((2*attack - defense) / defense) * (20 + self.get_lvl()) * aff_mod * variance)
+            dmg = int(((2*attack - defense) / defense) * (20 + self.get_lvl()) * aff_mod * variance) #* move power or something
             return dmg
 
         def take_damage(self, target, damage):
@@ -617,50 +757,36 @@ init python:
                 target.set_ooa(0)
                 #target.set_icon("unconcious")
 
-        def use_move(self, cmove, x, y):
+        def use_move(self, cmove, x, y, battle):
             #legend:
             # cmove = the chosen move. e.g. hit. it's an object.
 
-
-            #method:
-            # 1. calc xc, yc
-            # 2. call highlight, pass in xc, yc, targeting type. Return = a list of all the affected spots.
-            # 3. for each spot on the list, find if there's a unit hiding out there. if there is, apply affect.
-
-            #coordinate fun stuff, pass it into highlight
-
-
             #pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
 
-            #return a list of all squares affected by the highlight.
+            #returns a tuple of the (row, column) that was clicked.
             if cmove.get_iff() == 0:
-                nl = renpy.call_in_new_context("call_e_highlight", self) #choose targeted area on enemy board
-                #nl = renpy.show_screen("enemy_highlight", self, cmove.get_type())
-                #TODO ^when i show this screen, it hides all the other screens :(
-
-
+                sq = renpy.invoke_in_new_context(call_highlight_e, self, cmove, battle)
             elif cmove.get_iff() == 1:
-                nl = renpy.call_screen("ally_highlight", self) #choose targeted area on allied board
+                sq = renpy.invoke_in_new_context(call_highlight_a, self, cmove, battle)
+
             elif cmove.get_iff() == 2:
                 pass
-                #nl = [...] #create the list yourself. #set area on enemy board
+                #nl = [...] #create the targeted spots yourself. it's a set area on enemy board.
             elif cmove.get_iff() == 3:
                 pass
-                #nl = [...] #create the list yourself. ##choose targeted area on allied board
+                #nl = [...] #create the targeted spots yourself. it affects a set area on allied board.
+
 
             #for each affected square,
                 #if there is a unit on it,
                     #apply move effect: i.e. cmove.effect(affected unit)
 
-
-
-            #renpy.call_screen("attack_highlight")
-
-            #use move where it showed up
-
-            #move the unit around according to the move's requirement.
-            self.set_able(0)
-
+            #this function must handle:
+            # -able drain
+            # -stamina drain
+            # -finding targets
+            # -dealing damage to targets
+            cmove.exert(self, sq, battle)
 
 
     class unit_mc(unit):
@@ -669,7 +795,11 @@ init python:
             self.point = point(0, 0) #instance of point class. coordinates for unit's position.
             self.icon = "icon_mc" #picture
             self.deployable = 1 #whether you can field them
+            self.ablemax = 1 #
             self.able = 1 #let's the unit act each round
+            self.staminamax = 50
+            self.stamina = 50 #basically mana. some recovers each round.
+            self.restam = 10
             self.lvl = 0 #unit's level
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
@@ -716,7 +846,11 @@ init python:
             self.point = point(0, 0) #instance of point class. coordinates for unit's position.
             self.icon = "icon_yve" #picture
             self.deployable = 1 #whether you can field them
-            self.able = 1 #let's the unit act each round
+            self.ablemax = 2
+            self.able = 2 #let's the unit act each round
+            self.staminamax = 60
+            self.stamina = 60 #basically mana. some recovers each round.
+            self.restam = 12
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
@@ -759,7 +893,11 @@ init python:
             self.point = point(x, y) #instance of point class. coordinates for unit's position.
             self.icon = "icon_grunt" #picture
             self.deployable = 1 #whether you can field them
+            self.ablemax = 1
             self.able = 1 #let's the unit act each round
+            self.staminamax = 50
+            self.stamina = 50 #basically mana. some recovers each round.
+            self.restam = 5
             self.lvl = lvl
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
@@ -791,18 +929,16 @@ init python:
     #nai_d = unit()
     #yve_d = unit_yve(unit)
 
+    def call_highlight_e(unit, cmove, battle):
+        battle.refresh_visuals()
+        sq = renpy.call_screen("enemy_highlight", unit, cmove)
+        return sq
+    def call_highlight_a(unit, cmove, battle):
+        battle.refresh_visuals()
+        sq = renpy.call_screen("allied_highlight", unit, cmove)
+        return sq
 
 
-label call_e_highlight(unit):
-
-    $nl = renpy.call_screen("enemy_highlight", unit)
-
-    #$renpy.call_screen("enemy_highlight", unit)
-
-    #call screen enemy_highlight(unit)
-
-
-#etc
 
 
 

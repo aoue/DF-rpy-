@@ -67,7 +67,7 @@ label start:
     #call display_tests
     #(for testing graphics, effects, etc)
 
-    #call tests
+    call tests
     #(for testing programming)
 
     jump day0_scene0
