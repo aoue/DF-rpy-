@@ -32,6 +32,23 @@ screen deploy_screen(deployer):
                 hover "combat/face/deploy yve hover.png"
                 action Function(deployer.deploy_unit, yve_d) hovered Function(deployer.browse, yve_d) unhovered Hide("deploy_browse")
 
+screen choose_deploy_loc():
+    #select which unit to order from available units that have yet to act. returns rank of unit.
+
+    for x in range(0, 5): #column
+        for i in range(0, 5): #row
+            for j in range(0, len(playerlist)): #make sure spot is empty
+                if playerlist[j].get_point().get_x() != x or playerlist[j].get_point().get_y() != i:
+                    button:
+                        pos(340 + i*120, 135 + x*65)
+                        text "([i],[x])"
+                        action Return(value = (i,x))
+            if len(playerlist) == 0:
+                button:
+                    pos(340 + i*120, 135 + x*65)
+                    text "([i],[x])"
+                    action Return(value = (i,x))
+
 #unit overview. one screen fits all.
 screen deploy_browse(unit):
     frame: #obviously all the positioning aspects will have to be perfected.
@@ -44,7 +61,7 @@ screen deploy_browse(unit):
             text unit.get_name()
             text "HP = " + str(unit.get_hp())
             text "EXP = " + str(unit.get_exp())
-            text "moves, whatever, etc{p}what the character has to say about the upcoming battle?"
+            text "moves, focus, whatever, etc{p}what the character has to say about the upcoming battle?"
 
             #text "Moves:"
             #for i in range(0, 6):
@@ -80,7 +97,7 @@ init python:
                 unit.set_deployable(0)
 
                 #call screen that places unit on the map, and set point.x, point.y accordingly
-                renpy.call_in_new_context("attempt")
+                dtuple = renpy.invoke_in_new_context(self.select_deploy_loc)
                 #dtuple = renpy.invoke_in_new_context("choose_deploy_loc") #TODO unicode object is not callable, which means you're treating a string as if it were a function.
                 unit.point.set_x(dtuple[0])
                 unit.point.set_y(dtuple[1])
@@ -101,21 +118,15 @@ init python:
                 renpy.hide(playerlist[i].icon)
             del playerlist[:]
 
-label attempt: #this is a work around because the line dtuple = renpy.invoke_in_new_context("choose_deply_loc") returns an error. 'unicode object is not callable'
-    $dtuple = renpy.call_screen("choose_deploy_loc")
+
+        def select_deploy_loc(self):
+            dtuple = renpy.call_screen("choose_deploy_loc")
+            return dtuple
 
 
-screen choose_deploy_loc():
-    #select which unit to order from available units that have yet to act. returns rank of unit.
-    for x in range(0, 5): #column
-        for i in range(0, 5): #row
-            #if spot is empty, then:
-            button:
-                pos(340 + i*120, 135 + x*65)
-                text "([i],[x])"
-                action Return(value = (i,x))
 
-    #TODO ^also make sure the spot is empty. no deploying overtop each other.
+
+
 
 
 

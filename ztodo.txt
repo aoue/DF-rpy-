@@ -1,28 +1,31 @@
 ------the very next thing(s)------
 
-telling the grid where each unit is. grid class
+unit dodging (add at the start of the take damage function)
 
-walk option: costs no stamina, but costs 1 able.
+check for clearance when using moves. don't allow it to be clicked if clearance ain't there.
+^account for both hopping or non hopping
+
+walk option: costs no stamina, but costs 1 able.?? or reversed?
+-costs only able: you can do some dodging shenanigans while you try to regain stamina.
+OR
+-costs only stamina: you can dodge without losing firepower. it's not a sacrifice, but another option.
 (add to pick moves below stamina. move 1 in any direction.) The player might have to decide that its worth the stamina/able cost to move a gravely injured unit out of the way of an attack. However, it costs them their turn regardless, so the enemy is free to start another attack right away.
 
-clearance checks for moves
-
-dealing damage to the target. (instead of the square, pass in a list of targets? idk)
-
+show damage number on screen near unit. or show dodge if they dodge
 
 ------what needs doing-------
 
-combat system (5x5, use moves, take damage)
- -create a unit and get it to display.
- -test damage on the unit
-
 reposition battlefield information
-
-use moves on the battlefield (move the char and do damage). pick where the move lands.
 
 leveling up (increase stats + learn moves)
 
+unit passive abilities. can just be the first two stances. (see below)
+
 moves (pick and choose before battle. adjust moves once you click the unit in deploy screen but before clicking the spot. show the changes options with show screen)
+
+hover over a move: power, element, physical or magical, diagram of what it hits, clearance, flavor text, stamina/able drain,
+
+create some test movesets
 
 stances (implement their effects)
 
@@ -36,7 +39,7 @@ make the dungeon crawler interface (just images of interconnecting rooms, where 
 
 make the glossary (cannibalize the letter viewport grid)
 
-make the map.
+make the town map.
 
 figure out why my Unicode characters aren't working. ex: \u2603 should be a snowman
 
@@ -44,16 +47,16 @@ blender grease pencil. can interpolate animations. I can make all my still image
 ---------------------------------
 combat thingies:
 
-instead of the whole: 1 unit gets 1 action per 1 round thing: stamina.
--as many moves as you have able and stamina.
--each move spends some combination of the unit's stamina and able. some may spend none of a certain type.
--the round persists until all unit's able is 0.
--units recover a portion of their stamina, and a new round begins.
+damage = int(((2*attack - defense) / defense) * (power + (2 * self.get_lvl())) * aff_mod * spread)
 
-exhaustion stance. if a unit's stamina goes to 0, apply this stance.
--the unit takes 50% more damage.
--the unit's able is set immediately to 0.
--the unit regains stamina at half the pace while the stance persists.
+each unit can have some passives. 2? that is, equipped at once. they can have a larger pool available.
+e.g. bad connotations. Not good things to be.
+ -sadist: regain some stamina on kill.
+ -masochist: regain some stamina when damaged.
+ -bloodhungry: regain some able on kill
+ -egoist: enemies more likely to target you (weight the inevitable get target priority function)
+ -cowardly: if another ally is in area of effect of enemy attack, act like this unit is not. (i.e. don't split the damage.)
+
 
 each time a unit's acted this round, their next attack deals 10% more damage. 'combos'
 e.g. the unit has acted twice: damage = 1.2 * damage
@@ -62,17 +65,7 @@ some units might get stuck. <- fix this.
 ^a swap phase after attacking, where you can move 1 unit 1 space. also helps with making tactical dodges/slight rearrangements.
 
 defeated allies stay on the board. they can be revived.
-
 defeated enemies go off the board.
-
-damage formula (there's a working one... quality undetermined.)
-
-move targeting and hovering over targeted area. (in progress, imperfect.)
--some moves allow you to select where you want it to hit, some moves always hit in the same place.
- -e.g. a heal might always affect squares adjacent to the user.
- -e.g. a heroic attack might hit the enemy board with the cross shape.
-
-
 
 
 

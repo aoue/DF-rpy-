@@ -51,10 +51,13 @@ init -555:
 
     #battle fx
     transform e_tile_hover(row, column):
-        pos(275 + min(row, 4) *125, 5 + min(column, 4) * 65)
+        #respect bounds:
+        #r = max(min(row, 4), max(row, 0))
+        #c = max(min(column, 4), max(column, 0))
+        pos(275 + max(min(row, 4), max(row, 0))*125, 5 + max(min(column, 4), max(column, 0))* 65)
 
     transform a_tile_hover(row, column):
-        pos(275 + min(row, 4) *125, 385 + min(column, 4) * 65)
+        pos(275 + max(min(row, 4), max(row, 0))*125, 385 + max(min(column, 4), max(column, 0))* 65)
 
     #px: 320 + 120*(point.get_x()), 135 + 65*(point.get_y())
 
