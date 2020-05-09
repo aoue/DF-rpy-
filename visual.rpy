@@ -11,7 +11,7 @@ define config.quit_action = Quit(confirm=True)
 define _game_menu_screen = "preferences"
 
 init python:
-    def flashback(img):
+    def flashback(image):
         #TODO
         #get current bg
         #renpy.show img
@@ -54,10 +54,13 @@ init -555:
         #respect bounds:
         #r = max(min(row, 4), max(row, 0))
         #c = max(min(column, 4), max(column, 0))
-        pos(275 + max(min(row, 4), max(row, 0))*125, 5 + max(min(column, 4), max(column, 0))* 65)
+        #pos(275 + max(min(row, 4), max(row, 0))*125, 5 + min(min(column, 4), max(column, 0))* 65)
+        pos(275 + min(abs(row), 4)*125, 5 + min(abs(column), 4)* 65)
+
+        #still wanting. with the long ones, we end up showing over the same tiles more than once.
 
     transform a_tile_hover(row, column):
-        pos(275 + max(min(row, 4), max(row, 0))*125, 385 + max(min(column, 4), max(column, 0))* 65)
+        pos(275 + abs(row)*125, 5 + abs(column)* 65)
 
     #px: 320 + 120*(point.get_x()), 135 + 65*(point.get_y())
 

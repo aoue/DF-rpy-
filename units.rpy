@@ -13,6 +13,8 @@
 #self.hp = 300 + (20 *lvl)#current hp
 #self.dodgemax = 10 + (1 *lvl)#max dodge
 #self.dodge = 10 + (1 *lvl)#percent chance to dodge attacks.
+#self.hitmax = 10 #for hitting dodgers
+#self.hit = 10 #for hitting dodgers
 #self.ooa = 0 #out of action. defeated.
 #self.dead = 0 #dead. not a battle stat.
 
@@ -65,7 +67,6 @@ init python:
             return (self.x, self.y)
 
 
-
     #--- UNITS ---
     class unit:
         #constructor:
@@ -83,10 +84,13 @@ init python:
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
 
+            self.stance = stances() #unit's status effects
             self.hpmax = 0 #max hp
             self.hp = 0 #current hp
             self.dodgemax = 30 #max dodge. always a bit higher than dodge.
-            self.dodge = 20 #percent chance to dodge attacks.
+            self.dodge = 30 #percent chance to dodge attacks.
+            self.hitmax = 20 #subtract from eenmy's dodge
+            self.hit = 20 #subtract from enemy's dodge
             self.ooa = 0 #out of action. defeated.
             self.dead = 0 #dead. not a battle stat.
 
@@ -95,7 +99,6 @@ init python:
             self.physd = 0 #physical defense
             self.maga = 0 #magical attack
             self.magd = 0 #magical defense
-            self.stance = [0] * 5 #times however many stances there are
 
             #moves:
             self.pattern = 3 #3/3
@@ -132,6 +135,8 @@ init python:
             return self.exp
         def get_evo(self):
             return self.evo
+        def get_stance(self):
+            return self.stance
         def get_hpmax(self):
             return self.hpmax
         def get_hp(self):
@@ -140,6 +145,10 @@ init python:
             return self.dodgemax
         def get_dodge(self):
             return self.dodge
+        def get_hitmax(self):
+            return self.hitmax
+        def get_hit(self):
+            return self.hit
         def get_ooa(self):
             return self.ooa
         def get_dead(self):
@@ -154,8 +163,6 @@ init python:
             return self.maga
         def get_magd(self):
             return self.magd
-        def get_stance(self, i):
-            return self.stance[i]
         def get_pattern(self):
             return self.pattern
         def get_moves(self):
@@ -196,6 +203,10 @@ init python:
             self.dodgemax = dodgemax
         def set_dodge(self, dodge):
             self.dodge = dodge
+        def set_hitmax(self, hitmax):
+            self.hitmax = hitmax
+        def set_hit(self, hit):
+            self.hit = hit
         def set_ooa(self, ooa):
             self.ooa = ooa
         def set_dead(self, dead):
@@ -219,27 +230,48 @@ init python:
         def set_flavour(self, i, flavour):
             self.flavour[i] = flavour
         #useful functions
-        def walk(self, grid):
-            #move 1 square in any direction. respect borders, respect collision.
-            #this means i need to pass in the grid, yeah
+        def level_up(self):
+            #if self.get_exp() > constant * self.get_lvl():
+            #   level up!
+            pass
 
-            unit.set_able(unit.get_able()-1)
+        def walk(self, battle):
+            #move to an open, adjacent square. ends the unit's turn.
+            sq = renpy.invoke_in_new_context(call_highlight_walk, self, battle) #tuple
 
+            battle.get_allymap().remove_unit(self)
+
+            self.get_point().set_x(sq[0])
+            self.get_point().set_y(sq[1])
+            battle.get_allymap().place_unit(self)
+            self.set_able(self.get_able()-1)
+
+        def wait(self):
+            self.set_able(0)
+            self.set_stamina(min(self.get_stamina()+20, self.get_staminamax()))
+
+        def defend(self):
+            #the unit must have full able points to do this.
+            #regen some stam and set both physd and magd stances up.
+            self.set_able(0)
+            self.set_stamina(min(self.get_stamina()+20, self.get_staminamax()))
 
         def get_aff_mod(self, target, ele):
             #used in calc damage.
-            #ele = affinity of the move
+            #ele = affinity of the attacking move
+            #aff = affinity of the defender
+
             aff = target.get_aff()
             #normal affinitty
             if ele == 0:
                 if aff == 0:
                     mod = 1
                 elif aff == 1:
-                    mod = 1
+                    mod = 0.75
                 elif aff == 2:
                     mod = 0.75
                 elif aff == 3:
-                    mod = 1
+                    mod = 0.5
                 elif aff == 4:
                     mod = 1
                 elif aff == 5:
@@ -299,7 +331,7 @@ init python:
                 elif aff == 2:
                     mod = 1
                 elif aff == 3:
-                    mod = 0.75
+                    mod = 0.5
                 elif aff == 4:
                     mod = 1
                 elif aff == 5:
@@ -329,7 +361,7 @@ init python:
                 elif aff == 7:
                     mod = 1
                 elif aff == 8:
-                    mod = 1
+                    mod = 1.25
             #fire affinity
             elif ele == 5:
                 if aff == 0:
@@ -349,7 +381,7 @@ init python:
                 elif aff == 7:
                     mod = 1
                 elif aff == 8:
-                    mod = 1
+                    mod = 1.5
             #water affinity
             elif ele == 6:
                 if aff == 0:
@@ -370,14 +402,14 @@ init python:
                     mod = 1
                 elif aff == 8:
                     mod = 1
-            #lightning affinity
+            #electric affinity
             elif ele == 7:
                 if aff == 0:
                     mod = 1
                 elif aff == 1:
                     mod = 1
                 elif aff == 2:
-                    mod = 0.75
+                    mod = 1
                 elif aff == 3:
                     mod = 0.5
                 elif aff == 4:
@@ -389,7 +421,7 @@ init python:
                 elif aff == 7:
                     mod = 0.75
                 elif aff == 8:
-                    mod = 1
+                    mod = 0.75
             #metal affinity
             elif ele == 8:
                 if aff == 0:
@@ -409,56 +441,58 @@ init python:
                 elif aff == 7:
                     mod = 1
                 elif aff == 8:
-                    mod = 1
+                    mod = 0.75
             return mod
 
-        def calc_damage(self, target, type, ele, power):
+        def calc_damage(self, target, cmove):
             #self: dealer of the damage
             #target: recipient of the damage, unit child obj
             #type: whether move does phys (0) or mag (1) damage
             #element: move's element (affinity). 0 through 8
             #power = move's power. int
 
-            #there is no way to differentiate the power of a certain move. add that in to the damage formula.
+            #see if we're dealing with physical or magical damage.
+            if cmove.get_damage_type() == 0: #returns a tuple
+                astats = self.get_stance().get_attacking_stances(self.get_physa(), self.get_hit(), cmove.get_damage_type())
+                dstats = target.get_stance().get_defending_stances(target.get_physd(), target.get_dodge(), cmove.get_damage_type())
+            else:
+                astats = self.get_stance().get_attacking_stances(self.get_maga(), self.get_hit(), cmove.get_damage_type())
+                dstats = target.get_stance().get_defending_stances(target.get_magd(), target.get_dodge(), cmove.get_damage_type())
 
-            aff_mod = self.get_aff_mod(target, ele)
+
+            #even if the unit has kindara on, it will still try to dodge.
+            if random.randint(1, 100) < max(dstats[1] - (astats[1] + cmove.get_hit()), 0):
+                return 0 #dodge successful. returns 0 damage
+
+            aff_mod = self.get_aff_mod(target, cmove.get_element())
             spread = random.randint(216, 255) /255.0
 
-            if type == 1:
-                attack = self.get_physa()
-                defense = target.get_physd()
-            else:
-                attack = self.get_maga()
-                defense = target.get_magd()
-
-            #look through damage mod stances. they influence attack or defense (or other stats maybe, idk)
-
-            damage = int(((2*attack - defense) / defense) * (power + (2 * self.get_lvl())) * aff_mod * spread) #* move power or something
-
-            #REWORK THE FORMULA
-            #samples:
-            #low level: hp = 150. a = 130. d = 110. dmg ~ 30-40
-            #med level: hp = 500. a = 220. d = 200. dmg ~ 80-120
-            #high level: hp = 1500. a = 300. d = 290. dmg ~200-400
-
-            #low power move: 20
-            #med power move: 75
-            #high power move: 150
-
-
-
+            #actual damage calculation
+            damage = max(int(((2*astats[0] - 1.5*dstats[0]) / dstats[0]) * (cmove.get_power() + (2 * self.get_lvl())) * aff_mod * spread), 0)
 
             return damage
 
-        def take_damage(self, damage):
+        def take_damage(self, dealer, damage):
             #self: unit taking the damage
+            #dealer: unit dealing the damage
             #damage: an int.
 
-            #look through damage cancelling stances
-            #kindara
-            #shatter point
-            #[...]
+            #look through stances: the order is important.
+            if self.get_stance().get_exhausted() > 0: #if exhausted, take 1.2x damage
+                damage = damage * 1.2
 
+            if self.get_stance().get_kindara() > 0: #hit enemy will full damage. take no damage.
+                self.get_stance().set_kindara(self.get_kindara() - 1)
+                dealer.set_hp(max(self.get_hp()-damage, 0))
+                return
+
+            if self.get_stance().get_shatter() > 0: #if not put ooa, take no damage.
+                if self.get_hp() - damage > 0:
+                    self.get_stance().set_shatter(self.get_stance().get_shatter()-1)
+                    return
+
+
+            #unit takes damage
             self.set_hp(max(self.get_hp()-damage, 0))
 
             if self.get_hp() == 0:
@@ -488,9 +522,57 @@ init python:
             cmove.exert(self, sq, battle)
 
 
-    class unit_mc(unit):
+
+    #playable units (in order of appearance)
+    class unit_yve(unit):
         def __init__(self):
-            self.name = "Mc"
+            self.name = "Yve"
+            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.icon = "icon_yve" #picture
+            self.deployable = 1 #whether you can field them
+            self.ablemax = 1
+            self.able = 10 #let's the unit act each round
+            self.staminamax = 60
+            self.stamina = 60 #basically mana. some recovers each round.
+            self.restam = 10
+            self.lvl = 0
+            self.exp = 0 #the unit's exp for leveling up
+            self.evo = 0 #whether the unit is in evo mode
+
+            self.stance = stances() #unit's status effects
+            self.hpmax = 130 #max hp
+            self.hp = 130 #current hp
+            self.dodgemax = 15 #max dodge
+            self.dodge = 15 #percent chance to dodge attacks.
+            self.hitmax = 5 #subtract from eenmy's dodge
+            self.hit = 5 #subtract from enemy's dodge
+            self.ooa = 0 #out of action. defeated.
+            self.dead = 0 #dead. not a battle stat.
+
+            self.aff = 4 #affinity. for super effective and stuff.
+            self.physa = 110 #physical attack
+            self.physd = 100 #physical defense
+            self.maga = 80 #magical attack
+            self.magd = 100 #magical defense
+
+            #moves:
+            self.pattern = 2 #2/4
+            self.move1 = hit()
+            self.move2 = pirouette()
+            self.move3 = hit()
+            self.move4 = hit()
+            self.move5 = skate()
+            self.move6 = adrenaline() #adrenaline rush
+            self.move7 = evo_storm()
+            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
+
+        def level_up():
+            #see above
+            pass
+
+    class unit_boy(unit):
+        def __init__(self):
+            self.name = "Boy"
             self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
             self.icon = "icon_mc" #picture
             self.deployable = 1 #whether you can field them
@@ -498,16 +580,19 @@ init python:
             self.able = 1 #let's the unit act each round
             self.staminamax = 50
             self.stamina = 50 #basically mana. some recovers each round.
-            self.restam = 5
+            self.restam = 10
             self.lvl = 0 #unit's level
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
             self.foc = 0 #determines weighting in the level up and some moves learned.
 
+            self.stance = stances() #unit's status effects
             self.hpmax = 100 #max hp
             self.hp = 100 #current hp
             self.dodgemax = 10 #max dodge
             self.dodge = 10 #percent chance to dodge attacks.
+            self.hitmax = 0 #subtract from eenmy's dodge
+            self.hit = 0 #subtract from enemy's dodge
             self.ooa = 0 #out of action. defeated.
             self.dead = 0 #dead. not a battle stat.
 
@@ -516,7 +601,6 @@ init python:
             self.physd = 100 #physical defense
             self.maga = 100 #magical attack
             self.magd = 100 #magical defense
-            self.stance = [0] * 5 #times however many stances there are
 
             #moves:
             self.pattern = 3 #3/3
@@ -552,51 +636,8 @@ init python:
             pass
 
 
-    class unit_yve(unit):
-        def __init__(self):
-            self.name = "Yve"
-            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
-            self.icon = "icon_yve" #picture
-            self.deployable = 1 #whether you can field them
-            self.ablemax = 1
-            self.able = 1 #let's the unit act each round
-            self.staminamax = 50
-            self.stamina = 50 #basically mana. some recovers each round.
-            self.restam = 5
-            self.lvl = 0
-            self.exp = 0 #the unit's exp for leveling up
-            self.evo = 0 #whether the unit is in evo mode
 
-            self.hpmax = 120 #max hp
-            self.hp = 120 #current hp
-            self.dodgemax = 15 #max dodge
-            self.dodge = 15 #percent chance to dodge attacks.
-            self.ooa = 0 #out of action. defeated.
-            self.dead = 0 #dead. not a battle stat.
-
-            self.aff = 4 #affinity. for super effective and stuff.
-            self.physa = 110 #physical attack
-            self.physd = 100 #physical defense
-            self.maga = 80 #magical attack
-            self.magd = 100 #magical defense
-            self.stance = [0] * 5 #times however many stances there are
-
-            #moves:
-            self.pattern = 2 #2/4
-            self.move1 = hit()
-            self.move2 = hit()
-            self.move3 = hit()
-            self.move4 = hit()
-            self.move5 = jumpkick()
-            self.move6 = jumpkick()
-            self.move7 = evo_storm()
-            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
-
-        def level_up():
-            #see above
-            pass
-
-
+    #enemy units (in order of appearance)
     class unit_grunt(unit):
         def __init__(self, lvl, name, x, y):
             self.name = name
@@ -612,10 +653,13 @@ init python:
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
 
+            self.stance = stances() #unit's status effects
             self.hpmax = 60 + (5 *lvl) #max hp
             self.hp = 60 + (5 *lvl)#current hp
             self.dodgemax = 10 + int(lvl/5)#max dodge
             self.dodge = 10 + int(lvl/5)#percent chance to dodge attacks.
+            self.hitmax = 0 #subtract from eenmy's dodge
+            self.hit = 0 #subtract from enemy's dodge
             self.ooa = 0 #out of action. defeated.
             self.dead = 0 #dead. not a battle stat.
 
@@ -624,7 +668,6 @@ init python:
             self.physd = 80 + (3 *lvl)#physical defense
             self.maga = 80 + (1 *lvl)#magical attack
             self.magd = 80 + (2 *lvl)#magical defense
-            self.stance = [0] * 5 #times however many stances there are
 
             #moves:
             self.pattern = 3 #3/3
@@ -632,3 +675,45 @@ init python:
 
         def move1():
             pass
+
+
+
+
+    #initialize all the units and helperss
+    playerlist = []
+    boy_d = unit_boy()
+    yve_d = unit_yve()
+    baddie = unit_grunt(0, "vile grunt", 2, 1)
+    baddie2 = unit_grunt(0, "horrid grunt", 2, 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#eof

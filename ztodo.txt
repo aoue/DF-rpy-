@@ -1,17 +1,10 @@
 ------the very next thing(s)------
 
-unit dodging (add at the start of the take damage function)
+preferences screen. Just wiggle it about a quarter of the screen to the left.
 
-check for clearance when using moves. don't allow it to be clicked if clearance ain't there.
-^account for both hopping or non hopping
+show damage number on screen near unit. show *dodge* if they dodge
 
-walk option: costs no stamina, but costs 1 able.?? or reversed?
--costs only able: you can do some dodging shenanigans while you try to regain stamina.
-OR
--costs only stamina: you can dodge without losing firepower. it's not a sacrifice, but another option.
-(add to pick moves below stamina. move 1 in any direction.) The player might have to decide that its worth the stamina/able cost to move a gravely injured unit out of the way of an attack. However, it costs them their turn regardless, so the enemy is free to start another attack right away.
-
-show damage number on screen near unit. or show dodge if they dodge
+defeated units changing picture
 
 ------what needs doing-------
 
@@ -19,13 +12,13 @@ reposition battlefield information
 
 leveling up (increase stats + learn moves)
 
-unit passive abilities. can just be the first two stances. (see below)
+unit passive abilities. (can be stances, i.e. stance 0 and stance 1, which will never be decremented when the others are.)
 
 moves (pick and choose before battle. adjust moves once you click the unit in deploy screen but before clicking the spot. show the changes options with show screen)
 
 hover over a move: power, element, physical or magical, diagram of what it hits, clearance, flavor text, stamina/able drain,
 
-create some test movesets
+create full move sets
 
 stances (implement their effects)
 
@@ -47,8 +40,6 @@ blender grease pencil. can interpolate animations. I can make all my still image
 ---------------------------------
 combat thingies:
 
-damage = int(((2*attack - defense) / defense) * (power + (2 * self.get_lvl())) * aff_mod * spread)
-
 each unit can have some passives. 2? that is, equipped at once. they can have a larger pool available.
 e.g. bad connotations. Not good things to be.
  -sadist: regain some stamina on kill.
@@ -58,8 +49,10 @@ e.g. bad connotations. Not good things to be.
  -cowardly: if another ally is in area of effect of enemy attack, act like this unit is not. (i.e. don't split the damage.)
 
 
-each time a unit's acted this round, their next attack deals 10% more damage. 'combos'
-e.g. the unit has acted twice: damage = 1.2 * damage
+combo moves:
+-each time the unit uses a 'combo move', increase combo counter.
+-combo moves deal .x? extra damage per combo counter.
+-reset combo counter to 0 at the end of a round.
 
 some units might get stuck. <- fix this.
 ^a swap phase after attacking, where you can move 1 unit 1 space. also helps with making tactical dodges/slight rearrangements.
@@ -67,7 +60,9 @@ some units might get stuck. <- fix this.
 defeated allies stay on the board. they can be revived.
 defeated enemies go off the board.
 
+enemy reinforcements during a battle
 
+switching out a unit midbattle for one in reserve?
 
 
 

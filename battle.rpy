@@ -1,6 +1,7 @@
 
 init python:
     import random
+    allow_save = True
 
     #--- BATTLE ---
     class map():
@@ -18,27 +19,33 @@ init python:
         def get_ul(self):
             return self.ul
 
+        def remove_unit(self, unit):
+            #finds the unit's spot, and sets it to None.
+            self.get_map()[unit.get_point().get_x()][unit.get_point().get_y()] = None
+
         def place_unit(self, unit):
-            #places unit according to their x, y coordinates. 5x5 grid.
-            #renpy.say(None, "{}, {}".format(unit.get_point().get_x(), unit.get_point().get_y()))
+            #first look for the unit. if it's in the list, set the list object to none
+            #index returns the 'index' of the unit we're looking for. so set = none by index
+
             self.get_map()[unit.get_point().get_x()][unit.get_point().get_y()] = unit
 
         def search_map(self, dtuple):
-            unit = self.get_map()[dtuple[0]][dtuple[1]]
+
+            x = min(dtuple[0], 4)
+            x = max(dtuple[0], 0)
+            y = min(dtuple[1], 4)
+            y = max(dtuple[1], 0)
+
+            unit = self.get_map()[x][y]
 
             return unit
-
-        def move_unit(self, xi, yi, xf, yf):
-            #move the unit from one map place to another.
-            #find the unit by its initial coordinates (xi, yi), and place it at its final (xf, yf)
-            pass
 
         def kill_unit(self, unit):
             #enemy unit ooa. set self.map[row][col] = None
             pass
 
 
-    class battle(): #battle class. runs all the battles nice and tidily.
+    class battle():
         def __init__(self, rounds, pl, el, bg):
             self.rounds = rounds #number of rounds the battle will last. negative for infinite.
             self.bg = bg
@@ -102,16 +109,18 @@ init python:
             self.set_pable(self.calc_pable())
             self.set_eable(self.calc_eable())
             self.set_ableleft(self.get_pable() + self.get_eable())
-
-        def reset_round(self):
+        def new_round(self):
             renpy.say(None, "new round")
-            self.refresh_stamina()
             for i in range(0, len(self.get_pl())):
                 if self.get_pl()[i].get_ooa() == 0:
-                    self.get_pl()[i].set_able(self.get_pl()[i].get_ablemax())
+                    self.get_pl()[i].set_able(self.get_pl()[i].get_ablemax()) #refresh able
+                    self.get_pl()[i].get_stance().new_round() #restam, DOTs, HOTs, stances
+
             for i in range(0, len(self.get_el())):
                 if self.get_el()[i].get_ooa() == 0:
                     self.get_el()[i].set_able(self.get_el()[i].get_ablemax())
+                    self.get_el()[i].get_stance().new_round() #restam, DOTs, HOTs, stances. Note that we check whether unit is still exhausted after restam. I think it's superior this way.
+
         def is_battle_over(self):
             if self.get_rounds() == 0:
                 renpy.say(None, "Time elapsed.")
@@ -124,9 +133,8 @@ init python:
         def refresh_visuals(self):
             renpy.show_screen("combatinfo", self.get_pl(), self.get_el(), self.get_pable(), self.get_eable(), self.get_ableleft(), self.get_rounds(), self.get_phase())
             renpy.show_screen("show_units", self.get_pl(), self.get_el())
-        def refresh_stamina(self):
-            for i in range(0, len(self.get_pl())):
-                self.get_pl()[i].set_stamina(min(self.get_pl()[i].get_stamina() + self.get_pl()[i].get_restam(), self.get_pl()[i].get_staminamax()))
+
+
 
         #--settings
         def prebattle_settings(self):
@@ -137,6 +145,9 @@ init python:
             renpy.block_rollback()
             config.rollback_enabled = True
             renpy.hide_screen("combatinfo")
+        def game_over(self):
+            pass
+            #return to title screen
 
         #--combat round. uses everything
         def player_turn(self):
@@ -180,73 +191,41 @@ init python:
 
 
                     if self.is_battle_over() == 1:
+                        self.postbattle_settings()
                         return
 
                 self.set_rounds(max(self.get_rounds()-1,0)) #proceed to next round
-                self.reset_round() #reset for next round
+                self.new_round() #reset for next round
 
             self.postbattle_settings()
 
-#standalone functions
+
+#target picking functions
+
+    def enemy_highlighter(unit, cmove, row, column):
+        renpy.show_screen("enemy_highlight_extra", unit, cmove, row, column)
+    def ally_highlighter(unit, cmove, row, column):
+        renpy.show_screen("ally_highlight_extra", unit, cmove, row, column)
+    def hide_highlighter():
+        renpy.hide_screen("enemy_highlight_extra")
+        renpy.hide("tile_f_hovered")
     def call_highlight_e(unit, cmove, battle):
         battle.refresh_visuals()
         sq = renpy.call_screen("enemy_highlight", unit, cmove)
         return sq
     def call_highlight_a(unit, cmove, battle):
         battle.refresh_visuals()
-        sq = renpy.call_screen("allied_highlight", unit, cmove)
+        sq = renpy.call_screen("ally_highlight", unit, cmove)
         return sq
-    #---- TARGETING LEGEND ----
-    # 1: 1x1
-    # 2: 1x2
-    # 3: 1x3
-    # 4: 1x4
-    # 5: 1x5
-    # 6: 2x1
-    # 7: 2x2
-    # 8: 2x3
-    # 9: 2x4
-    #10: 2x5
-    #11: 3x1
-    #12: 3x2
-    #13: 3x3
-    #14: 3x4
-    #14: 3x5
-    #15: 4x1
-    #16: 4x2
-    #17: 4x3
-    #18: 4x4
-    #19: 4x5
-    #20: 5x1
-    #21: 5x2
-    #22: 5x3
-    #23: 5x4
-    #24: 5x5
-    #26: cross 3x3
-    #27: cross 5x5
-
-    def enemy_highlighter(unit, cmove, row, column):
-        if cmove.get_type() == 2:
-            renpy.show("tile_e_hovered", at_list=[e_tile_hover(row, column-1)], zorder = 102)
-
-        elif cmove.get_type() == 3:
-            pass
-
-    #highlighting allied grid
-    def ally_highlighter(unit, cmove, row, column):
-        if cmove.get_type == 2:
-            renpy.show("tile_f_hovered", at_list=[a_tile_hover(row, column-1)], zorder = 102)
-
-        elif cmove.get_type() == 3:
-            pass
+    def call_highlight_walk(unit, battle):
+        battle.refresh_visuals()
+        sq = renpy.call_screen("walk_highlight", unit, battle)
+        return sq
 
 
-    def hide_highlighter(type):
-        if type == 0:
-            renpy.hide("tile_e_hovered")
-        else:
-            renpy.hide("tile_f_hovered")
 
-    def unit_pass(unit):
-        unit.set_able(0)
-        unit.set_stamina(min(unit.get_stamina()+10, unit.get_staminamax()))
+
+
+
+
+#eof

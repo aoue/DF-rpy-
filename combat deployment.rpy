@@ -21,11 +21,11 @@ screen deploy_screen(deployer):
         yalign 1.0
         spacing 15
 
-        if mc_d.get_deployable() == 1: #mc
+        if boy_d.get_deployable() == 1: #mc
             imagebutton:
                 idle "combat/face/deploy mc.png"
                 hover "combat/face/deploy mc hover.png"
-                action Function(deployer.deploy_unit, mc_d) hovered Function(deployer.browse, mc_d) unhovered Hide("deploy_browse")
+                action Function(deployer.deploy_unit, boy_d) hovered Function(deployer.browse, boy_d) unhovered Hide("deploy_browse")
         if yve_d.get_deployable() == 1: #yve
             imagebutton:
                 idle "combat/face/deploy yve.png"
@@ -38,7 +38,9 @@ screen choose_deploy_loc():
     for x in range(0, 5): #column
         for i in range(0, 5): #row
             for j in range(0, len(playerlist)): #make sure spot is empty
-                if playerlist[j].get_point().get_x() != x or playerlist[j].get_point().get_y() != i:
+                if playerlist[j].get_point().get_x() == i and playerlist[j].get_point().get_y() == x:
+                    pass
+                else:
                     button:
                         pos(340 + i*120, 135 + x*65)
                         text "([i],[x])"
