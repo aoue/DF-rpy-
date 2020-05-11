@@ -1,12 +1,32 @@
 ------the very next thing(s)------
 
-preferences screen. Just wiggle it about a quarter of the screen to the left.
+write enemy AI.
 
-show damage number on screen near unit. show *dodge* if they dodge
+write moves for tutorial.
+-federal- 4 moves
+-federal aide- 4 moves.
+-enemies
 
-defeated units changing picture
+when showing damage, show if any stances activated or were applied or wore off
+^also, damage only shows up on one unit even if many are hit
+^also, show the name of the move used somewhere. allow it to be moused over so the player can learn about it.
+
+when hovering on a unit:
+-show hp out of max
+-show stamina out of max
+-show dodge out of max
+-show able of out max
+-show stances applied
+-show move set
+    on move hover:
+    -show move targeting diagram
+    -show power
+    -show stamina drain
+    -show able drain
 
 ------what needs doing-------
+
+gear. there will be a weapon attack, hit value, an armor defense/dodge value. these will need to be added into the damage formula.
 
 reposition battlefield information
 
@@ -19,6 +39,8 @@ moves (pick and choose before battle. adjust moves once you click the unit in de
 hover over a move: power, element, physical or magical, diagram of what it hits, clearance, flavor text, stamina/able drain,
 
 create full move sets
+
+a battle log on the right or something?
 
 stances (implement their effects)
 

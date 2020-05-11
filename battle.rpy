@@ -31,12 +31,8 @@ init python:
 
         def search_map(self, dtuple):
 
-            x = min(dtuple[0], 4)
-            x = max(dtuple[0], 0)
-            y = min(dtuple[1], 4)
-            y = max(dtuple[1], 0)
 
-            unit = self.get_map()[x][y]
+            unit = self.get_map()[dtuple[0]][dtuple[1]]
 
             return unit
 
@@ -114,12 +110,12 @@ init python:
             for i in range(0, len(self.get_pl())):
                 if self.get_pl()[i].get_ooa() == 0:
                     self.get_pl()[i].set_able(self.get_pl()[i].get_ablemax()) #refresh able
-                    self.get_pl()[i].get_stance().new_round() #restam, DOTs, HOTs, stances
+                    self.get_pl()[i].get_stance().new_round(self.get_pl()[i]) #restam, DOTs, HOTs, stances
 
             for i in range(0, len(self.get_el())):
                 if self.get_el()[i].get_ooa() == 0:
                     self.get_el()[i].set_able(self.get_el()[i].get_ablemax())
-                    self.get_el()[i].get_stance().new_round() #restam, DOTs, HOTs, stances. Note that we check whether unit is still exhausted after restam. I think it's superior this way.
+                    self.get_el()[i].get_stance().new_round(self.get_el()[i]) #restam, DOTs, HOTs, stances. Note that we check whether unit is still exhausted after restam. I think it's superior this way.
 
         def is_battle_over(self):
             if self.get_rounds() == 0:
@@ -178,6 +174,7 @@ init python:
                         self.refresh_visuals()
 
                     if self.is_battle_over() == 1:
+                        self.postbattle_settings()
                         return
 
                     if self.get_eable() > 0: #enemy turn

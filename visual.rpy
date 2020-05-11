@@ -62,6 +62,11 @@ init -555:
     transform a_tile_hover(row, column):
         pos(275 + abs(row)*125, 5 + abs(column)* 65)
 
+
+    #transform e_show_damage(row, column)
+
+
+
     #px: 320 + 120*(point.get_x()), 135 + 65*(point.get_y())
 
     #------ally side positions------#
@@ -88,6 +93,9 @@ init -555:
 
 
     #unit imgs. dimensions are (82, 60). obv these are trash dimensions.
+    image dead_icon:
+        "images/combat/units/dead icon.png"
+
     image icon_grunt:
         "images/combat/units/grunt icon.png"
         0.5

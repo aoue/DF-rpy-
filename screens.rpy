@@ -350,6 +350,13 @@ screen navigation():
     vbox:
         style_prefix "navigation"
 
+        if renpy.get_screen('main_menu'): #NOTE this is how to change the position of the main menu block
+            xalign 0.1
+            ypos 400
+        else:
+            xpos 90
+            ypos 300
+
         xpos gui.navigation_xpos
         yalign 0.5
 

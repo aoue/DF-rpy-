@@ -27,7 +27,8 @@
 
 #self.pattern = 3 #3/3
 #self.move1 = fyaya #its a child object of the move class
-#self.moves = [] #its a list of every move.
+#self.moves = [] #its all the moves the unit has equipped
+#self.movelist = [] #all moves learned. just append them in here when a character learns them.
 
 #--------------------------------
 #self.pattern = 0 #how many moves the unit has
@@ -110,6 +111,7 @@ init python:
             self.move6 = hit(move)
             self.move7 = hit(move)
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
+            self.movelist = [] #all moves learned. just append them in here when a character learns them.
         #getters
         def get_name(self):
             return self.name
@@ -230,6 +232,13 @@ init python:
         def set_flavour(self, i, flavour):
             self.flavour[i] = flavour
         #useful functions
+        def check_dead(self):
+            if self.get_hp() == 0:
+                self.set_able(0)
+                self.set_stamina(0)  #<-- too brutal?
+                self.set_ooa(1)
+                self.set_icon("dead_icon")
+
         def level_up(self):
             #if self.get_exp() > constant * self.get_lvl():
             #   level up!
@@ -451,8 +460,8 @@ init python:
             #element: move's element (affinity). 0 through 8
             #power = move's power. int
 
-            #see if we're dealing with physical or magical damage.
-            if cmove.get_damage_type() == 0: #returns a tuple
+            #see if we're dealing with physical or magical damage. returns tuples of (attack, hit) , (defense, dodge)
+            if cmove.get_damage_type() == 0:
                 astats = self.get_stance().get_attacking_stances(self.get_physa(), self.get_hit(), cmove.get_damage_type())
                 dstats = target.get_stance().get_defending_stances(target.get_physd(), target.get_dodge(), cmove.get_damage_type())
             else:
@@ -462,7 +471,7 @@ init python:
 
             #even if the unit has kindara on, it will still try to dodge.
             if random.randint(1, 100) < max(dstats[1] - (astats[1] + cmove.get_hit()), 0):
-                return 0 #dodge successful. returns 0 damage
+                return -1 #dodge successful. returns -1 damage
 
             aff_mod = self.get_aff_mod(target, cmove.get_element())
             spread = random.randint(216, 255) /255.0
@@ -477,28 +486,33 @@ init python:
             #dealer: unit dealing the damage
             #damage: an int.
 
-            #look through stances: the order is important.
-            if self.get_stance().get_exhausted() > 0: #if exhausted, take 1.2x damage
-                damage = damage * 1.2
-
-            if self.get_stance().get_kindara() > 0: #hit enemy will full damage. take no damage.
-                self.get_stance().set_kindara(self.get_kindara() - 1)
-                dealer.set_hp(max(self.get_hp()-damage, 0))
+            if damage == -1:
+                renpy.show_screen("e_show_damage", self, "Dodge")
                 return
 
-            if self.get_stance().get_shatter() > 0: #if not put ooa, take no damage.
+            #look through stances: the order is important.
+            if self.get_stance().get_exhausted()[0] > 0: #if exhausted, take 1.2x damage
+                damage = damage * 1.2
+
+            if self.get_stance().get_kindara()[0] > 0: #hit enemy will full damage. take no damage.
+                dealer.set_hp(max(dealer.get_hp()-damage, 0))
+                dealer.check_dead()
+                renpy.show_screen("a_show_damage", dealer, damage)
+                self.get_stance().set_kindara(self.get_stance().get_kindara() - 1, self.get_stance().get_kindara()[1])
+
+                return
+
+            if self.get_stance().get_shatter()[0] > 0: #if not put ooa, take no damage.
                 if self.get_hp() - damage > 0:
-                    self.get_stance().set_shatter(self.get_stance().get_shatter()-1)
+                    self.get_stance().set_shatter(self.get_stance().get_shatter()-1, self.get_stance().get_shatter()[1])
                     return
 
 
             #unit takes damage
             self.set_hp(max(self.get_hp()-damage, 0))
+            self.check_dead()
+            renpy.show_screen("e_show_damage", self, damage)
 
-            if self.get_hp() == 0:
-                self.set_able(0)
-                self.set_ooa(1)
-                #target.set_icon("unconcious")
 
         def use_move(self, cmove, x, y, battle):
             #legend:
@@ -532,8 +546,8 @@ init python:
             self.deployable = 1 #whether you can field them
             self.ablemax = 1
             self.able = 10 #let's the unit act each round
-            self.staminamax = 60
-            self.stamina = 60 #basically mana. some recovers each round.
+            self.staminamax = 70
+            self.stamina = 70 #basically mana. some recovers each round.
             self.restam = 10
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up
@@ -557,14 +571,15 @@ init python:
 
             #moves:
             self.pattern = 2 #2/4
-            self.move1 = hit()
-            self.move2 = pirouette()
-            self.move3 = hit()
-            self.move4 = hit()
-            self.move5 = skate()
-            self.move6 = adrenaline() #adrenaline rush
-            self.move7 = evo_storm()
-            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
+            self.move1 = spear()
+            self.move2 = pierce()
+            self.move3 = whirl()
+            self.move4 = None
+            self.move5 = adrenaline()
+            self.move6 = None
+            self.move7 = None
+            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
+            self.movelist = [] #all moves learned. just append them in here when a character learns them.
 
         def level_up():
             #see above
@@ -604,14 +619,15 @@ init python:
 
             #moves:
             self.pattern = 3 #3/3
-            self.move1 = hit()
-            self.move2 = hit()
-            self.move3 = hit()
-            self.move4 = jumpkick()
-            self.move5 = jumpkick()
-            self.move6 = jumpkick()
-            self.move7 = evo_storm()
+            self.move1 = None
+            self.move2 = None
+            self.move3 = None
+            self.move4 = None
+            self.move5 = None
+            self.move6 = None
+            self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
+            self.movelist = [] #all moves learned. just append them in here when a character learns them.
 
         def level_up():
             #increase the following stats by an amount depending on:
@@ -636,7 +652,6 @@ init python:
             pass
 
 
-
     #enemy units (in order of appearance)
     class unit_grunt(unit):
         def __init__(self, lvl, name, x, y):
@@ -654,20 +669,20 @@ init python:
             self.evo = 0 #whether the unit is in evo mode
 
             self.stance = stances() #unit's status effects
-            self.hpmax = 60 + (5 *lvl) #max hp
-            self.hp = 60 + (5 *lvl)#current hp
-            self.dodgemax = 10 + int(lvl/5)#max dodge
-            self.dodge = 10 + int(lvl/5)#percent chance to dodge attacks.
+            self.hpmax = 80 #max hp
+            self.hp = 80 #current hp
+            self.dodgemax = 0 #max dodge
+            self.dodge = 0 #percent chance to dodge attacks.
             self.hitmax = 0 #subtract from eenmy's dodge
             self.hit = 0 #subtract from enemy's dodge
             self.ooa = 0 #out of action. defeated.
             self.dead = 0 #dead. not a battle stat.
 
             self.aff = 0 # affinity. for super effective and stuff.
-            self.physa = 80 + (3 *lvl)#physical attack
-            self.physd = 80 + (3 *lvl)#physical defense
-            self.maga = 80 + (1 *lvl)#magical attack
-            self.magd = 80 + (2 *lvl)#magical defense
+            self.physa = 80 #physical attack
+            self.physd = 80 #physical defense
+            self.maga = 80 #magical attack
+            self.magd = 80 #magical defense
 
             #moves:
             self.pattern = 3 #3/3
@@ -683,7 +698,7 @@ init python:
     playerlist = []
     boy_d = unit_boy()
     yve_d = unit_yve()
-    baddie = unit_grunt(0, "vile grunt", 2, 1)
+    baddie = unit_grunt(0, "vile grunt", 2, 0)
     baddie2 = unit_grunt(0, "horrid grunt", 2, 2)
 
 

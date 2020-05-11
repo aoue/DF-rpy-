@@ -41,6 +41,22 @@ screen show_units(pl, el):
         add el[i].get_icon() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
         text el[i].get_name() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
 
+screen e_show_damage(unit, damage):
+    zorder 103
+
+    text "{color=ff0000}[damage]{/color}" pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
+
+    timer 1.0 action Hide("e_show_damage", transition = dissolve)
+
+
+screen a_show_damage(unit, damage):
+    zorder 103
+
+    text "{color=ff0000}[damage]{/color}" pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
+
+    timer 1.0 action Hide("a_show_damage", transition = dissolve)
+
+
 screen order_unit(pl):
     #select which unit to order from available units that have yet to act. returns rank of unit.
     zorder 100
@@ -65,7 +81,9 @@ screen pick_move(unit, battle):
             text "Selected: " + unit.get_name()
             spacing 10
             for i in range(0, len(unit.get_moves())):
-                if (unit.get_point().get_y() in range(0, 3)) and unit.get_moves()[i].get_rank() == 1:
+                if unit.get_moves()[i] == None:
+                    pass
+                elif (unit.get_point().get_y() in range(0, 3)) and unit.get_moves()[i].get_rank() == 1:
                     if unit.get_stamina() >= unit.get_moves()[i].get_stamina_drain() and unit.get_moves()[i].check_clearance(unit, battle) == 1:
                         textbutton unit.get_moves()[i].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
                     else:
@@ -93,12 +111,15 @@ screen pick_move(unit, battle):
 screen enemy_highlight(unit, cmove):
     zorder 101
 
-    if cmove.get_type() == 26:
+    if cmove.get_type() == 26 or cmove.get_type() == 27:
         for column in range(1, 4): #column
             for row in range(1, 4): #row
                 imagebutton:
                     idle "images/combat/fx/tile.png"
-                    hover "images/combat/fx/tile e hover.png"
+                    if cmove.get_type() == 27:
+                        idle "images/combat/fx/tile.png"
+                    else:
+                        hover "images/combat/fx/tile e hover.png"
                     pos(275 + row*125, 5 + column*65)
                     action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
 
@@ -201,7 +222,8 @@ screen walk_highlight(unit, battle):
 #23: 5x4
 #24: 5x5
 #26: cross 3x3
-#27: cross 5x5
+#27: cross 3x3 w/ no center
+#28: cross 5x5
 
 
 screen enemy_highlight_extra(unit, cmove, row, column):
@@ -210,7 +232,11 @@ screen enemy_highlight_extra(unit, cmove, row, column):
         add "tile_e_hovered" at e_tile_hover(row, column-1)
 
     elif cmove.get_type() == 3: # 1x3
-        pass
+        add "tile_e_hovered" at e_tile_hover(row, column-1)
+        if column == 1:
+            add "tile_e_hovered" at e_tile_hover(row, 2)
+        else:
+            add "tile_e_hovered" at e_tile_hover(row, column-2)
 
     elif cmove.get_type() == 15: # 4x1
         if column != 0:
@@ -225,6 +251,12 @@ screen enemy_highlight_extra(unit, cmove, row, column):
             add "tile_e_hovered" at e_tile_hover(row, 4)
 
     elif cmove.get_type() == 26: #3x3 cross
+        add "tile_e_hovered" at e_tile_hover(row, column-1)
+        add "tile_e_hovered" at e_tile_hover(row, column+1)
+        add "tile_e_hovered" at e_tile_hover(row-1, column)
+        add "tile_e_hovered" at e_tile_hover(row+1, column)
+
+    elif cmove.get_type() == 27: #3x3 cross w/ no center
         add "tile_e_hovered" at e_tile_hover(row, column-1)
         add "tile_e_hovered" at e_tile_hover(row, column+1)
         add "tile_e_hovered" at e_tile_hover(row-1, column)
