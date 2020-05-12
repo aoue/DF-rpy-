@@ -50,7 +50,7 @@
 # 8: metal
 #--------------------------------
 
-init python:
+init -1 python:
     #--- POINT ---
     class point():
         def __init__(self, x, y):
@@ -492,7 +492,7 @@ init python:
 
             #look through stances: the order is important.
             if self.get_stance().get_exhausted()[0] > 0: #if exhausted, take 1.2x damage
-                damage = damage * 1.2
+                damage = damage * 1.5
 
             if self.get_stance().get_kindara()[0] > 0: #hit enemy will full damage. take no damage.
                 dealer.set_hp(max(dealer.get_hp()-damage, 0))
@@ -512,7 +512,6 @@ init python:
             self.set_hp(max(self.get_hp()-damage, 0))
             self.check_dead()
             renpy.show_screen("e_show_damage", self, damage)
-
 
         def use_move(self, cmove, x, y, battle):
             #legend:
@@ -544,8 +543,8 @@ init python:
             self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
             self.icon = "icon_yve" #picture
             self.deployable = 1 #whether you can field them
-            self.ablemax = 1
-            self.able = 10 #let's the unit act each round
+            self.ablemax = 2
+            self.able = 2 #lets the unit act each round
             self.staminamax = 70
             self.stamina = 70 #basically mana. some recovers each round.
             self.restam = 10
@@ -652,54 +651,7 @@ init python:
             pass
 
 
-    #enemy units (in order of appearance)
-    class unit_grunt(unit):
-        def __init__(self, lvl, name, x, y):
-            self.name = name
-            self.point = point(x, y) #instance of point class. coordinates for unit's position.
-            self.icon = "icon_grunt" #picture
-            self.deployable = 1 #whether you can field them
-            self.ablemax = 1
-            self.able = 1 #let's the unit act each round
-            self.staminamax = 50
-            self.stamina = 50 #basically mana. some recovers each round.
-            self.restam = 5
-            self.lvl = lvl
-            self.exp = 0 #the unit's exp for leveling up
-            self.evo = 0 #whether the unit is in evo mode
 
-            self.stance = stances() #unit's status effects
-            self.hpmax = 80 #max hp
-            self.hp = 80 #current hp
-            self.dodgemax = 0 #max dodge
-            self.dodge = 0 #percent chance to dodge attacks.
-            self.hitmax = 0 #subtract from eenmy's dodge
-            self.hit = 0 #subtract from enemy's dodge
-            self.ooa = 0 #out of action. defeated.
-            self.dead = 0 #dead. not a battle stat.
-
-            self.aff = 0 # affinity. for super effective and stuff.
-            self.physa = 80 #physical attack
-            self.physd = 80 #physical defense
-            self.maga = 80 #magical attack
-            self.magd = 80 #magical defense
-
-            #moves:
-            self.pattern = 3 #3/3
-            self.flavour = [""] * 7 # 7 of them. is set when moves are selected
-
-        def move1():
-            pass
-
-
-
-
-    #initialize all the units and helperss
-    playerlist = []
-    boy_d = unit_boy()
-    yve_d = unit_yve()
-    baddie = unit_grunt(0, "vile grunt", 2, 0)
-    baddie2 = unit_grunt(0, "horrid grunt", 2, 2)
 
 
 

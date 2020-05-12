@@ -3,6 +3,13 @@ label battle0:
 
     #do any deployment enabling/disabling
     python:
+        #initialize all the units and helperss
+        playerlist = []
+        boy_d = unit_boy()
+        yve_d = unit_yve()
+        baddie = unit_grunt(0, "vile grunt", 2, 0)
+        baddie2 = unit_grunt(0, "horrid grunt", 2, 2)
+
         allow_save = False
         enemylist = [baddie, baddie2]
 

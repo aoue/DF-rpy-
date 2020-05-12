@@ -10,7 +10,7 @@
 # 8: metal
 #--------------------------------
 
-init python:
+init -2 python:
     #--- GUIDELINES ---
 
     #any move that sets a stance first checks if the stance is already applied. If it is, the move only resets its duration
@@ -278,8 +278,8 @@ init python:
 
     #--- Federal Aide ---
     #shoot. single target. back rank. light damage. light cost.
-    #supprss. 2x2. terrible hit. back rank.
-    #form VI - graceful retreat. 1x1. front rank. retreats 2.
+    #suppress. 2x2. terrible hit. back rank.
+    #Twelve Forms - VI. 1x1. front rank. retreats 2.
 
 
 
@@ -368,14 +368,15 @@ init python:
 
 #yve:
 #flourish. heavy stam drain, but no able.
-
+#battlefield trance. increase able and stamina regen at the start of each round.
 
 #nai:
 #misdirect. target self or ally. lower priority so the enemy doesn't target you as often.
 
 
 
-
+#enemy:
+#pull/push units. get the player units out of position.
 
 
 

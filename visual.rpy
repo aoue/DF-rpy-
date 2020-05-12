@@ -18,6 +18,10 @@ init python:
         #reset current bg
         pass
 
+    def copy_list(nl):
+        nl_copy = nl[:]
+        return nl_copy
+
 init -555:
     #------vn portion display positions------#
     transform maxleft:

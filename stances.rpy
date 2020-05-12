@@ -1,7 +1,7 @@
 
 
 
-init python:
+init -2 python:
 
     #--- STANCES ---
     class stances():
@@ -163,24 +163,29 @@ init python:
         def new_round(self, unit):
             #check:
             #hp regen/dots.
-            hp_regen = 1
 
             if self.get_hp_regen()[0] > 0:
-                hp_regen = hp_regen * self.get_hp_regen()[1]
+                unit.set_hp(int(min(unit.get_hp() + (unit.get_hpmax()*self.get_hp_regen[1]), unit.get_hpmax())))
+
             if self.get_bleeding()[0] > 0:
-                hp_regen = hp_regen * self.get_bleeding()[1]
+                unit.set_hp(int(min(unit.get_hp() - (unit.get_hpmax()*self.get_bleeding[1]), unit.get_hpmax())))
+
+
             #apply hp regen
-            unit.set_hp(int(min(unit.get_hp() + (unit.get_hpmax()*hp_regen), unit.get_hpmax())))
 
             #stamina regen. first, calc it:
             st_regen = unit.get_restam()
-            if self.get_st_regen()[0] > 0: #if stam regen up applied, then regen *= 1.5
+
+            if self.get_st_regen()[0] > 0:
+
                 st_regen = st_regen * self.get_st_regen()[1]
-            if self.get_exhausted() == 1: #if exhausted applied, then regen *= 0.5
+
+            if self.get_exhausted()[0] == 1:
+
                 st_regen = st_regen * self.get_exhausted()[1]
 
             #apply stamina regen
-            unit.set_stamina(int(min(unit.get_stamina() + (unit.get_restam()*st_regen), unit.get_staminamax())))
+            unit.set_stamina(int(min(unit.get_stamina() + st_regen, unit.get_staminamax())))
 
 
             #-check if still exhausted. unit will no longer be exhausted if their stamina reaches a quarter of their max? that's what we're going with for now, anyway.
@@ -189,22 +194,24 @@ init python:
                     self.set_exhausted(0, 0)
 
             #-check if still under adrenaline. unit will no longer be under adrenaline if enough time has passed.
-            if self.get_adrenaline() == 0 and unit.get_hp() > unit.get_hpmax():
+            if self.get_adrenaline()[0] == 0 and unit.get_hp() > unit.get_hpmax():
                 unit.set_hp(max(unit.get_hpmax(), unit.get_hpmax() - self.get_ad_loss()))
 
+            self.dec_stances()
 
-            #decrease some stances by one.
-            self.set_adrenaline(max(self.get_adrenaline() - 1, 0))
-            self.set_bloodhungry(max(self.get_bloodhungry() - 1, 0))
-            self.set_martyr(max(self.get_martyr() - 1, 0))
-            self.set_hp_regen(max(self.get_hp_regen() - 1, 0))
-            self.set_st_regen(max(self.get_st_regen() - 1, 0))
-            self.set_dodge(max(self.get_dodge() - 1, 0))
-            self.set_hit(max(self.get_hit() - 1, 0))
-            self.set_physa(max(self.get_physa() - 1, 0))
-            self.set_physd(max(self.get_physd() - 1, 0))
-            self.set_maga(max(self.get_maga() - 1, 0))
-            self.set_magd(max(self.get_magd() - 1, 0))
+        def dec_stances(self):
+            #decrease some stances by one. call this at the end of the round
+            self.set_adrenaline(max(self.get_adrenaline()[0] - 1, 0), self.get_adrenaline()[1])
+            self.set_bloodhungry(max(self.get_bloodhungry()[0] - 1, 0), self.get_bloodhungry()[1])
+            self.set_martyr(max(self.get_martyr()[0] - 1, 0), self.get_martyr()[1])
+            self.set_hp_regen(max(self.get_hp_regen()[0] - 1, 0), self.get_hp_regen()[1])
+            self.set_st_regen(max(self.get_st_regen()[0] - 1, 0), self.get_st_regen()[1])
+            self.set_dodge(max(self.get_dodge()[0] - 1, 0), self.get_dodge()[1])
+            self.set_hit(max(self.get_hit()[0] - 1, 0), self.get_hit()[1])
+            self.set_physa(max(self.get_physa()[0] - 1, 0), self.get_physa()[1])
+            self.set_physd(max(self.get_physd()[0] - 1, 0), self.get_physd()[1])
+            self.set_maga(max(self.get_maga()[0] - 1, 0), self.get_maga()[1])
+            self.set_magd(max(self.get_magd()[0] - 1, 0), self.get_magd()[1])
 
 
 

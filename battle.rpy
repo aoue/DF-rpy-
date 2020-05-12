@@ -1,5 +1,5 @@
 
-init python:
+init -2 python:
     import random
     allow_save = True
 
@@ -7,7 +7,7 @@ init python:
     class map():
         def __init__(self, nl):
             #self.map = [[None]*5, [None]*5] #the grid. fill a certain spot with a unit child object
-            self.map = [[None]*5, [None]*5, [None]*5, [None]*5, [None]*5] #the grid. fill a certain spot with a unit child object
+            self.map = [[None]*5, [None]*5, [None]*5, [None]*5, [None]*5] #the grid. fill a certain spot with a unit child object.
 
             #set up the grid based on the units passed in
             for i in range(0, len(nl)):
@@ -26,19 +26,11 @@ init python:
         def place_unit(self, unit):
             #first look for the unit. if it's in the list, set the list object to none
             #index returns the 'index' of the unit we're looking for. so set = none by index
-
             self.get_map()[unit.get_point().get_x()][unit.get_point().get_y()] = unit
 
         def search_map(self, dtuple):
-
-
             unit = self.get_map()[dtuple[0]][dtuple[1]]
-
             return unit
-
-        def kill_unit(self, unit):
-            #enemy unit ooa. set self.map[row][col] = None
-            pass
 
 
     class battle():
@@ -105,18 +97,6 @@ init python:
             self.set_pable(self.calc_pable())
             self.set_eable(self.calc_eable())
             self.set_ableleft(self.get_pable() + self.get_eable())
-        def new_round(self):
-            renpy.say(None, "new round")
-            for i in range(0, len(self.get_pl())):
-                if self.get_pl()[i].get_ooa() == 0:
-                    self.get_pl()[i].set_able(self.get_pl()[i].get_ablemax()) #refresh able
-                    self.get_pl()[i].get_stance().new_round(self.get_pl()[i]) #restam, DOTs, HOTs, stances
-
-            for i in range(0, len(self.get_el())):
-                if self.get_el()[i].get_ooa() == 0:
-                    self.get_el()[i].set_able(self.get_el()[i].get_ablemax())
-                    self.get_el()[i].get_stance().new_round(self.get_el()[i]) #restam, DOTs, HOTs, stances. Note that we check whether unit is still exhausted after restam. I think it's superior this way.
-
         def is_battle_over(self):
             if self.get_rounds() == 0:
                 renpy.say(None, "Time elapsed.")
@@ -129,9 +109,17 @@ init python:
         def refresh_visuals(self):
             renpy.show_screen("combatinfo", self.get_pl(), self.get_el(), self.get_pable(), self.get_eable(), self.get_ableleft(), self.get_rounds(), self.get_phase())
             renpy.show_screen("show_units", self.get_pl(), self.get_el())
+        def new_round(self):
+            renpy.say(None, "new round")
+            for i in range(0, len(self.get_pl())):
+                if self.get_pl()[i].get_ooa() == 0:
+                    self.get_pl()[i].set_able(self.get_pl()[i].get_ablemax()) #refresh able
+                    self.get_pl()[i].get_stance().new_round(self.get_pl()[i]) #restam, DOTs, HOTs, stances
 
-
-
+            for i in range(0, len(self.get_el())):
+                if self.get_el()[i].get_ooa() == 0:
+                    self.get_el()[i].set_able(self.get_el()[i].get_ablemax())
+                    self.get_el()[i].get_stance().new_round(self.get_el()[i]) #restam, DOTs, HOTs, stances. Note that we check whether unit is still exhausted after restam. I think it's superior this way.
         #--settings
         def prebattle_settings(self):
             config.rollback_enabled = False
@@ -152,9 +140,26 @@ init python:
             #resolve damage, etc.
             chosen = renpy.call_screen("order_unit", self.get_pl())
             renpy.call_screen("pick_move", chosen, self)
-
         def enemy_turn(self):
-            renpy.say(None, "enemy turn")
+            chosen = None
+            nl = copy_list(self.get_el())
+
+            #calc priority of each unit. the one with the highest priority will be
+            for eunit in nl:
+                if eunit.get_ooa() == 0 and eunit.get_able() > 0:
+                    max = eunit.calc_priority(self.get_el())
+                    chosen = eunit
+                    nl.remove(eunit)
+                    break
+
+            for eunit in nl:
+                if eunit.get_ooa() == 0 and eunit.get_able() > 0:
+                    x = eunit.calc_priority(self.get_el())
+                    if max < x:
+                        max = x
+                        chosen = eunit
+
+            chosen.take_turn(self.get_el(), self.get_pl())
 
         def combat_round(self):
             self.prebattle_settings()

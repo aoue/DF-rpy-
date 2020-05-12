@@ -2,10 +2,15 @@
 
 write enemy AI.
 
+scale enemy units to player level? Or, enter a level variable for the unit to scale its stats.
+random naming for enemies
+write random placement function for enemy units.
+-not really random, but just make sure enemy units don't always end up in the same spots. front units should still end up in front.
+
 write moves for tutorial.
 -federal- 4 moves
 -federal aide- 4 moves.
--enemies
+-enemies (mutant animals, a few types. big mutant animal. two types of guard.)
 
 when showing damage, show if any stances activated or were applied or wore off
 ^also, damage only shows up on one unit even if many are hit
@@ -14,8 +19,8 @@ when showing damage, show if any stances activated or were applied or wore off
 when hovering on a unit:
 -show hp out of max
 -show stamina out of max
+-show able of out max. (little boxes. filled in means able, empty with a bar through it means that able was spent.)
 -show dodge out of max
--show able of out max
 -show stances applied
 -show move set
     on move hover:

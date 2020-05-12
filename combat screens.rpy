@@ -24,13 +24,13 @@ screen combatinfo(pl, el, pt, et, tl, rounds, ph):
         yalign 0.9
         spacing 2
         for i in range(0, len(pl)):
-            text "{}'s hp = {} ({}) [[{}] stam={}".format(pl[i].get_name(), str(pl[i].get_hp()), str(pl[i].get_dodge()), pl[i].get_able(), pl[i].get_stamina())
+            text "{}'s hp = {} ({}%) [[{}] stam={}".format(pl[i].get_name(), str(pl[i].get_hp()), str(pl[i].get_dodge()), pl[i].get_able(), pl[i].get_stamina())
     vbox:
         xalign 1.0
         yalign 0.9
         spacing 2
         for i in range(0, len(el)):
-            text "{}'s hp = {} ({}) [[{}]".format(el[i].get_name(), str(el[i].get_hp()), str(el[i].get_dodge()), el[i].get_able())
+            text "{}'s hp = {} ({}%) [[{}]".format(el[i].get_name(), str(el[i].get_hp()), str(el[i].get_dodge()), el[i].get_able())
 
 screen show_units(pl, el):
     zorder 99
