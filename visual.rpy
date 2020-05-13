@@ -22,8 +22,11 @@ init python:
         nl_copy = nl[:]
         return nl_copy
 
+    pos_list = [0,1,2,3,4,3,2,1,0]
+
+
 init -555:
-    #------vn portion display positions------#
+    #------vn display positions------#
     transform maxleft:
         xalign 0.0
         yalign 1.0
@@ -55,20 +58,10 @@ init -555:
 
     #battle fx
     transform e_tile_hover(row, column):
-        #respect bounds:
-        #r = max(min(row, 4), max(row, 0))
-        #c = max(min(column, 4), max(column, 0))
-        #pos(275 + max(min(row, 4), max(row, 0))*125, 5 + min(min(column, 4), max(column, 0))* 65)
-        pos(275 + min(abs(row), 4)*125, 5 + min(abs(column), 4)* 65)
-
-        #still wanting. with the long ones, we end up showing over the same tiles more than once.
+        pos(275 + (125*row), 5 + (65*column))
 
     transform a_tile_hover(row, column):
-        pos(275 + abs(row)*125, 5 + abs(column)* 65)
-
-
-    #transform e_show_damage(row, column)
-
+        pos(275 + (125*row), 385 + (65*column))
 
 
     #px: 320 + 120*(point.get_x()), 135 + 65*(point.get_y())
@@ -79,6 +72,16 @@ init -555:
 
     #------enemy side positions------#
     #px: 275 + 125*(point.get_x()), , 5 + 65*(point.get_y())
+
+    #face imgs. for deployment screen.
+    image face_boy:
+        "combat/face/deploy mc.png"
+    image face_boy_hover:
+        "combat/face/deploy mc hover.png"
+    image face_yve:
+        "combat/face/deploy yve.png"
+    image face_yve_hover:
+        "combat/face/deploy yve hover.png"
 
 
     #combat background images
@@ -107,7 +110,7 @@ init -555:
         0.5
         repeat
 
-    image icon_mc:
+    image icon_boy:
         "images/combat/units/mc icon.png"
         0.5
         "images/combat/units/mc icon 2.png"

@@ -210,7 +210,7 @@ init -2 python:
         renpy.show_screen("ally_highlight_extra", unit, cmove, row, column)
     def hide_highlighter():
         renpy.hide_screen("enemy_highlight_extra")
-        renpy.hide("tile_f_hovered")
+        renpy.hide_screen("ally_highlight_extra")
     def call_highlight_e(unit, cmove, battle):
         battle.refresh_visuals()
         sq = renpy.call_screen("enemy_highlight", unit, cmove)

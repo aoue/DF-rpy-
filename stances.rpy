@@ -13,29 +13,33 @@ init -2 python:
             #format
             #self.stance = (duration, multiplier)
 
-            #special
-            self.ad = (0, 1) #adrenaline
-            self.bl = (0, 1) #bloodhungry
-            self.sh = (0, 1) #shatter point
-            self.ki = (0, 1) #kindara
-            self.ex = (0, 1) #exhausted
-            self.mr = (0, 1) #martyr
+            #special - these are trackers. int=duration
+            self.ex = 0 #exhausted
+            self.ad = -1 #adrenaline
+            self.rally = -1 #rally
+            self.ki = 0 #kindara
+            self.sh = 0 #shatter point
+
+            #self.re = 0 #reciprocal. if a foe attacks you, they heal equal to the damage. if an ally heals you, they take damage equal to the heal.
+
+            #DOTs
+            self.be = -1 #bleeding
+
+            #self.bl = 0 #bloodhungry
+            #self.mr = 0 #martyr
 
             #special helpers
             self.ad_loss = 0 #hp that the unit gained when going into adrenaline.
 
-            #stat changes
-            self.hp_re = (0, 1) #hp regen
-            self.st_re = (0, 1) #stamina regen
-            self.do = (0, 1) #dodge
-            self.hi = (0, 1) #hit
-            self.pa = (0, 1) #phys a
-            self.pd = (0, 1) #phys d
-            self.ma = (0, 1) #mag a
-            self.md = (0, 1) #mag d
-
-            #DOTs
-            self.be = (0, 1) #bleeding
+            #stat changes - these are modifiers. float=multiplier
+            self.hp_re = 1.0 #hp regen
+            self.st_re = 1.0 #stamina regen
+            self.do = 1.0 #dodge
+            self.hi = 1.0 #hit
+            self.pa = 1.0 #phys a
+            self.pd = 1.0 #phys d
+            self.ma = 1.0 #mag a
+            self.md = 1.0 #mag d
 
         #getters
         def get_adrenaline(self):
@@ -70,58 +74,46 @@ init -2 python:
             return self.md
         def get_bleeding(self):
             return self.be
+        def get_rally(self):
+            return self.rally
 
         #setters
-        def set_adrenaline(self, x, y):
-            self.ad = (x, y)
-        def set_bloodhungry(self, x, y):
-            self.bl = (x, y)
-        def set_shatter(self, x, y):
-            self.sh = (x, y)
-        def set_kindara(self, x, y):
-            self.ki = (x, y)
-        def set_exhausted(self, x, y):
-            self.ex = (x, y)
-        def set_martyr(self, x, y):
-            self.mr = (x, y)
+        def set_adrenaline(self, x):
+            self.ad = x
+        def set_bloodhungry(self, x):
+            self.bl = x
+        def set_shatter(self, x):
+            self.sh = x
+        def set_kindara(self, x):
+            self.ki = x
+        def set_exhausted(self, x):
+            self.ex = x
+        def set_martyr(self, x):
+            self.mr = x
         def set_ad_loss(self, x):
             self.ad_loss = x
-        def set_hp_regen(self, x, y):
-            self.hp_re = (x, y)
-        def set_st_regen(self, x, y):
-            self.st_re = (x, y)
-        def set_dodge(self, x, y):
-            self.do = (x, y)
-        def set_hit(self, x, y):
-            self.hi = (x, y)
-        def set_physa(self, x, y):
-            self.pa = (x, y)
-        def set_physd(self, x, y):
-            self.pd = (x, y)
-        def set_maga(self, x, y):
-            self.ma = (x, y)
-        def set_magd(self, x, y):
-            self.md = (x, y)
-        def set_bleeding(self, x, y):
-            self.be = (x, y)
+        def set_hp_regen(self, x):
+            self.hp_re = x
+        def set_st_regen(self, x):
+            self.st_re = x
+        def set_dodge(self, x):
+            self.do = x
+        def set_hit(self, x):
+            self.hi = x
+        def set_physa(self, x):
+            self.pa = x
+        def set_physd(self, x):
+            self.pd = x
+        def set_maga(self, x):
+            self.ma = x
+        def set_magd(self, x):
+            self.md = x
+        def set_bleeding(self, x):
+            self.be = x
+        def set_rally(self, x):
+            self.rally = x
 
         #useful functions
-        def enter_adrenaline(self, unit):
-            #call this to enter the unit into adrenaline state.
-
-            #-set ad_loss equal to the hp gain
-            self.set_ad_loss(int(unit.get_hp() + (unit.get_hpmax()*0.5) + (5*unit.get_lvl())))
-
-            #-increase current hp by (1.5*max hp + 5*lvl)
-            unit.set_hp(self.get_ad_loss())
-
-            #-increase hit by 1.25 or something
-            self.set_hit(5, self.get_hit()[1] + 0.25)
-
-            #-increase physa by 1.25 or something
-            self.set_physa(5, self.get_physa()[1] + 0.15)
-
-
         def get_attacking_stances(self, attack, hit, type):
             #attack = unit's attack
             #hit = unit's hit
@@ -129,15 +121,12 @@ init -2 python:
 
             if type == 0:
                 #phys damage
-                if self.get_physa()[0] > 0:
-                    attack = attack * self.get_physa()[1]
+                attack = attack * self.get_physa()
             else:
                 #mag damage
-                if self.get_maga()[0] > 0:
-                    attack = attack * self.get_maga()[1]
+                attack = attack * self.get_maga()
 
-            if self.get_hit()[0] > 0:
-                hit = hit * self.get_hit()[1]
+            hit = hit * self.get_hit()
 
             return attack, hit
 
@@ -148,15 +137,13 @@ init -2 python:
 
             if type == 0:
                 #phys damage
-                if self.get_physd()[0] > 0:
-                    defense = defense * self.get_physd()[1]
+                defense = defense * self.get_physd()
             else:
                 #mag damage
-                if self.get_magd()[0] > 0:
-                    defense = defense * self.get_magd()[1]
+                defense = defense * self.get_magd()
 
-            if self.get_dodge()[0] > 0:
-                dodge = dodge * self.get_dodge()[1]
+
+            dodge = dodge * self.get_dodge()
 
             return defense, dodge
 
@@ -164,55 +151,95 @@ init -2 python:
             #check:
             #hp regen/dots.
 
-            if self.get_hp_regen()[0] > 0:
-                unit.set_hp(int(min(unit.get_hp() + (unit.get_hpmax()*self.get_hp_regen[1]), unit.get_hpmax())))
+            ##-- for this: check if a 'hp regen' tracker is on. if it is, then check self.get_hp_regen() for the modifier
+            #if self.get_hp_regen()[0] > 0:
+            #    unit.set_hp(int(min(unit.get_hp() + (unit.get_hpmax()*self.get_hp_regen[1]), unit.get_hpmax())))
 
-            if self.get_bleeding()[0] > 0:
-                unit.set_hp(int(min(unit.get_hp() - (unit.get_hpmax()*self.get_bleeding[1]), unit.get_hpmax())))
+            #if self.get_bleeding()[0] > 0:
+            #    unit.set_hp(int(min(unit.get_hp() - (unit.get_hpmax()*self.get_bleeding[1]), unit.get_hpmax())))
 
-
-            #apply hp regen
 
             #stamina regen. first, calc it:
             st_regen = unit.get_restam()
 
-            if self.get_st_regen()[0] > 0:
+            #for this: check if a 'stamina regen' tracker is on. if it is, then check self.get_st_regen() for the modifier
+            #if self.get_st_regen()[0] > 0:
+            #    st_regen = st_regen * self.get_st_regen()[1]
 
-                st_regen = st_regen * self.get_st_regen()[1]
-
-            if self.get_exhausted()[0] == 1:
-
-                st_regen = st_regen * self.get_exhausted()[1]
+            #if self.get_exhausted()[0] == 1:
+            #    st_regen = st_regen * self.get_exhausted()[1]
 
             #apply stamina regen
             unit.set_stamina(int(min(unit.get_stamina() + st_regen, unit.get_staminamax())))
 
-
             #-check if still exhausted. unit will no longer be exhausted if their stamina reaches a quarter of their max? that's what we're going with for now, anyway.
-            if self.get_exhausted()[0] == 1:
+            if self.get_exhausted() == 1:
                 if unit.get_stamina() > (unit.get_staminamax() / 4):
-                    self.set_exhausted(0, 0)
+                    self.set_exhausted(0)
 
-            #-check if still under adrenaline. unit will no longer be under adrenaline if enough time has passed.
-            if self.get_adrenaline()[0] == 0 and unit.get_hp() > unit.get_hpmax():
-                unit.set_hp(max(unit.get_hpmax(), unit.get_hpmax() - self.get_ad_loss()))
+            #check if still under the effect of various stances. if the unit is not, then exit stance.
+            if self.get_adrenaline() == 0:
+                self.exit_adrenaline(unit)
+
+            if self.get_rally() == 0:
+                self.exit_rally()
 
             self.dec_stances()
 
         def dec_stances(self):
-            #decrease some stances by one. call this at the end of the round
-            self.set_adrenaline(max(self.get_adrenaline()[0] - 1, 0), self.get_adrenaline()[1])
-            self.set_bloodhungry(max(self.get_bloodhungry()[0] - 1, 0), self.get_bloodhungry()[1])
-            self.set_martyr(max(self.get_martyr()[0] - 1, 0), self.get_martyr()[1])
-            self.set_hp_regen(max(self.get_hp_regen()[0] - 1, 0), self.get_hp_regen()[1])
-            self.set_st_regen(max(self.get_st_regen()[0] - 1, 0), self.get_st_regen()[1])
-            self.set_dodge(max(self.get_dodge()[0] - 1, 0), self.get_dodge()[1])
-            self.set_hit(max(self.get_hit()[0] - 1, 0), self.get_hit()[1])
-            self.set_physa(max(self.get_physa()[0] - 1, 0), self.get_physa()[1])
-            self.set_physd(max(self.get_physd()[0] - 1, 0), self.get_physd()[1])
-            self.set_maga(max(self.get_maga()[0] - 1, 0), self.get_maga()[1])
-            self.set_magd(max(self.get_magd()[0] - 1, 0), self.get_magd()[1])
+            #decrease (some) tracking stances by one. call this at the end of /start of new round
+            self.set_adrenaline(max(self.get_adrenaline() - 1, -1))
+            self.set_rally(max(self.get_rally() - 1, -1))
 
+        #enter/exit stance pairs
+        def enter_adrenaline(self, unit):
+            #call this to enter the unit into adrenaline state.
+
+            #-set ad_loss equal to the hp gain
+            self.set_ad_loss(int(unit.get_hp() + (unit.get_hpmax()*0.5) + (5*unit.get_lvl())))
+
+            #-increase current hp by (1.5*max hp + 5*lvl)
+            unit.set_hp(self.get_ad_loss())
+
+            #-increase hit mod by .25
+            self.set_hit(self.get_hit() + 0.25)
+
+            #-increase physa mod by .15
+            self.set_physa(self.get_physa() + 0.15)
+        def exit_adrenaline(self, unit):
+            #call this to exit the unit from adrenaline state
+
+            #if above max health thanks to adrenaline hp buff, remove hp buff.
+            if unit.get_hp() > unit.get_hpmax():
+                unit.set_hp(max(unit.get_hpmax(), unit.get_hp() - self.get_ad_loss()))
+
+            #-decrease hit mod by .25 or something
+            self.set_hit(self.get_hit() - 0.25)
+
+            #-decrease physa mod by .15 or something
+            self.set_physa(self.get_physa() - 0.15)
+
+        def enter_rally(self):
+            #call to enter unit into rally state
+
+            #hit mod up by .25
+            self.set_hit(self.get_hit() + 0.25)
+
+            #physa mod up by .1
+            self.set_physa(self.get_physa() + 0.1)
+        def exit_rally(self):
+            #call to exit unit from rally state
+
+            #hit mod down by .25
+            self.set_hit(self.get_hit() - 0.25)
+
+            #physa mod down by .1
+            self.set_physa(self.get_physa() - 0.1)
+
+        def enter_bleeding(self):
+            pass
+        def exit_bleeding(self):
+            self.set_bleeding(-1)
 
 
 

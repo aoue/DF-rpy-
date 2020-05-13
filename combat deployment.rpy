@@ -21,31 +21,28 @@ screen deploy_screen(deployer):
         yalign 1.0
         spacing 15
 
-        if boy_d.get_deployable() == 1: #mc
-            imagebutton:
-                idle "combat/face/deploy mc.png"
-                hover "combat/face/deploy mc hover.png"
-                action Function(deployer.deploy_unit, boy_d) hovered Function(deployer.browse, boy_d) unhovered Hide("deploy_browse")
-        if yve_d.get_deployable() == 1: #yve
-            imagebutton:
-                idle "combat/face/deploy yve.png"
-                hover "combat/face/deploy yve hover.png"
-                action Function(deployer.deploy_unit, yve_d) hovered Function(deployer.browse, yve_d) unhovered Hide("deploy_browse")
+        for unit in party_list:
+            if unit.get_deployable() == 1:
+                imagebutton:
+                    idle unit.get_face()
+                    hover unit.get_face_h()
+                    action Function(deployer.deploy_unit, unit) hovered Function(deployer.browse, unit) unhovered Hide("deploy_browse")
+
 
 screen choose_deploy_loc():
     #select which unit to order from available units that have yet to act. returns rank of unit.
 
     for x in range(0, 5): #column
         for i in range(0, 5): #row
-            for j in range(0, len(playerlist)): #make sure spot is empty
-                if playerlist[j].get_point().get_x() == i and playerlist[j].get_point().get_y() == x:
+            for j in range(0, len(player_list)): #make sure spot is empty
+                if player_list[j].get_point().get_x() == i and player_list[j].get_point().get_y() == x:
                     pass
                 else:
                     button:
                         pos(340 + i*120, 135 + x*65)
                         text "([i],[x])"
                         action Return(value = (i,x))
-            if len(playerlist) == 0:
+            if len(player_list) == 0:
                 button:
                     pos(340 + i*120, 135 + x*65)
                     text "([i],[x])"
@@ -83,7 +80,6 @@ init python:
             self.deploycounter = dc
         def set_dm(self, dm):
             self.deploycounter = dm
-
         #getters
         def get_dc(self):
             return self.deploycounter
@@ -104,8 +100,8 @@ init python:
                 unit.point.set_x(dtuple[0])
                 unit.point.set_y(dtuple[1])
 
-                playerlist.append(unit)
-                renpy.show(playerlist[self.get_dc()].icon, at_list=[deploypos(320 + unit.get_point().get_x() * 120, 135 + unit.get_point().get_y() * 65)])
+                player_list.append(unit)
+                renpy.show(player_list[self.get_dc()].icon, at_list=[deploypos(320 + unit.get_point().get_x() * 120, 135 + unit.get_point().get_y() * 65)])
             else:
                 renpy.notify("You've already deployed the maximum number of units.")
 
@@ -115,10 +111,10 @@ init python:
 
         def reset_deployment(self):
             self.set_dc(0)
-            for i in range(0, len(playerlist)):
-                playerlist[i].set_deployable(1)
-                renpy.hide(playerlist[i].icon)
-            del playerlist[:]
+            for i in range(0, len(player_list)):
+                player_list[i].set_deployable(1)
+                renpy.hide(player_list[i].icon)
+            del player_list[:]
 
 
         def select_deploy_loc(self):

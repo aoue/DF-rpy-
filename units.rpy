@@ -74,6 +74,8 @@ init -1 python:
         def __init__(self):
             self.name = "Default Entity"
             self.point = point(0,0) #instance of point class. coordinates for unit's position.
+            self.face = "face_boy" #deploy picture
+            self.face_h = "face_boy_hover" #deploy picture, hovered
             self.icon = "mechicon_mc" #picture
             self.deployable = 1 #whether you can field them
             self.ablemax = 2 #max of able
@@ -112,11 +114,16 @@ init -1 python:
             self.move7 = hit(move)
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = [] #all moves learned. just append them in here when a character learns them.
+
         #getters
         def get_name(self):
             return self.name
         def get_point(self):
             return self.point
+        def get_face(self):
+            return self.face
+        def get_face_h(self):
+            return self.face_h
         def get_icon(self):
             return self.icon
         def get_deployable(self):
@@ -177,6 +184,10 @@ init -1 python:
         def set_point(self, x, y):
             self.point.set_x(x)
             self.point.set_y(y)
+        def set_face(self, face):
+            self.face = face
+        def set_face_h(self, face_h):
+            self.face_h = face_h
         def set_icon(self, icon):
             self.icon = icon
         def set_deployable(self, deployable):
@@ -238,12 +249,10 @@ init -1 python:
                 self.set_stamina(0)  #<-- too brutal?
                 self.set_ooa(1)
                 self.set_icon("dead_icon")
-
         def level_up(self):
             #if self.get_exp() > constant * self.get_lvl():
             #   level up!
             pass
-
         def walk(self, battle):
             #move to an open, adjacent square. ends the unit's turn.
             sq = renpy.invoke_in_new_context(call_highlight_walk, self, battle) #tuple
@@ -254,17 +263,14 @@ init -1 python:
             self.get_point().set_y(sq[1])
             battle.get_allymap().place_unit(self)
             self.set_able(self.get_able()-1)
-
         def wait(self):
             self.set_able(0)
             self.set_stamina(min(self.get_stamina()+20, self.get_staminamax()))
-
         def defend(self):
             #the unit must have full able points to do this.
             #regen some stam and set both physd and magd stances up.
             self.set_able(0)
             self.set_stamina(min(self.get_stamina()+20, self.get_staminamax()))
-
         def get_aff_mod(self, target, ele):
             #used in calc damage.
             #ele = affinity of the attacking move
@@ -452,7 +458,27 @@ init -1 python:
                 elif aff == 8:
                     mod = 0.75
             return mod
+        def calc_heal(self, target, cmove):
+            #self: dealer of the heals
+            #target: recipient of the heals
+            #cmove: healing move
 
+            astats = self.get_maga() * self.get_stance().get_maga()
+            dstats = target.get_magd() * target.get_stance().get_magd()
+
+            spread = random.randint(230, 255) /255.0
+            #spread = 1 #for testing buffs
+
+            heal = max(int(((astats + cmove.get_power()) / dstats) * cmove.get_power() * spread), 0)
+
+            return heal
+        def take_heal(self, dealer, heal):
+            #check stances: i.e. reciprocal
+
+            #unit takes damage
+            if self.get_ooa() == 0:
+                self.set_hp(min(self.get_hp()+heal, self.get_hpmax()))
+                renpy.show_screen("a_show_heal", self, heal)
         def calc_damage(self, target, cmove):
             #self: dealer of the damage
             #target: recipient of the damage, unit child obj
@@ -474,13 +500,13 @@ init -1 python:
                 return -1 #dodge successful. returns -1 damage
 
             aff_mod = self.get_aff_mod(target, cmove.get_element())
-            spread = random.randint(216, 255) /255.0
+            spread = random.randint(230, 255) /255.0
+            #spread = 1 #for testing buffs
 
             #actual damage calculation
-            damage = max(int(((2*astats[0] - 1.5*dstats[0]) / dstats[0]) * (cmove.get_power() + (2 * self.get_lvl())) * aff_mod * spread), 0)
+            damage = max(int((((2*astats[0]) - (1.5*dstats[0])) / (0.5*dstats[0])) * (cmove.get_power() + self.get_lvl()) * aff_mod * spread), 0)
 
             return damage
-
         def take_damage(self, dealer, damage):
             #self: unit taking the damage
             #dealer: unit dealing the damage
@@ -491,20 +517,20 @@ init -1 python:
                 return
 
             #look through stances: the order is important.
-            if self.get_stance().get_exhausted()[0] > 0: #if exhausted, take 1.2x damage
+            if self.get_stance().get_exhausted() > 0: #if exhausted, take 1.2x damage
                 damage = damage * 1.5
 
-            if self.get_stance().get_kindara()[0] > 0: #hit enemy will full damage. take no damage.
+            if self.get_stance().get_kindara() > 0: #hit enemy will full damage. take no damage.
                 dealer.set_hp(max(dealer.get_hp()-damage, 0))
                 dealer.check_dead()
                 renpy.show_screen("a_show_damage", dealer, damage)
-                self.get_stance().set_kindara(self.get_stance().get_kindara() - 1, self.get_stance().get_kindara()[1])
+                self.get_stance().set_kindara(self.get_stance().get_kindara()-1)
 
                 return
 
-            if self.get_stance().get_shatter()[0] > 0: #if not put ooa, take no damage.
+            if self.get_stance().get_shatter() > 0: #if not put ooa, take no damage.
+                self.get_stance().set_shatter(self.get_stance().get_shatter()-1)
                 if self.get_hp() - damage > 0:
-                    self.get_stance().set_shatter(self.get_stance().get_shatter()-1, self.get_stance().get_shatter()[1])
                     return
 
 
@@ -512,7 +538,6 @@ init -1 python:
             self.set_hp(max(self.get_hp()-damage, 0))
             self.check_dead()
             renpy.show_screen("e_show_damage", self, damage)
-
         def use_move(self, cmove, x, y, battle):
             #legend:
             # cmove = the chosen move. e.g. hit. it's an object.
@@ -535,26 +560,27 @@ init -1 python:
             cmove.exert(self, sq, battle)
 
 
-
-    #playable units (in order of appearance)
+    #playable units (in order)
     class unit_yve(unit):
         def __init__(self):
             self.name = "Yve"
             self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.face = "face_yve"
+            self.face_h = "face_yve_hover"
             self.icon = "icon_yve" #picture
             self.deployable = 1 #whether you can field them
-            self.ablemax = 2
-            self.able = 2 #lets the unit act each round
+            self.ablemax = 1
+            self.able = 1 #lets the unit act each round
             self.staminamax = 70
             self.stamina = 70 #basically mana. some recovers each round.
-            self.restam = 10
+            self.restam = 15
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
 
             self.stance = stances() #unit's status effects
             self.hpmax = 130 #max hp
-            self.hp = 130 #current hp
+            self.hp = 10 #current hp
             self.dodgemax = 15 #max dodge
             self.dodge = 15 #percent chance to dodge attacks.
             self.hitmax = 5 #subtract from eenmy's dodge
@@ -566,15 +592,109 @@ init -1 python:
             self.physa = 110 #physical attack
             self.physd = 100 #physical defense
             self.maga = 80 #magical attack
-            self.magd = 100 #magical defense
+            self.magd = 90 #magical defense
 
             #moves:
             self.pattern = 2 #2/4
             self.move1 = spear()
             self.move2 = pierce()
             self.move3 = whirl()
-            self.move4 = None
+            self.move4 = rally()
             self.move5 = adrenaline()
+            self.move6 = suppress()
+            self.move7 = first_aid()
+            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
+            self.movelist = [] #all moves learned. just append them in here when a character learns them.
+
+        def level_up():
+            #see above
+            pass
+
+    class unit_federal(unit):
+        def __init__(self):
+            self.name = "Federal"
+            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.icon = "icon_federal" #picture
+            self.deployable = 1 #whether you can field them
+            self.ablemax = 1
+            self.able = 1 #lets the unit act each round
+            self.staminamax = 60
+            self.stamina = 60 #basically mana. some recovers each round.
+            self.restam = 10
+            self.lvl = 0
+            self.exp = 0 #the unit's exp for leveling up
+            self.evo = 0 #whether the unit is in evo mode
+
+            self.stance = stances() #unit's status effects
+            self.hpmax = 100 #max hp
+            self.hp = 100 #current hp
+            self.dodgemax = 5 #max dodge
+            self.dodge = 5 #percent chance to dodge attacks.
+            self.hitmax = 5 #subtract from eenmy's dodge
+            self.hit = 5 #subtract from enemy's dodge
+            self.ooa = 0 #out of action. defeated.
+            self.dead = 0 #dead. not a battle stat.
+
+            self.aff = 0 #affinity. for super effective and stuff.
+            self.physa = 100 #physical attack
+            self.physd = 100 #physical defense
+            self.maga = 70 #magical attack
+            self.magd = 100 #magical defense
+
+            #moves:
+            self.pattern = 3 #3/3
+            self.move1 = sword()
+            self.move2 = flourish()
+            self.move3 = form6()
+            self.move4 = rally()
+            self.move5 = shoot()
+            self.move6 = None
+            self.move7 = None
+            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
+            self.movelist = [] #all moves learned. just append them in here when a character learns them.
+
+        def level_up():
+            #see above
+            pass
+
+    class unit_aide(unit):
+        def __init__(self):
+            self.name = "Aide"
+            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.icon = "icon_aide" #picture
+            self.deployable = 1 #whether you can field them
+            self.ablemax = 1
+            self.able = 1 #lets the unit act each round
+            self.staminamax = 50
+            self.stamina = 50 #basically mana. some recovers each round.
+            self.restam = 10
+            self.lvl = 0
+            self.exp = 0 #the unit's exp for leveling up
+            self.evo = 0 #whether the unit is in evo mode
+
+            self.stance = stances() #unit's status effects
+            self.hpmax = 90 #max hp
+            self.hp = 90 #current hp
+            self.dodgemax = 5 #max dodge
+            self.dodge = 5 #percent chance to dodge attacks.
+            self.hitmax = 5 #subtract from eenmy's dodge
+            self.hit = 5 #subtract from enemy's dodge
+            self.ooa = 0 #out of action. defeated.
+            self.dead = 0 #dead. not a battle stat.
+
+            self.aff = 0 #affinity. for super effective and stuff.
+            self.physa = 90 #physical attack
+            self.physd = 90 #physical defense
+            self.maga = 70 #magical attack
+            self.magd = 90 #magical defense
+
+            #moves:
+            self.pattern = 3 #3/3
+            self.move1 = form6()
+            self.move2 = shoot()
+            self.move3 = suppress()
+            self.move4 = first_aid()
+            self.move5 = None
             self.move6 = None
             self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
@@ -588,7 +708,9 @@ init -1 python:
         def __init__(self):
             self.name = "Boy"
             self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
-            self.icon = "icon_mc" #picture
+            self.face = "face_boy"
+            self.face_h = "face_boy_hover"
+            self.icon = "icon_boy" #picture
             self.deployable = 1 #whether you can field them
             self.ablemax = 1 #
             self.able = 1 #let's the unit act each round
@@ -618,10 +740,10 @@ init -1 python:
 
             #moves:
             self.pattern = 3 #3/3
-            self.move1 = None
-            self.move2 = None
-            self.move3 = None
-            self.move4 = None
+            self.move1 = form6()
+            self.move2 = suppress()
+            self.move3 = first_aid()
+            self.move4 = rally()
             self.move5 = None
             self.move6 = None
             self.move7 = None

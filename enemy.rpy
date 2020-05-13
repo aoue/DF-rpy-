@@ -89,7 +89,7 @@ init python:
             #is healer and injured allies: +++
             #is healer and uninjured allies: ---
             if self.get_healer() == 1:
-                pass
+                pass #for each unit in el, not ooa. if concerned, ++
 
             #is buffer and unbuffed allies: ++
             #is buffer and buffed allies: --

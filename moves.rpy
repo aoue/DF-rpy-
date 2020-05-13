@@ -117,7 +117,7 @@ init -2 python:
                     dif -= 1
 
             if unit.get_stamina() == 0: #if the unit is at 0 stamina, set them as exhausted
-                unit.get_stance().set_exhausted(1,0)
+                unit.get_stance().set_exhausted(1)
             unit.set_able(dif)
 
     #--- Yve ---
@@ -182,12 +182,12 @@ init -2 python:
             self.drain(unit)
             self.translate(unit, battle)
 
-            target = battle.get_enemymap().search_map(sq)
-            target2 = battle.get_enemymap().search_map((sq[0],abs(sq[1]-1)))
-            if sq[1] == 1:
-                target3 = battle.get_enemymap().search_map((sq[0],2))
-            else:
-                target3 = battle.get_enemymap().search_map((sq[0],abs(sq[1]-2)))
+            r = sq[0]
+            c = min(sq[1], 2)
+
+            target = battle.get_enemymap().search_map((r,c))
+            target2 = battle.get_enemymap().search_map((r,c+1))
+            target3 = battle.get_enemymap().search_map((r,c+2))
 
             if target != None:
                 target.take_damage(unit, unit.calc_damage(target, self))
@@ -222,10 +222,10 @@ init -2 python:
             self.translate(unit, battle)
 
             #apply adrenaline stance
-            if unit.get_stance().get_adrenaline()[0] > 0:
-                unit.get_stance().set_adrenaline(5, 0)
-            else:
+            if unit.get_stance().get_adrenaline() <= 0:
                 unit.get_stance().enter_adrenaline(unit)
+            else:
+                unit.get_stance().set_adrenaline(5)
 
     class whirl(move):
         #3x3 cross minus the center square
@@ -271,35 +271,23 @@ init -2 python:
 
 
     #--- Federal ---
-    #sword. single target. front rank. light damage. light cost.
-    #flourish. single target. front rank. heavy damage. heavy stamina cost. no able cost.
-    #rally. 3x3 (allies). hit up, physa up. back rank. light cost.
-    #quickshot. horizontal pair. back rank. medium cost.
 
-    #--- Federal Aide ---
-    #shoot. single target. back rank. light damage. light cost.
-    #suppress. 2x2. terrible hit. back rank.
-    #Twelve Forms - VI. 1x1. front rank. retreats 2.
-
-
-
-    #--- TEST MOVES ---
-
-    class skate(move):
+    class sword(move):
+        #sword. single target. front rank. light damage. light cost.
         def __init__(self):
-            self.flavour = "{i}Skates can cut{/i}"
-            self.title = "Skate"
-            self.rank = 2
-            self.type = 15
+            self.flavour = "{i}Strike with the sword.{/i}"
+            self.title = "Sword"
+            self.rank = 1
+            self.type = 1
             self.iff = 0
-            self.clearance = (0,-4)
-            self.clearance_type = 0 #needs whole row clear
-            self.stamina_drain = 30
-            self.able_drain = 2
-            self.power = 50
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 15
+            self.able_drain = 1
+            self.power = 20
             self.hit = 0
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8.
+            self.damage_type = 0
+            self.element = 0
 
         def exert(self, unit, sq, battle):
             #unit: the unit doing the attack
@@ -310,51 +298,247 @@ init -2 python:
             self.drain(unit)
             self.translate(unit, battle)
 
+            #this move hits only the selected square.
             target = battle.get_enemymap().search_map(sq)
+
+            #calc damage and deal it to the target
+            #damage =
             if target != None:
-                target.take_damage(unit.calc_damage(target, self))
+                target.take_damage(unit, unit.calc_damage(target, self))
 
-            if sq[1] != 0:
-                target0 = battle.get_enemymap().search_map((sq[0],0))
-                if target0 != None:
-                    target0.take_damage(unit.calc_damage(target0, self))
-            if sq[1] != 1:
-                target1 = battle.get_enemymap().search_map((sq[0],1))
-                if target1 != None:
-                    target1.take_damage(unit.calc_damage(target1, self))
-            if sq[1] != 2:
-                target2 = battle.get_enemymap().search_map((sq[0],2))
-                if target2 != None:
-                    target2.take_damage(unit.calc_damage(target2, self))
-            if sq[1] != 3:
-                target3 = battle.get_enemymap().search_map((sq[0],3))
-                if target3 != None:
-                    target3.take_damage(unit.calc_damage(target3, self))
-            if sq[1] != 4:
-                target4 = battle.get_enemymap().search_map((sq[0],4))
-                if target4 != None:
-                    target4.take_damage(unit.calc_damage(target4, self))
-
-    class evo_storm(move):
+    class flourish(move):
+        #flourish. single target. front rank. heavy damage. heavy stamina cost. no able cost.
         def __init__(self):
-            self.flavour = "{i}Storm on the horizon.{/i}"
-            self.title = "Storm"
-            self.rank = 0
+            self.flavour = "{i}A fast, accurate blow.{/i}"
+            self.title = "Flourish"
+            self.rank = 1
             self.type = 1
-            self.iff = 2
+            self.iff = 0
             self.clearance = (0,0)
-            self.clearance_type = 0
-            self.stamina_drain = 0
+            self.clearance_type = 2
+            self.stamina_drain = 35
             self.able_drain = 0
+            self.power = 50
+            self.hit = 5
+            self.damage_type = 0
+            self.element = 0
+
+        def exert(self, unit, sq, battle):
+            #unit: the unit doing the attack
+            #sq: the clicked square. tuple
+            #battle: the battle class
+
+            #moves cost stamina and able
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            #this move hits only the selected square.
+            target = battle.get_enemymap().search_map(sq)
+
+            #calc damage and deal it to the target
+            #damage =
+            if target != None:
+                target.take_damage(unit, unit.calc_damage(target, self))
+
+    class form6(move):
+        #Twelve Forms - VI. 1x1. front rank. retreats 2.
+        def __init__(self):
+            self.flavour = "{i}Twelve Forms - Form VI.{/i}"
+            self.title = "Form VI"
+            self.rank = 1
+            self.type = 1
+            self.iff = 0
+            self.clearance = (0,1)
+            self.clearance_type = 0
+            self.stamina_drain = 20
+            self.able_drain = 1
+            self.power = 10
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 0
+
+        def exert(self, unit, sq, battle):
+            #unit: the unit doing the attack
+            #sq: the clicked square. tuple
+            #battle: the battle class
+
+            #moves cost stamina and able
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            #this move hits only the selected square.
+            target = battle.get_enemymap().search_map(sq)
+
+            #calc damage and deal it to the target
+            #damage =
+            if target != None:
+                target.take_damage(unit, unit.calc_damage(target, self))
+
+    class rally(move):
+        #rally. 3x3 (allies). hit up, physa up. back rank. light cost.
+        def __init__(self):
+            self.flavour = "{i}Rally together.{/i}"
+            self.title = "Rally"
+            self.rank = 2
+            self.type = 13
+            self.iff = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 20
+            self.able_drain = 1
             self.power = 0
             self.hit = 0
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
+            self.damage_type = 0
+            self.element = 0
+
+        def exert(self, unit, sq, battle):
+            #unit: the unit doing the attack
+            #sq: the clicked square. tuple
+            #battle: the battle class
+
+            #moves cost stamina and able
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            r = min(sq[0], 2)
+            c = min(sq[1], 2)
+
+            target0 = battle.get_allymap().search_map((r-1,c-1))
+            target1 = battle.get_allymap().search_map((r, c-1))
+            target2 = battle.get_allymap().search_map((r+1,c-1))
+            target3 = battle.get_allymap().search_map((r-1,c))
+            target4 = battle.get_allymap().search_map((r,c))
+            target5 = battle.get_allymap().search_map((r+1,c))
+            target6 = battle.get_allymap().search_map((r-1,c+1))
+            target7 = battle.get_allymap().search_map((r,c+1))
+            target8 = battle.get_allymap().search_map((r+1,c+1))
+            targetlist = [target0, target1, target2, target3, target4, target5, target6, target7, target8]
+
+            #apply buffs to any targets
+            #-physa up
+            #-hit up
+
+            for target in targetlist:
+                if target != None:
+                    if target.get_stance().get_rally() <= 0: #if rally is not active on this unit, make it so.
+                        target.get_stance().enter_rally()
+                    target.get_stance().set_rally(5) #set/refresh duration
+
+    class shoot(move):
+        #shoot. single target. back rank. light damage. light cost.
+        def __init__(self):
+            self.flavour = "{i}Shoot carefully.{/i}"
+            self.title = "Shoot"
+            self.rank = 2
+            self.type = 1
+            self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 15
+            self.able_drain = 1
+            self.power = 15
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 0
+
+        def exert(self, unit, sq, battle):
+            #unit: the unit doing the attack
+            #sq: the clicked square. tuple
+            #battle: the battle class
+
+            #moves cost stamina and able
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            #this move hits only the selected square.
+            target = battle.get_enemymap().search_map(sq)
+
+            #calc damage and deal it to the target
+            #damage =
+            if target != None:
+                target.take_damage(unit, unit.calc_damage(target, self))
+    #--- Federal Aide ---
+
+    class suppress(move):
+        #suppress. 2x2. terrible hit. back rank.
+        def __init__(self):
+            self.flavour = "{i}A swift, innacurate burst.{/i}"
+            self.title = "Suppress"
+            self.rank = 2
+            self.type = 7
+            self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 30
+            self.able_drain = 1
+            self.power = 15
+            self.hit = -40
+            self.damage_type = 0
+            self.element = 0
+
+        def exert(self, unit, sq, battle):
+            #unit: the unit doing the attack
+            #sq: the clicked square. tuple
+            #battle: the battle class
+
+            #moves cost stamina and able
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            r = min(sq[0], 3)
+            c = min(sq[1], 3)
+
+            target0 = battle.get_enemymap().search_map((r,c))
+            target1 = battle.get_enemymap().search_map((r+1,c))
+            target2 = battle.get_enemymap().search_map((r,c+1))
+            target3 = battle.get_enemymap().search_map((r+1,c+1))
+            targetlist = [target0, target1, target2, target3]
+
+            for target in targetlist:
+                if target != None:
+                    target.take_damage(unit, unit.calc_damage(target, self))
+
+    class first_aid(move):
+        #first aid. very light heal, stops bleeding. light cost.
+        def __init__(self):
+            self.flavour = "{i}Basic magical care is better than nothing.{/i}"
+            self.title = "First Aid"
+            self.rank = 2 #can be 1, or 2. determines where the move can be used
+            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
+            self.iff = 1 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
+            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
+            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
+            self.stamina_drain = 15 #the amount of stamina the unit loses using this move
+            self.able_drain = 1 #the amount of able the unit loses using this move
+            self.power = 20 #affects damage/heals
+            self.hit = 0 #affects dodging
+            self.damage_type = 1 #0: deals physical damage, 1: deals magical damage
             self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
 
         def exert(self, unit, sq, battle):
             #unit: the unit doing the attack
             #sq: the clicked square
-            pass
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            #do stuff
+            target = battle.get_allymap().search_map(sq)
+
+            if target != None:
+
+                #heal a little. based on ma.
+                target.take_heal(unit, unit.calc_heal(target, self))
+
+                if unit.get_stance().get_bleeding() == 1:
+                    unit.set_stance().set_bleeding(0)
+
+
+
+
+
+
+
+
 
 
 

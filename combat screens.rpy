@@ -48,7 +48,6 @@ screen e_show_damage(unit, damage):
 
     timer 1.0 action Hide("e_show_damage", transition = dissolve)
 
-
 screen a_show_damage(unit, damage):
     zorder 103
 
@@ -56,6 +55,12 @@ screen a_show_damage(unit, damage):
 
     timer 1.0 action Hide("a_show_damage", transition = dissolve)
 
+screen a_show_heal(unit, heal):
+    zorder 103
+
+    text "{color=327345}[heal]{/color}" pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
+
+    timer 1.0 action Hide("a_show_heal", transition = dissolve)
 
 screen order_unit(pl):
     #select which unit to order from available units that have yet to act. returns rank of unit.
@@ -132,6 +137,7 @@ screen enemy_highlight(unit, cmove):
                     pos(275 + row*125, 5 + column*65)
                     action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
 
+
 screen ally_highlight(unit, cmove):
     zorder 101
 
@@ -141,6 +147,7 @@ screen ally_highlight(unit, cmove):
             hover "images/combat/fx/tile f hover.png"
             pos(275 + unit.get_point().get_x()*125, 385 + unit.get_point().get_y()*65)
             action Return() #return tuple
+
     else:
         for column in range(0, 5): #column
             for row in range(0, 5): #row
@@ -229,32 +236,24 @@ screen walk_highlight(unit, battle):
 screen enemy_highlight_extra(unit, cmove, row, column):
     zorder 102
     if cmove.get_type() == 2: # 1x2
-        add "tile_e_hovered" at e_tile_hover(row, column-1)
+        $column = min(column, 1)
+        for c in range(column, column+2):
+            for r in range(row, row+1):
+                add "tile_e_hovered" at e_tile_hover(r, c)
+
 
     elif cmove.get_type() == 3: # 1x3
-        add "tile_e_hovered" at e_tile_hover(row, column-1)
-        if column == 1:
-            add "tile_e_hovered" at e_tile_hover(row, 2)
-        else:
-            add "tile_e_hovered" at e_tile_hover(row, column-2)
+        $column = min(column, 2)
+        for c in range(column, column+3):
+            for r in range(row, row+1):
+                add "tile_e_hovered" at e_tile_hover(r, c)
 
-    elif cmove.get_type() == 15: # 4x1
-        if column != 0:
-            add "tile_e_hovered" at e_tile_hover(row, 0)
-        if column != 1:
-            add "tile_e_hovered" at e_tile_hover(row, 1)
-        if column != 2:
-            add "tile_e_hovered" at e_tile_hover(row, 2)
-        if column != 3:
-            add "tile_e_hovered" at e_tile_hover(row, 3)
-        if column != 4:
-            add "tile_e_hovered" at e_tile_hover(row, 4)
-
-    elif cmove.get_type() == 26: #3x3 cross
-        add "tile_e_hovered" at e_tile_hover(row, column-1)
-        add "tile_e_hovered" at e_tile_hover(row, column+1)
-        add "tile_e_hovered" at e_tile_hover(row-1, column)
-        add "tile_e_hovered" at e_tile_hover(row+1, column)
+    elif cmove.get_type() == 7: # 2x2
+        $column = min(column, 3)
+        $row = min(row, 3)
+        for c in range(column, column+2):
+            for r in range(row, row+2):
+                add "tile_e_hovered" at e_tile_hover(r, c)
 
     elif cmove.get_type() == 27: #3x3 cross w/ no center
         add "tile_e_hovered" at e_tile_hover(row, column-1)
@@ -266,23 +265,18 @@ screen enemy_highlight_extra(unit, cmove, row, column):
 screen ally_highlight_extra(unit, cmove, row, column):
     zorder 102
 
-    if cmove.get_type() == 2: # 1x2
-        add "tile_e_hovered" at a_tile_hover(row, column-1)
+    if cmove.get_type() == 3: # 1x3
+        add "tile_f_hovered" at a_tile_hover(row, column-1)
+        add "tile_f_hovered" at a_tile_hover(row, column-2)
 
-    elif cmove.get_type() == 3: # 1x3
-        pass
+    elif cmove.get_type() == 13: #3x3
+        $row = min(row, 2)
+        $column = min(column, 2)
+        for c in range(column, column+3):
+            for r in range(row, row+3):
+                add "tile_f_hovered" at a_tile_hover(r, c)
 
-    elif cmove.get_type() == 15: # 4x1
-        if column != 0:
-            add "tile_e_hovered" at a_tile_hover(row, 0)
-        if column != 1:
-            add "tile_e_hovered" at a_tile_hover(row, 1)
-        if column != 2:
-            add "tile_e_hovered" at a_tile_hover(row, 2)
-        if column != 3:
-            add "tile_e_hovered" at a_tile_hover(row, 3)
-        if column != 4:
-            add "tile_e_hovered" at a_tile_hover(row, 4)
+
 
 
 

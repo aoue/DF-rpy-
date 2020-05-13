@@ -1,5 +1,7 @@
 ------the very next thing(s)------
 
+show damage on all affected units. don't show damage on corpses.
+
 write enemy AI.
 
 scale enemy units to player level? Or, enter a level variable for the unit to scale its stats.
@@ -25,11 +27,13 @@ when hovering on a unit:
 -show move set
     on move hover:
     -show move targeting diagram
-    -show power
+    -show power and damage type
     -show stamina drain
     -show able drain
 
 ------what needs doing-------
+
+hard cap on buffs? design it so this isn't necessary.
 
 gear. there will be a weapon attack, hit value, an armor defense/dodge value. these will need to be added into the damage formula.
 
@@ -73,16 +77,11 @@ e.g. bad connotations. Not good things to be.
  -masochist: regain some stamina when damaged.
  -bloodhungry: regain some able on kill
  -egoist: enemies more likely to target you (weight the inevitable get target priority function)
- -cowardly: if another ally is in area of effect of enemy attack, act like this unit is not. (i.e. don't split the damage.)
-
 
 combo moves:
 -each time the unit uses a 'combo move', increase combo counter.
 -combo moves deal .x? extra damage per combo counter.
 -reset combo counter to 0 at the end of a round.
-
-some units might get stuck. <- fix this.
-^a swap phase after attacking, where you can move 1 unit 1 space. also helps with making tactical dodges/slight rearrangements.
 
 defeated allies stay on the board. they can be revived.
 defeated enemies go off the board.
