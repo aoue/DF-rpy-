@@ -23,14 +23,14 @@ screen combatinfo(pl, el, pt, et, tl, rounds, ph):
         xalign 0.0
         yalign 0.9
         spacing 2
-        for i in range(0, len(pl)):
-            text "{}'s hp = {} ({}%) [[{}] stam={}".format(pl[i].get_name(), str(pl[i].get_hp()), str(pl[i].get_dodge()), pl[i].get_able(), pl[i].get_stamina())
+        for unit in pl:
+            text "{}'s hp = {} ({}%) [[{}] stam={}".format(unit.get_name(), str(unit.get_hp()), str(unit.get_dodge()), unit.get_able(), unit.get_stamina())
     vbox:
         xalign 1.0
         yalign 0.9
         spacing 2
-        for i in range(0, len(el)):
-            text "{}'s hp = {} ({}%) [[{}]".format(el[i].get_name(), str(el[i].get_hp()), str(el[i].get_dodge()), el[i].get_able())
+        for unit in el:
+            text "{}'s hp = {} ({}%) [[{}] stam={}".format(unit.get_name(), str(unit.get_hp()), str(unit.get_dodge()), unit.get_able(), unit.get_stamina())
 
 screen show_units(pl, el):
     zorder 99
@@ -72,10 +72,9 @@ screen order_unit(pl):
                 text pl[i].get_name()
                 action Return(pl[i])
 
-
 screen pick_move(unit, battle):
     #show moves. top left of box is 900, 175
-    #TODO. show move descrition on hover. make it a long list thingy of symbols. we don't want it to be too large
+    #TODO. show move description on hover. make it a long list thingy of symbols. we don't want it to be too large
 
     frame:
         xpadding 5

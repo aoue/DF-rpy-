@@ -14,9 +14,10 @@ init -2 python:
             #self.stance = (duration, multiplier)
 
             #special - these are trackers. int=duration
-            self.ex = 0 #exhausted
             self.ad = -1 #adrenaline
             self.rally = -1 #rally
+            self.defend = -1 #defend
+            self.ex = 0 #exhausted
             self.ki = 0 #kindara
             self.sh = 0 #shatter point
 
@@ -76,6 +77,8 @@ init -2 python:
             return self.be
         def get_rally(self):
             return self.rally
+        def get_defend(self):
+            return self.defend
 
         #setters
         def set_adrenaline(self, x):
@@ -112,6 +115,8 @@ init -2 python:
             self.be = x
         def set_rally(self, x):
             self.rally = x
+        def set_defend(self, x):
+            self.defend = x
 
         #useful functions
         def get_attacking_stances(self, attack, hit, type):
@@ -184,12 +189,17 @@ init -2 python:
             if self.get_rally() == 0:
                 self.exit_rally()
 
+            if self.get_defend() == 0:
+                self.exit_defend()
+
             self.dec_stances()
 
         def dec_stances(self):
             #decrease (some) tracking stances by one. call this at the end of /start of new round
             self.set_adrenaline(max(self.get_adrenaline() - 1, -1))
             self.set_rally(max(self.get_rally() - 1, -1))
+            self.set_bleeding(max(self.get_bleeding() - 1, -1))
+            self.set_defend(max(self.get_defend() - 1, -1))
 
         #enter/exit stance pairs
         def enter_adrenaline(self, unit):
@@ -240,6 +250,18 @@ init -2 python:
             pass
         def exit_bleeding(self):
             self.set_bleeding(-1)
+
+        def enter_defend(self):
+            self.set_defend(1)
+
+            self.set_physd(self.get_physd() + 0.5)
+            self.set_magd(self.get_magd() + 0.5)
+        def exit_defend(self):
+            self.set_physd(self.get_physd() - 0.5)
+            self.set_magd(self.get_magd() - 0.5)
+
+
+
 
 
 

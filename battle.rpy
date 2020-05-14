@@ -45,7 +45,6 @@ init -2 python:
             ableleft = 0
             self.allymap = map(self.pl)
             self.enemymap = map(self.el)
-
         #getters
         def get_rounds(self):
             return self.rounds
@@ -67,7 +66,6 @@ init -2 python:
             return self.allymap
         def get_enemymap(self):
             return self.enemymap
-
         #setters
         def set_rounds(self, rounds):
             self.rounds = rounds
@@ -81,7 +79,6 @@ init -2 python:
             self.eable = eable
         def set_ableleft(self, ableleft):
             self.ableleft = ableleft
-
         #--during battle
         def calc_pable(self):
             pable = 0
@@ -159,8 +156,7 @@ init -2 python:
                         max = x
                         chosen = eunit
 
-            chosen.take_turn(self.get_el(), self.get_pl())
-
+            chosen.take_turn(self.get_el(), self.get_pl(), self)
         def combat_round(self):
             self.prebattle_settings()
 

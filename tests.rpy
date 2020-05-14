@@ -11,8 +11,8 @@ label battle0:
         party_list = [boy_d, yve_d] #all units that are part of the party
 
 
-        baddie = unit_grunt(0, "vile grunt", 2, 0)
-        baddie2 = unit_grunt(0, "horrid grunt", 2, 2)
+        baddie = unit_grunt(0, "vile grunt", 1, 3)
+        baddie2 = unit_grunt(0, "horrid grunt", 3, 3)
 
         allow_save = False
         enemy_list = [baddie, baddie2]
@@ -20,7 +20,7 @@ label battle0:
 
         deployer = deployment(5)
 
-        battle0 = battle(5, playerlist, enemy_list, "battlefield0")
+        battle0 = battle(5, player_list, enemy_list, "battlefield0")
 
 
     scene image "combat/bg/deployfield0.jpg"

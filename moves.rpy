@@ -10,7 +10,7 @@
 # 8: metal
 #--------------------------------
 
-init -2 python:
+init -3 python:
     #--- GUIDELINES ---
 
     #any move that sets a stance first checks if the stance is already applied. If it is, the move only resets its duration
@@ -23,7 +23,7 @@ init -2 python:
         def __init__(self):
             self.flavour = "{i}flavour text/move description{/i}"
             self.title = "move"
-            self.rank = 0 #can be 0, 1, or 2. determines where the move can be used
+            self.rank = 0 #can be 0 (anywhere), 1 (front), or 2 (back).
             self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
             self.iff = 0 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
             self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
@@ -106,8 +106,6 @@ init -2 python:
             battle.get_allymap().place_unit(unit)
         def drain(self, unit):
             unit.set_stamina(max(unit.get_stamina()-self.get_stamina_drain(), 0))
-
-
             dif = unit.get_able() - self.get_able_drain()
 
             if dif < 0: #if the drain is greater than the unit's able
@@ -156,7 +154,6 @@ init -2 python:
             #damage =
             if target != None:
                 target.take_damage(unit, unit.calc_damage(target, self))
-
     class pierce(move):
         #three squares in a row
         #low damage
@@ -195,7 +192,6 @@ init -2 python:
                 target2.take_damage(unit, unit.calc_damage(target2, self))
             if target3 != None:
                 target3.take_damage(unit, unit.calc_damage(target3, self))
-
     class adrenaline(move):
         #self
         #heal some hp, can go over max. dodge up, hit up. fades after 4? turns
@@ -226,7 +222,6 @@ init -2 python:
                 unit.get_stance().enter_adrenaline(unit)
             else:
                 unit.get_stance().set_adrenaline(5)
-
     class whirl(move):
         #3x3 cross minus the center square
         #med damage
@@ -269,9 +264,7 @@ init -2 python:
             if target5 != None:
                 target5.take_damage(unit, unit.calc_damage(target5, self))
 
-
     #--- Federal ---
-
     class sword(move):
         #sword. single target. front rank. light damage. light cost.
         def __init__(self):
@@ -305,7 +298,6 @@ init -2 python:
             #damage =
             if target != None:
                 target.take_damage(unit, unit.calc_damage(target, self))
-
     class flourish(move):
         #flourish. single target. front rank. heavy damage. heavy stamina cost. no able cost.
         def __init__(self):
@@ -339,7 +331,6 @@ init -2 python:
             #damage =
             if target != None:
                 target.take_damage(unit, unit.calc_damage(target, self))
-
     class form6(move):
         #Twelve Forms - VI. 1x1. front rank. retreats 2.
         def __init__(self):
@@ -373,7 +364,6 @@ init -2 python:
             #damage =
             if target != None:
                 target.take_damage(unit, unit.calc_damage(target, self))
-
     class rally(move):
         #rally. 3x3 (allies). hit up, physa up. back rank. light cost.
         def __init__(self):
@@ -423,7 +413,6 @@ init -2 python:
                     if target.get_stance().get_rally() <= 0: #if rally is not active on this unit, make it so.
                         target.get_stance().enter_rally()
                     target.get_stance().set_rally(5) #set/refresh duration
-
     class shoot(move):
         #shoot. single target. back rank. light damage. light cost.
         def __init__(self):
@@ -457,8 +446,8 @@ init -2 python:
             #damage =
             if target != None:
                 target.take_damage(unit, unit.calc_damage(target, self))
-    #--- Federal Aide ---
 
+    #--- Federal Aide ---
     class suppress(move):
         #suppress. 2x2. terrible hit. back rank.
         def __init__(self):
@@ -497,7 +486,6 @@ init -2 python:
             for target in targetlist:
                 if target != None:
                     target.take_damage(unit, unit.calc_damage(target, self))
-
     class first_aid(move):
         #first aid. very light heal, stops bleeding. light cost.
         def __init__(self):

@@ -264,13 +264,14 @@ init -1 python:
             battle.get_allymap().place_unit(self)
             self.set_able(self.get_able()-1)
         def wait(self):
+            self.set_stamina(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax()))
             self.set_able(0)
-            self.set_stamina(min(self.get_stamina()+20, self.get_staminamax()))
         def defend(self):
             #the unit must have full able points to do this.
-            #regen some stam and set both physd and magd stances up.
+            #regen some stam and set both physd and magd up.
+            self.set_stamina(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax()))
+            self.get_stance().enter_defend()
             self.set_able(0)
-            self.set_stamina(min(self.get_stamina()+20, self.get_staminamax()))
         def get_aff_mod(self, target, ele):
             #used in calc damage.
             #ele = affinity of the attacking move
@@ -580,7 +581,7 @@ init -1 python:
 
             self.stance = stances() #unit's status effects
             self.hpmax = 130 #max hp
-            self.hp = 10 #current hp
+            self.hp = 130 #current hp
             self.dodgemax = 15 #max dodge
             self.dodge = 15 #percent chance to dodge attacks.
             self.hitmax = 5 #subtract from eenmy's dodge

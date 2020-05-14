@@ -1,18 +1,23 @@
 ------the very next thing(s)------
 
-show damage on all affected units. don't show damage on corpses.
+write enemy targeting. right now they just hit the first unit in player list
+^add in a move variable: targeting type
+1: hit enemy closest to the front
+2: hit random enemy
+3: hit weakest enemy
+4: hit strongest enemy
+5: etc.
 
-write enemy AI.
+fix damage displaying. when the enemies attack, it still shows damage on their side of the board. it's because they're using the show_e_damage screen.
+^add a unit variable 'iff', which will tell the board which side to show damage on, yeah? clean up daamge display things.
+^show damage on all affected units. don't show damage on corpses.
 
 scale enemy units to player level? Or, enter a level variable for the unit to scale its stats.
 random naming for enemies
 write random placement function for enemy units.
 -not really random, but just make sure enemy units don't always end up in the same spots. front units should still end up in front.
 
-write moves for tutorial.
--federal- 4 moves
--federal aide- 4 moves.
--enemies (mutant animals, a few types. big mutant animal. two types of guard.)
+write enemies for tutorial
 
 when showing damage, show if any stances activated or were applied or wore off
 ^also, damage only shows up on one unit even if many are hit
