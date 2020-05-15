@@ -10,8 +10,8 @@ init -2 python:
             self.map = [[None]*5, [None]*5, [None]*5, [None]*5, [None]*5] #the grid. fill a certain spot with a unit child object.
 
             #set up the grid based on the units passed in
-            for i in range(0, len(nl)):
-                self.place_unit(nl[i])
+            for unit in nl:
+                self.place_unit(unit)
 
         #getters
         def get_map(self):
@@ -43,8 +43,8 @@ init -2 python:
             pable = 0
             eable = 0
             ableleft = 0
-            self.allymap = map(self.pl)
-            self.enemymap = map(self.el)
+            self.allymap = map(pl)
+            self.enemymap = map(el)
         #getters
         def get_rounds(self):
             return self.rounds
@@ -160,6 +160,9 @@ init -2 python:
         def combat_round(self):
             self.prebattle_settings()
 
+            for unit in self.get_pl():
+                self.get_allymap().place_unit(unit) #a hack. this is supposed to be done in the constructor. i can't figure out for the life of me why it isn't working. it stopped a unit from using first_aid() on another unit until the targeted unit had moved.
+
             while self.get_rounds > 0: #for the whole fight
                 self.calc_turns()
 
@@ -193,7 +196,11 @@ init -2 python:
                         return
 
                 self.set_rounds(max(self.get_rounds()-1,0)) #proceed to next round
+                if self.is_battle_over() == 1:
+                    self.postbattle_settings()
+                    return
                 self.new_round() #reset for next round
+
 
             self.postbattle_settings()
 

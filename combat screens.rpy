@@ -24,13 +24,13 @@ screen combatinfo(pl, el, pt, et, tl, rounds, ph):
         yalign 0.9
         spacing 2
         for unit in pl:
-            text "{}'s hp = {} ({}%) [[{}] stam={}".format(unit.get_name(), str(unit.get_hp()), str(unit.get_dodge()), unit.get_able(), unit.get_stamina())
+            text "{}'s hp = {} ({}%) [[{}] stam={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
     vbox:
         xalign 1.0
         yalign 0.9
         spacing 2
         for unit in el:
-            text "{}'s hp = {} ({}%) [[{}] stam={}".format(unit.get_name(), str(unit.get_hp()), str(unit.get_dodge()), unit.get_able(), unit.get_stamina())
+            text "{}'s hp = {} ({}%) [[{}] stam={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
 
 screen show_units(pl, el):
     zorder 99
@@ -41,26 +41,28 @@ screen show_units(pl, el):
         add el[i].get_icon() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
         text el[i].get_name() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
 
-screen e_show_damage(unit, damage):
+screen show_damage(showlist):
     zorder 103
 
-    text "{color=ff0000}[damage]{/color}" pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
+    for tup in showlist:
 
-    timer 1.0 action Hide("e_show_damage", transition = dissolve)
+        if tup[0].get_iff() == 1:
+            text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+        else:
+            text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
 
-screen a_show_damage(unit, damage):
+    timer 1.0 action Hide("show_damage", transition = dissolve)
+
+screen show_heal(showlist):
     zorder 103
 
-    text "{color=ff0000}[damage]{/color}" pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
+    for tup in showlist:
+        if tup[0].get_iff() == 1:
+            text "{color=327345}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+        else:
+            text "{color=327345}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
 
-    timer 1.0 action Hide("a_show_damage", transition = dissolve)
-
-screen a_show_heal(unit, heal):
-    zorder 103
-
-    text "{color=327345}[heal]{/color}" pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
-
-    timer 1.0 action Hide("a_show_heal", transition = dissolve)
+    timer 1.0 action Hide("show_heal", transition = dissolve)
 
 screen order_unit(pl):
     #select which unit to order from available units that have yet to act. returns rank of unit.

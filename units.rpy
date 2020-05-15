@@ -72,6 +72,7 @@ init -1 python:
     class unit:
         #constructor:
         def __init__(self):
+            self.iff = 0 #which board damage/etc should be shown on. 0: ally, 1: enemy
             self.name = "Default Entity"
             self.point = point(0,0) #instance of point class. coordinates for unit's position.
             self.face = "face_boy" #deploy picture
@@ -116,6 +117,8 @@ init -1 python:
             self.movelist = [] #all moves learned. just append them in here when a character learns them.
 
         #getters
+        def get_iff(self):
+            return self.iff
         def get_name(self):
             return self.name
         def get_point(self):
@@ -246,7 +249,7 @@ init -1 python:
         def check_dead(self):
             if self.get_hp() == 0:
                 self.set_able(0)
-                self.set_stamina(0)  #<-- too brutal?
+                self.set_stamina(0)  #<-- too brutal? No it's good. when a unit is rezzed, set their stamina depending on the rez move
                 self.set_ooa(1)
                 self.set_icon("dead_icon")
         def level_up(self):
@@ -264,12 +267,12 @@ init -1 python:
             battle.get_allymap().place_unit(self)
             self.set_able(self.get_able()-1)
         def wait(self):
-            self.set_stamina(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax()))
+            self.set_stamina(int(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
             self.set_able(0)
         def defend(self):
             #the unit must have full able points to do this.
             #regen some stam and set both physd and magd up.
-            self.set_stamina(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax()))
+            self.set_stamina(int(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
             self.get_stance().enter_defend()
             self.set_able(0)
         def get_aff_mod(self, target, ele):
@@ -473,13 +476,15 @@ init -1 python:
             heal = max(int(((astats + cmove.get_power()) / dstats) * cmove.get_power() * spread), 0)
 
             return heal
-        def take_heal(self, dealer, heal):
+        def take_heal(self, dealer, heal, showlist):
             #check stances: i.e. reciprocal
 
-            #unit takes damage
-            if self.get_ooa() == 0:
+            if self.get_hp() >= self.get_hpmax():
+                showlist.append((self, "maxed"))
+            else:
                 self.set_hp(min(self.get_hp()+heal, self.get_hpmax()))
-                renpy.show_screen("a_show_heal", self, heal)
+                showlist.append((self, heal))
+
         def calc_damage(self, target, cmove):
             #self: dealer of the damage
             #target: recipient of the damage, unit child obj
@@ -508,13 +513,14 @@ init -1 python:
             damage = max(int((((2*astats[0]) - (1.5*dstats[0])) / (0.5*dstats[0])) * (cmove.get_power() + self.get_lvl()) * aff_mod * spread), 0)
 
             return damage
-        def take_damage(self, dealer, damage):
+        def take_damage(self, dealer, damage, showlist):
             #self: unit taking the damage
             #dealer: unit dealing the damage
             #damage: an int.
+            #showlist: for showing damage
 
-            if damage == -1:
-                renpy.show_screen("e_show_damage", self, "Dodge")
+            if damage == -1: #dodge
+                showlist.append((self, "Dodge"))
                 return
 
             #look through stances: the order is important.
@@ -523,10 +529,9 @@ init -1 python:
 
             if self.get_stance().get_kindara() > 0: #hit enemy will full damage. take no damage.
                 dealer.set_hp(max(dealer.get_hp()-damage, 0))
+                dealer.display_damage(damage)
                 dealer.check_dead()
-                renpy.show_screen("a_show_damage", dealer, damage)
                 self.get_stance().set_kindara(self.get_stance().get_kindara()-1)
-
                 return
 
             if self.get_stance().get_shatter() > 0: #if not put ooa, take no damage.
@@ -536,9 +541,9 @@ init -1 python:
 
 
             #unit takes damage
+            showlist.append((self, damage))
             self.set_hp(max(self.get_hp()-damage, 0))
             self.check_dead()
-            renpy.show_screen("e_show_damage", self, damage)
         def use_move(self, cmove, x, y, battle):
             #legend:
             # cmove = the chosen move. e.g. hit. it's an object.
@@ -561,9 +566,11 @@ init -1 python:
             cmove.exert(self, sq, battle)
 
 
+
     #playable units (in order)
     class unit_yve(unit):
         def __init__(self):
+            self.iff = 0
             self.name = "Yve"
             self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
             self.face = "face_yve"
@@ -572,8 +579,8 @@ init -1 python:
             self.deployable = 1 #whether you can field them
             self.ablemax = 1
             self.able = 1 #lets the unit act each round
-            self.staminamax = 70
-            self.stamina = 70 #basically mana. some recovers each round.
+            self.staminamax = 60
+            self.stamina = 60 #basically mana. some recovers each round.
             self.restam = 15
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up
@@ -592,8 +599,8 @@ init -1 python:
             self.aff = 4 #affinity. for super effective and stuff.
             self.physa = 110 #physical attack
             self.physd = 100 #physical defense
-            self.maga = 80 #magical attack
-            self.magd = 90 #magical defense
+            self.maga = 90 #magical attack
+            self.magd = 100 #magical defense
 
             #moves:
             self.pattern = 2 #2/4
@@ -613,6 +620,7 @@ init -1 python:
 
     class unit_federal(unit):
         def __init__(self):
+            self.iff = 0
             self.name = "Federal"
             self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
             self.icon = "icon_federal" #picture
@@ -660,6 +668,7 @@ init -1 python:
 
     class unit_aide(unit):
         def __init__(self):
+            self.iff = 0
             self.name = "Aide"
             self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
             self.icon = "icon_aide" #picture
@@ -707,6 +716,7 @@ init -1 python:
 
     class unit_boy(unit):
         def __init__(self):
+            self.iff = 0
             self.name = "Boy"
             self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
             self.face = "face_boy"

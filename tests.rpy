@@ -20,13 +20,13 @@ label battle0:
 
         deployer = deployment(5)
 
-        battle0 = battle(5, player_list, enemy_list, "battlefield0")
+        battle0 = battle(10, player_list, enemy_list, "battlefield0")
 
 
     scene image "combat/bg/deployfield0.jpg"
     call screen deploy_screen(deployer)
 
-    "deployment finished. Fight!" #test
+    #"deployment finished. Fight!" #test
 
     #battle test
     python:

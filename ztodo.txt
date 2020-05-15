@@ -1,19 +1,21 @@
 ------the very next thing(s)------
 
+reposition battle information.
+
+show damage/heals on all affected units.
+
 write enemy targeting. right now they just hit the first unit in player list
 ^add in a move variable: targeting type
-1: hit enemy closest to the front
+target by move, not by enemy.
+0: hit enemy closest to the front
+1: hit enemy closest to the back
 2: hit random enemy
 3: hit weakest enemy
 4: hit strongest enemy
 5: etc.
 
-fix damage displaying. when the enemies attack, it still shows damage on their side of the board. it's because they're using the show_e_damage screen.
-^add a unit variable 'iff', which will tell the board which side to show damage on, yeah? clean up daamge display things.
-^show damage on all affected units. don't show damage on corpses.
-
 scale enemy units to player level? Or, enter a level variable for the unit to scale its stats.
-random naming for enemies
+random naming for enemy copies.
 write random placement function for enemy units.
 -not really random, but just make sure enemy units don't always end up in the same spots. front units should still end up in front.
 
@@ -21,7 +23,7 @@ write enemies for tutorial
 
 when showing damage, show if any stances activated or were applied or wore off
 ^also, damage only shows up on one unit even if many are hit
-^also, show the name of the move used somewhere. allow it to be moused over so the player can learn about it.
+^also, show the name of the move used somewhere. allow it to be hovered so the player can learn about it.
 
 when hovering on a unit:
 -show hp out of max

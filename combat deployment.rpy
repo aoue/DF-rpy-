@@ -32,21 +32,21 @@ screen deploy_screen(deployer):
 screen choose_deploy_loc():
     #select which unit to order from available units that have yet to act. returns rank of unit.
 
-    for x in range(0, 5): #column
-        for i in range(0, 5): #row
+    for y in range(0, 5): #column
+        for x in range(0, 5): #row
             for j in range(0, len(player_list)): #make sure spot is empty
-                if player_list[j].get_point().get_x() == i and player_list[j].get_point().get_y() == x:
+                if player_list[j].get_point().get_x() == x and player_list[j].get_point().get_y() == y:
                     pass
                 else:
                     button:
-                        pos(340 + i*120, 135 + x*65)
-                        text "([i],[x])"
-                        action Return(value = (i,x))
+                        pos(340 + x*120, 135 + y*65)
+                        text "([x],[y])"
+                        action Return(value = (x,y))
             if len(player_list) == 0:
                 button:
-                    pos(340 + i*120, 135 + x*65)
-                    text "([i],[x])"
-                    action Return(value = (i,x))
+                    pos(340 + x*120, 135 + y*65)
+                    text "([x],[y])"
+                    action Return(value = (x,y))
 
 #unit overview. one screen fits all.
 screen deploy_browse(unit):

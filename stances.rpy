@@ -56,7 +56,7 @@ init -2 python:
         def get_martyr(self):
             return self.mr
         def get_ad_loss(self):
-            self.ad_loss
+            return self.ad_loss
         def get_hp_regen(self):
             return self.hp_re
         def get_st_regen(self):
@@ -206,7 +206,7 @@ init -2 python:
             #call this to enter the unit into adrenaline state.
 
             #-set ad_loss equal to the hp gain
-            self.set_ad_loss(int(unit.get_hp() + (unit.get_hpmax()*0.5) + (5*unit.get_lvl())))
+            self.set_ad_loss(int(unit.get_hp() + (unit.get_hpmax()*0.5) + (10*unit.get_lvl())))
 
             #-increase current hp by (1.5*max hp + 5*lvl)
             unit.set_hp(self.get_ad_loss())
@@ -216,6 +216,7 @@ init -2 python:
 
             #-increase physa mod by .15
             self.set_physa(self.get_physa() + 0.15)
+            
         def exit_adrenaline(self, unit):
             #call this to exit the unit from adrenaline state
 
@@ -252,13 +253,13 @@ init -2 python:
             self.set_bleeding(-1)
 
         def enter_defend(self):
-            self.set_defend(1)
+            self.set_defend(0)
 
-            self.set_physd(self.get_physd() + 0.5)
-            self.set_magd(self.get_magd() + 0.5)
+            self.set_physd(self.get_physd() + 0.2)
+            self.set_magd(self.get_magd() + 0.2)
         def exit_defend(self):
-            self.set_physd(self.get_physd() - 0.5)
-            self.set_magd(self.get_magd() - 0.5)
+            self.set_physd(self.get_physd() - 0.2)
+            self.set_magd(self.get_magd() - 0.2)
 
 
 

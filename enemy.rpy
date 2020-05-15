@@ -6,6 +6,7 @@ init python:
         #and don't need some things the player units do need
 
         def __init__(self, lvl, name, x, y):
+            self.iff = 1 #all enemy units have iff of 1.
             self.name = name
             self.point = point(x, y) #instance of point class. coordinates for unit's position.
             self.icon = "icon_grunt" #picture
@@ -76,11 +77,16 @@ init python:
         def get_discipline(self):
             return self.discipline
 
-
         #setters
         def set_pri(self, pri):
             self.pri = pri
         #useful functions
+        def is_concerned(self):
+            if float(self.get_hp()) / float(self.get_hpmax()) < self.get_concern():
+                return 1
+            return 0
+        def fatigue(self):
+            return float(self.get_stamina()) / float(self.get_staminamax())
         def calc_priority(self, el):
             #unit's innate pri value
             pri = self.get_pri()
@@ -110,7 +116,7 @@ init python:
                         pri += self.get_buffer_change()
 
             #is the unit concerned?
-            if self.get_hp()/self.get_hpmax() < self.get_concern():
+            if self.is_concerned() == 1:
                 pri += self.get_concern_change()
 
             #random priority calculated based on discipline
@@ -132,14 +138,13 @@ init python:
 
 
             #buff (if unit in el is not buffed)
-            #worry about this later
+            #TODO worry about it later
 
-            ##enemy strikes by picking a pl unit. different moves will favour hitting units based on their position and hp.
-            if self.get_stamina()/self.get_staminamax() > 0.7:
+            if self.fatigue() > 0.7:
                 chosen = self.select_move(1)
-            elif self.get_stamina()/self.get_staminamax() > 0.4:
+            elif self.fatigue() > 0.35:
                 chosen = self.select_move(2)
-            elif self.get_stamina()/self.get_staminamax() > 0.1:
+            elif self.fatigue() > 0.1:
                 chosen = self.select_move(3)
             else:
                 if self.get_able() == self.get_ablemax():
@@ -166,26 +171,11 @@ init python:
 
             return chosen
 
-        #TODO or whatever. it's empty right now.
-        def pick_target(self, pl, el, battle, type):
-            #type: 0: single, 1:aoe
-
-            if type == 0: #single target
-                pass
-                #for unit in pl
-
-            else: #aoe
-                pass
-                ##choosing aoe target area:
-                #for each square in every (row max - aoe length) in every (column max - target area height):
-                    #tally all the units in the square taking the current square as top left.
-                        #keep a running max
-                #use on the best area (9/10) or random area (1/10 accompanied by line: 'ugh - my hand slipped!' maybe?
-
 
     #enemy units (in order of appearance)
     class unit_grunt(enemy_unit):
         def __init__(self, lvl, name, x, y):
+            self.iff = 1
             self.name = name
             self.point = point(x, y) #instance of point class. coordinates for unit's position.
             self.icon = "icon_grunt" #picture
@@ -208,9 +198,9 @@ init python:
 
             self.aff = 0 # affinity. for super effective and stuff.
             self.physa = 100 #physical attack
-            self.physd = 80 #physical defense
-            self.maga = 100 #magical attack
-            self.magd = 80 #magical defense
+            self.physd = 90 #physical defense
+            self.maga = 70 #magical attack
+            self.magd = 70 #magical defense
 
             #moves:
             #self.pattern = 3 #3/3 enemies don't need pattern
@@ -229,9 +219,6 @@ init python:
             self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
             self.is_buffed = 0 #0: in not buffed. 1: is buffed.
             self.discipline = (-2,2) #range that affects unit's priority. the smaller the range, the less random.
-
-        def move1():
-            pass
 
 
 
