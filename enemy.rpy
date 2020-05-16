@@ -125,16 +125,10 @@ init python:
             return pri
         def take_turn(self, el, pl, battle):
             #decide what to do from the moves the unit knows.
-            renpy.say(None, "{}, reporting in".format(self.get_name()))
+            #renpy.say(None, "{}, reporting in".format(self.get_name()))
+            renpy.pause(1.0)
 
             #heal the unit one with the least hp left. not percentage of hp, but hp. unit must be at least 40% damaged to be considered.
-            if self.get_healer() == 1 and self.get_stamina/self.get_staminamax() > 0.5:
-                min = 999999
-                for unit in el:
-                    if unit.get_ooa() == 0 and unit.get_hp()/unit.get_hpmax() <= 0.6:
-                        if unit.get_hp() < min:
-                            min = unit.get_hp()
-                            target = unit
 
 
             #buff (if unit in el is not buffed)
@@ -153,11 +147,12 @@ init python:
                     self.wait()
                 return
 
-            chosen.exert(self, battle)
+            chosen.exert(self, pl, el, battle)
+
         def select_move(self, effort):
             #we've decided to use a heavy move. Now we need to determine which one.
-            #effort: heavy(1) ,medium(2) ,light(3)
-            x = random.randint(1, 100)
+            #effort: heavy(1), medium(2), light(3)
+            x = random.randint(1, 99)
 
             if self.get_point().get_y() < 4: #we're in front
                 for move in self.get_moves():
@@ -197,13 +192,12 @@ init python:
             self.ooa = 0 #out of action. defeated.
 
             self.aff = 0 # affinity. for super effective and stuff.
-            self.physa = 100 #physical attack
-            self.physd = 90 #physical defense
+            self.physa = 80 #physical attack
+            self.physd = 80 #physical defense
             self.maga = 70 #magical attack
             self.magd = 70 #magical defense
 
             #moves:
-            #self.pattern = 3 #3/3 enemies don't need pattern
             self.moves = [e_claw()]
 
             #thinking:

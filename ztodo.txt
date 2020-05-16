@@ -1,29 +1,15 @@
 ------the very next thing(s)------
 
-reposition battle information.
-
-show damage/heals on all affected units.
-
-write enemy targeting. right now they just hit the first unit in player list
-^add in a move variable: targeting type
-target by move, not by enemy.
-0: hit enemy closest to the front
-1: hit enemy closest to the back
-2: hit random enemy
-3: hit weakest enemy
-4: hit strongest enemy
-5: etc.
+some more enemy moves (medium, light)
+some more enemies
 
 scale enemy units to player level? Or, enter a level variable for the unit to scale its stats.
 random naming for enemy copies.
 write random placement function for enemy units.
 -not really random, but just make sure enemy units don't always end up in the same spots. front units should still end up in front.
 
-write enemies for tutorial
-
 when showing damage, show if any stances activated or were applied or wore off
-^also, damage only shows up on one unit even if many are hit
-^also, show the name of the move used somewhere. allow it to be hovered so the player can learn about it.
+also, show the name of the move used somewhere. allow it to be hovered so the player can learn about it.
 
 when hovering on a unit:
 -show hp out of max
@@ -34,17 +20,15 @@ when hovering on a unit:
 -show move set
     on move hover:
     -show move targeting diagram
-    -show power and damage type
+    -show power, hit, and damage type
     -show stamina drain
     -show able drain
 
 ------what needs doing-------
 
-hard cap on buffs? design it so this isn't necessary.
+hard cap on buffs?
 
-gear. there will be a weapon attack, hit value, an armor defense/dodge value. these will need to be added into the damage formula.
-
-reposition battlefield information
+gear. weapon: attack, hit. armor: defense, dodge. add to damage formula.
 
 leveling up (increase stats + learn moves)
 

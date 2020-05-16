@@ -93,14 +93,22 @@ init -3 python:
             #we do not have to worry about borders, because the player cannot click on the move if its out of bounds.
 
             #if unit is in the map, disassociate the spot with the unit.
-            battle.get_allymap().remove_unit(unit)
+            if unit.get_iff() == 0: #allied unit
+                battle.get_allymap().remove_unit(unit)
 
-            #move unit
-            unit.set_point(unit.get_point().get_x() + self.get_clearance()[0], unit.get_point().get_y() + self.get_clearance()[1])
+                #move unit
+                unit.set_point(unit.get_point().get_x() + self.get_clearance()[0], unit.get_point().get_y() + self.get_clearance()[1])
 
-            #place unit  in map
-            battle.get_allymap().place_unit(unit)
+                #place unit  in map
+                battle.get_allymap().place_unit(unit)
+            else:
+                battle.get_enemymap().remove_unit(unit)
 
+                #move unit
+                unit.set_point(unit.get_point().get_x() + self.get_clearance()[0], unit.get_point().get_y() + self.get_clearance()[1])
+
+                #place unit  in map
+                battle.get_enemymap().place_unit(unit)
         def drain(self, unit):
             unit.set_stamina(max(unit.get_stamina()-self.get_stamina_drain(), 0))
             dif = unit.get_able() - self.get_able_drain()
@@ -114,13 +122,13 @@ init -3 python:
             if unit.get_stamina() == 0: #if the unit is at 0 stamina, set them as exhausted
                 unit.get_stance().set_exhausted(1)
             unit.set_able(dif)
-        def do_damage(self, unit, nl):
+        def do_damage(self, unit, nl, battle):
             showlist = [] #list of tuples: (unit, damage)
 
             for target in nl:
                 if target != None:
                     if target.get_ooa() == 0:
-                        target.take_damage(unit, unit.calc_damage(target, self), showlist)
+                        target.take_damage(unit, unit.calc_damage(target, self), showlist, battle)
 
             if len(showlist) > 0:
                 renpy.show_screen("show_damage", showlist)
@@ -173,7 +181,7 @@ init -3 python:
 
             #calc damage and deal it to the target
             #damage =
-            self.do_damage(unit, targetlist)
+            self.do_damage(unit, targetlist, battle)
 
     class pierce(move):
         #three squares in a row
@@ -187,9 +195,9 @@ init -3 python:
             self.iff = 0 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
             self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
             self.clearance_type = 0 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 20 #the amount of stamina the unit loses using this move
+            self.stamina_drain = 30 #the amount of stamina the unit loses using this move
             self.able_drain = 2 #the amount of able the unit loses using this move
-            self.power = 25 #affects damage
+            self.power = 35 #affects damage
             self.hit = -5 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
             self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
@@ -208,7 +216,7 @@ init -3 python:
             target3 = battle.get_enemymap().search_map((r,c+2))
             targetlist = [target, target2, target3]
 
-            self.do_damage(unit, targetlist)
+            self.do_damage(unit, targetlist, battle)
 
     class adrenaline(move):
         #self
@@ -246,16 +254,16 @@ init -3 python:
         #med damage
         #med stam, low able
         def __init__(self):
-            self.flavour = "{i}I am a vortex.{/i}"
-            self.title = "Whirl"
+            self.flavour = "{i}I am a storm.{/i}"
+            self.title = "Ice Whirl"
             self.rank = 1 #can be 1, or 2. determines where the move can be used
             self.type = 27 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
             self.iff = 0 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
             self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
             self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 30 #the amount of stamina the unit loses using this move
+            self.stamina_drain = 40 #the amount of stamina the unit loses using this move
             self.able_drain = 2 #the amount of able the unit loses using this move
-            self.power = 40 #affects damage
+            self.power = 50 #affects damage
             self.hit = 0 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
             self.element = 4 #damage element. 0 through 8. see spreadsheet or top of this docs
@@ -275,7 +283,7 @@ init -3 python:
             target5 = battle.get_enemymap().search_map((sq[0]+1,sq[1]))
             targetlist = [target2, target3, target4, target5]
 
-            self.do_damage(unit, targetlist)
+            self.do_damage(unit, targetlist, battle)
 
     #--- Federal ---
     class sword(move):
@@ -310,7 +318,7 @@ init -3 python:
 
             #calc damage and deal it to the target
             #damage =
-            self.do_damage(unit, targetlist)
+            self.do_damage(unit, targetlist, battle)
 
     class flourish(move):
         #flourish. single target. front rank. heavy damage. heavy stamina cost. no able cost.
@@ -344,7 +352,7 @@ init -3 python:
 
             #calc damage and deal it to the target
             #damage =
-            self.do_damage(unit, targetlist)
+            self.do_damage(unit, targetlist, battle)
 
     class form6(move):
         #Twelve Forms - VI. 1x1. front rank. retreats 2.
@@ -375,7 +383,7 @@ init -3 python:
             #this move hits only the selected square.
             target = battle.get_enemymap().search_map(sq)
             targetlist = [target]
-            self.do_damage(unit, targetlist)
+            self.do_damage(unit, targetlist, battle)
 
 
     class rally(move):
@@ -457,7 +465,7 @@ init -3 python:
             #this move hits only the selected square.
             target = battle.get_enemymap().search_map(sq)
             targetlist = [target]
-            self.do_damage(unit, targetlist)
+            self.do_damage(unit, targetlist, battle)
 
     #--- Federal Aide ---
     class suppress(move):
@@ -494,7 +502,7 @@ init -3 python:
             target2 = battle.get_enemymap().search_map((r,c+1))
             target3 = battle.get_enemymap().search_map((r+1,c+1))
             targetlist = [target0, target1, target2, target3]
-            self.do_damage(unit, targetlist)
+            self.do_damage(unit, targetlist, battle)
 
     class first_aid(move):
         #first aid. very light heal, stops bleeding. light cost.
@@ -545,13 +553,12 @@ init -3 python:
 
 
 
-
 #---TO ADD ---
 #tori:
 #time warp: makes buffs run their course. set time remaining on target's buffs to half their current duration, or to 0 if current duration == 1.
 
 #boy:
-#screw: does 1 damage. purpose is to use up enemies kindara/shatter point.
+#screw: power = 3 or something. stam cost = 5 or something. purpose is to use up enemies kindara/shatter point/defensive stances, yeah.
 
 #yve:
 #flourish. heavy stam drain, but no able.
@@ -559,8 +566,6 @@ init -3 python:
 
 #nai:
 #misdirect. target self or ally. lower priority so the enemy doesn't target you as often.
-
-
 
 #enemy:
 #pull/push units. get the player units out of position.

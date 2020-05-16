@@ -152,18 +152,7 @@ init -2 python:
 
             return defense, dodge
 
-        def new_round(self, unit):
-            #check:
-            #hp regen/dots.
-
-            ##-- for this: check if a 'hp regen' tracker is on. if it is, then check self.get_hp_regen() for the modifier
-            #if self.get_hp_regen()[0] > 0:
-            #    unit.set_hp(int(min(unit.get_hp() + (unit.get_hpmax()*self.get_hp_regen[1]), unit.get_hpmax())))
-
-            #if self.get_bleeding()[0] > 0:
-            #    unit.set_hp(int(min(unit.get_hp() - (unit.get_hpmax()*self.get_bleeding[1]), unit.get_hpmax())))
-
-
+        def refresh_stamina(self, unit):
             #stamina regen. first, calc it:
             st_regen = unit.get_restam()
 
@@ -182,7 +171,21 @@ init -2 python:
                 if unit.get_stamina() > (unit.get_staminamax() / 4):
                     self.set_exhausted(0)
 
+        def turn_start(self, unit):
+            #check:
+            #hp regen/dots.
+
+            ##-- for this: check if a 'hp regen' tracker is on. if it is, then check self.get_hp_regen() for the modifier
+            #if self.get_hp_regen()[0] > 0:
+            #    unit.set_hp(int(min(unit.get_hp() + (unit.get_hpmax()*self.get_hp_regen[1]), unit.get_hpmax())))
+
+            #if self.get_bleeding()[0] > 0:
+            #    unit.set_hp(int(min(unit.get_hp() - (unit.get_hpmax()*self.get_bleeding[1]), unit.get_hpmax())))
+
+
             #check if still under the effect of various stances. if the unit is not, then exit stance.
+            self.dec_stances()
+
             if self.get_adrenaline() == 0:
                 self.exit_adrenaline(unit)
 
@@ -192,7 +195,7 @@ init -2 python:
             if self.get_defend() == 0:
                 self.exit_defend()
 
-            self.dec_stances()
+
 
         def dec_stances(self):
             #decrease (some) tracking stances by one. call this at the end of /start of new round
@@ -215,8 +218,7 @@ init -2 python:
             self.set_hit(self.get_hit() + 0.25)
 
             #-increase physa mod by .15
-            self.set_physa(self.get_physa() + 0.15)
-            
+            self.set_physa(self.get_physa() + 0.5)
         def exit_adrenaline(self, unit):
             #call this to exit the unit from adrenaline state
 
@@ -228,7 +230,7 @@ init -2 python:
             self.set_hit(self.get_hit() - 0.25)
 
             #-decrease physa mod by .15 or something
-            self.set_physa(self.get_physa() - 0.15)
+            self.set_physa(self.get_physa() - 0.5)
 
         def enter_rally(self):
             #call to enter unit into rally state
@@ -237,7 +239,7 @@ init -2 python:
             self.set_hit(self.get_hit() + 0.25)
 
             #physa mod up by .1
-            self.set_physa(self.get_physa() + 0.1)
+            self.set_physa(self.get_physa() + 0.15)
         def exit_rally(self):
             #call to exit unit from rally state
 
@@ -245,21 +247,20 @@ init -2 python:
             self.set_hit(self.get_hit() - 0.25)
 
             #physa mod down by .1
-            self.set_physa(self.get_physa() - 0.1)
+            self.set_physa(self.get_physa() - 0.5)
 
         def enter_bleeding(self):
             pass
         def exit_bleeding(self):
-            self.set_bleeding(-1)
+            pass
 
         def enter_defend(self):
-            self.set_defend(0)
-
-            self.set_physd(self.get_physd() + 0.2)
-            self.set_magd(self.get_magd() + 0.2)
+            self.set_defend(1)
+            self.set_physd(self.get_physd() + 0.5)
+            self.set_magd(self.get_magd() + 0.5)
         def exit_defend(self):
-            self.set_physd(self.get_physd() - 0.2)
-            self.set_magd(self.get_magd() - 0.2)
+            self.set_physd(self.get_physd() - 0.5)
+            self.set_magd(self.get_magd() - 0.5)
 
 
 

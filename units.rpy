@@ -28,7 +28,8 @@
 #self.pattern = 3 #3/3
 #self.move1 = fyaya #its a child object of the move class
 #self.moves = [] #its all the moves the unit has equipped
-#self.movelist = [] #all moves learned. just append them in here when a character learns them.
+#self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
+#self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
 
 #--------------------------------
 #self.pattern = 0 #how many moves the unit has
@@ -114,7 +115,8 @@ init -1 python:
             self.move6 = hit(move)
             self.move7 = hit(move)
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
-            self.movelist = [] #all moves learned. just append them in here when a character learns them.
+            self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
+            self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
 
         #getters
         def get_iff(self):
@@ -179,6 +181,10 @@ init -1 python:
             return self.pattern
         def get_moves(self):
             return self.moves
+        def get_movelist(self):
+            return self.movelist
+        def get_learnlist(self):
+            return self.learnlist
         def get_flavour(self, i):
             return self.flavour[i]
         #setters
@@ -246,12 +252,16 @@ init -1 python:
         def set_flavour(self, i, flavour):
             self.flavour[i] = flavour
         #useful functions
-        def check_dead(self):
+        def check_dead(self, battle):
             if self.get_hp() == 0:
                 self.set_able(0)
-                self.set_stamina(0)  #<-- too brutal? No it's good. when a unit is rezzed, set their stamina depending on the rez move
+                self.set_stamina(0)  #<-- too brutal? No it's fine. rez can heal some stamina.
                 self.set_ooa(1)
                 self.set_icon("dead_icon")
+
+                if self.get_iff() == 1:
+                    battle.get_enemymap().remove_unit(self)
+
         def level_up(self):
             #if self.get_exp() > constant * self.get_lvl():
             #   level up!
@@ -266,6 +276,7 @@ init -1 python:
             self.get_point().set_y(sq[1])
             battle.get_allymap().place_unit(self)
             self.set_able(self.get_able()-1)
+
         def wait(self):
             self.set_stamina(int(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
             self.set_able(0)
@@ -484,7 +495,6 @@ init -1 python:
             else:
                 self.set_hp(min(self.get_hp()+heal, self.get_hpmax()))
                 showlist.append((self, heal))
-
         def calc_damage(self, target, cmove):
             #self: dealer of the damage
             #target: recipient of the damage, unit child obj
@@ -506,14 +516,14 @@ init -1 python:
                 return -1 #dodge successful. returns -1 damage
 
             aff_mod = self.get_aff_mod(target, cmove.get_element())
-            spread = random.randint(230, 255) /255.0
-            #spread = 1 #for testing buffs
+            spread = round(random.uniform(0.9, 1.0), 2)
+            #spread = 1 #for testing
 
             #actual damage calculation
-            damage = max(int((((2*astats[0]) - (1.5*dstats[0])) / (0.5*dstats[0])) * (cmove.get_power() + self.get_lvl()) * aff_mod * spread), 0)
+            damage = astats[0] * (cmove.get_power() + self.get_lvl()) / dstats[0] * aff_mod * spread
 
-            return damage
-        def take_damage(self, dealer, damage, showlist):
+            return int(damage)
+        def take_damage(self, dealer, damage, showlist, battle):
             #self: unit taking the damage
             #dealer: unit dealing the damage
             #damage: an int.
@@ -543,7 +553,7 @@ init -1 python:
             #unit takes damage
             showlist.append((self, damage))
             self.set_hp(max(self.get_hp()-damage, 0))
-            self.check_dead()
+            self.check_dead(battle)
         def use_move(self, cmove, x, y, battle):
             #legend:
             # cmove = the chosen move. e.g. hit. it's an object.
@@ -598,25 +608,108 @@ init -1 python:
 
             self.aff = 4 #affinity. for super effective and stuff.
             self.physa = 110 #physical attack
-            self.physd = 100 #physical defense
+            self.physd = 110 #physical defense
             self.maga = 90 #magical attack
-            self.magd = 100 #magical defense
+            self.magd = 90 #magical defense
 
             #moves:
             self.pattern = 2 #2/4
             self.move1 = spear()
             self.move2 = pierce()
-            self.move3 = whirl()
-            self.move4 = rally()
-            self.move5 = adrenaline()
-            self.move6 = suppress()
-            self.move7 = first_aid()
-            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
-            self.movelist = [] #all moves learned. just append them in here when a character learns them.
+            self.move3 = adrenaline()
+            self.move4 = None
+            self.move5 = None
+            self.move6 = None
+            self.move7 = None
+            #lists
+            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped
+            self.learnlist = [whirl()] #all moves the unit can learn. list of lists, one list per focus.
+            self.movelist = [spear(), pierce(), adrenaline()] #all moves the unit has learned. used for equipping unequipping moves.
 
         def level_up():
             #see above
+
+            #get learnlist.
+            #if requirement met, etc, append learnlist item, depending on focus (which we index by the focus' number to get the right list in our list of lists (learnkust). anyway, append the new move to movelist)
+
             pass
+
+
+    class unit_boy(unit):
+        def __init__(self):
+            self.iff = 0
+            self.name = "Boy"
+            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.face = "face_boy"
+            self.face_h = "face_boy_hover"
+            self.icon = "icon_boy" #picture
+            self.deployable = 1 #whether you can field them
+            self.ablemax = 1 #
+            self.able = 1 #let's the unit act each round
+            self.staminamax = 50
+            self.stamina = 50 #basically mana. some recovers each round.
+            self.restam = 10
+            self.lvl = 0 #unit's level
+            self.exp = 0 #the unit's exp for leveling up
+            self.evo = 0 #whether the unit is in evo mode
+            self.foc = 0 #determines weighting in the level up and some moves learned.
+
+            self.stance = stances() #unit's status effects
+            self.hpmax = 100 #max hp
+            self.hp = 100 #current hp
+            self.dodgemax = 10 #max dodge
+            self.dodge = 10 #percent chance to dodge attacks.
+            self.hitmax = 0 #subtract from eenmy's dodge
+            self.hit = 0 #subtract from enemy's dodge
+            self.ooa = 0 #out of action. defeated.
+            self.dead = 0 #dead. not a battle stat.
+
+            self.aff = 0 #affinity. for super effective and stuff.
+            self.physa = 90 #physical attack
+            self.physd = 90 #physical defense
+            self.maga = 90 #magical attack
+            self.magd = 90 #magical defense
+
+            #moves:
+            self.pattern = 3 #3/3
+            self.move1 = form6()
+            self.move2 = suppress()
+            self.move3 = first_aid()
+            self.move4 = rally()
+            self.move5 = None
+            self.move6 = None
+            self.move7 = None
+            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
+            self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
+            self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
+
+        def level_up():
+            #increase the following stats by an amount depending on:
+            # -the level. e.g. if lvl mod 2 = 0, do something. if lvl mod 5 = 0, do another.
+            # -the unit's focus (or no focus)
+
+            #always increase:
+            #lvl
+            #hpmax and hp
+            #physa
+            #physd
+            #maga
+            #magd
+            #dodgemax and dodge
+            #staminamax and stamina
+            #restam
+            #ablemax and able
+
+            #check if the unit learns a new move. depends of the level and on the unit's focus (or no focus)
+            #check if the unit's level mod 10 == 0. if yes, call change focus screen.
+
+            pass
+
+
+
+
+
+    #temp units
 
     class unit_federal(unit):
         def __init__(self):
@@ -647,7 +740,7 @@ init -1 python:
             self.aff = 0 #affinity. for super effective and stuff.
             self.physa = 100 #physical attack
             self.physd = 100 #physical defense
-            self.maga = 70 #magical attack
+            self.maga = 90 #magical attack
             self.magd = 100 #magical defense
 
             #moves:
@@ -660,12 +753,12 @@ init -1 python:
             self.move6 = None
             self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
-            self.movelist = [] #all moves learned. just append them in here when a character learns them.
+            self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
+            self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
 
         def level_up():
             #see above
             pass
-
     class unit_aide(unit):
         def __init__(self):
             self.iff = 0
@@ -708,87 +801,12 @@ init -1 python:
             self.move6 = None
             self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
-            self.movelist = [] #all moves learned. just append them in here when a character learns them.
+            self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
+            self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
 
         def level_up():
             #see above
             pass
-
-    class unit_boy(unit):
-        def __init__(self):
-            self.iff = 0
-            self.name = "Boy"
-            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
-            self.face = "face_boy"
-            self.face_h = "face_boy_hover"
-            self.icon = "icon_boy" #picture
-            self.deployable = 1 #whether you can field them
-            self.ablemax = 1 #
-            self.able = 1 #let's the unit act each round
-            self.staminamax = 50
-            self.stamina = 50 #basically mana. some recovers each round.
-            self.restam = 10
-            self.lvl = 0 #unit's level
-            self.exp = 0 #the unit's exp for leveling up
-            self.evo = 0 #whether the unit is in evo mode
-            self.foc = 0 #determines weighting in the level up and some moves learned.
-
-            self.stance = stances() #unit's status effects
-            self.hpmax = 100 #max hp
-            self.hp = 100 #current hp
-            self.dodgemax = 10 #max dodge
-            self.dodge = 10 #percent chance to dodge attacks.
-            self.hitmax = 0 #subtract from eenmy's dodge
-            self.hit = 0 #subtract from enemy's dodge
-            self.ooa = 0 #out of action. defeated.
-            self.dead = 0 #dead. not a battle stat.
-
-            self.aff = 0 #affinity. for super effective and stuff.
-            self.physa = 100 #physical attack
-            self.physd = 100 #physical defense
-            self.maga = 100 #magical attack
-            self.magd = 100 #magical defense
-
-            #moves:
-            self.pattern = 3 #3/3
-            self.move1 = form6()
-            self.move2 = suppress()
-            self.move3 = first_aid()
-            self.move4 = rally()
-            self.move5 = None
-            self.move6 = None
-            self.move7 = None
-            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
-            self.movelist = [] #all moves learned. just append them in here when a character learns them.
-
-        def level_up():
-            #increase the following stats by an amount depending on:
-            # -the level. e.g. if lvl mod 2 = 0, do something. if lvl mod 5 = 0, do another.
-            # -the unit's focus (or no focus)
-
-            #always increase:
-            #lvl
-            #hpmax and hp
-            #physa
-            #physd
-            #maga
-            #magd
-            #dodgemax and dodge
-            #staminamax and stamina
-            #restam
-            #ablemax and able
-
-            #check if the unit learns a new move. depends of the level and on the unit's focus (or no focus)
-            #check if the unit's level mod 10 == 0. if yes, call change focus screen.
-
-            pass
-
-
-
-
-
-
-
 
 
 

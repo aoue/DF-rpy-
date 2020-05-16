@@ -8,29 +8,28 @@
 #------enemy side positions------#
 #px: 275 + 125*(point.get_x()), , 5 + 65*(point.get_y())
 
-screen combatinfo(pl, el, pt, et, tl, rounds, ph):
+screen combatinfo(pl, el, pt, et, rounds, ph):
     #display battle information: turns left for each, rounds, hp, positions, etc
-    vbox:
-        xalign 0.0
+    vbox: #round/turns info
+        xalign 0.9
         yalign 0.02
         spacing 1
         text "rounds left : [rounds]"
         text "player turns left : [pt]"
-        text "total turns left : [tl]"
         text "enemy turns left : [et]"
         text "phase: [ph]"
-    vbox:
+    vbox: #player stats/info
         xalign 0.0
-        yalign 0.9
+        yalign 0.6
         spacing 2
         for unit in pl:
-            text "{}'s hp = {} ({}%) [[{}] stam={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
-    vbox:
-        xalign 1.0
-        yalign 0.9
+            text "{}: {} ({}%) [[{}] stam={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
+    vbox: #enemy stats/info
+        xalign 0.0
+        yalign 0.1
         spacing 2
         for unit in el:
-            text "{}'s hp = {} ({}%) [[{}] stam={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
+            text "{}: {} ({}%) [[{}] stam={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
 
 screen show_units(pl, el):
     zorder 99

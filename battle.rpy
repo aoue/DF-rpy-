@@ -45,6 +45,7 @@ init -2 python:
             ableleft = 0
             self.allymap = map(pl)
             self.enemymap = map(el)
+
         #getters
         def get_rounds(self):
             return self.rounds
@@ -104,19 +105,19 @@ init -2 python:
             else:
                 return 0
         def refresh_visuals(self):
-            renpy.show_screen("combatinfo", self.get_pl(), self.get_el(), self.get_pable(), self.get_eable(), self.get_ableleft(), self.get_rounds(), self.get_phase())
+            renpy.show_screen("combatinfo", self.get_pl(), self.get_el(), self.get_pable(), self.get_eable(), self.get_rounds(), self.get_phase())
             renpy.show_screen("show_units", self.get_pl(), self.get_el())
         def new_round(self):
             renpy.say(None, "new round")
-            for i in range(0, len(self.get_pl())):
-                if self.get_pl()[i].get_ooa() == 0:
-                    self.get_pl()[i].set_able(self.get_pl()[i].get_ablemax()) #refresh able
-                    self.get_pl()[i].get_stance().new_round(self.get_pl()[i]) #restam, DOTs, HOTs, stances
+            for unit in self.get_pl():
+                if unit.get_ooa() == 0:
+                    unit.set_able(unit.get_ablemax()) #refresh able
+                    unit.get_stance().refresh_stamina(unit) #restam
 
-            for i in range(0, len(self.get_el())):
-                if self.get_el()[i].get_ooa() == 0:
-                    self.get_el()[i].set_able(self.get_el()[i].get_ablemax())
-                    self.get_el()[i].get_stance().new_round(self.get_el()[i]) #restam, DOTs, HOTs, stances. Note that we check whether unit is still exhausted after restam. I think it's superior this way.
+            for unit in self.get_el():
+                if unit.get_ooa() == 0:
+                    unit.set_able(unit.get_ablemax())
+                    unit.get_stance().refresh_stamina(unit) #restam
         #--settings
         def prebattle_settings(self):
             config.rollback_enabled = False
@@ -136,7 +137,10 @@ init -2 python:
             #click on move. pick target location.
             #resolve damage, etc.
             chosen = renpy.call_screen("order_unit", self.get_pl())
+            chosen.get_stance().turn_start(chosen)
             renpy.call_screen("pick_move", chosen, self)
+
+
         def enemy_turn(self):
             chosen = None
             nl = copy_list(self.get_el())
@@ -156,12 +160,16 @@ init -2 python:
                         max = x
                         chosen = eunit
 
+            chosen.get_stance().turn_start(chosen)
             chosen.take_turn(self.get_el(), self.get_pl(), self)
+
         def combat_round(self):
             self.prebattle_settings()
 
             for unit in self.get_pl():
                 self.get_allymap().place_unit(unit) #a hack. this is supposed to be done in the constructor. i can't figure out for the life of me why it isn't working. it stopped a unit from using first_aid() on another unit until the targeted unit had moved.
+            for unit in self.get_el():
+                self.get_enemymap().place_unit(unit)
 
             while self.get_rounds > 0: #for the whole fight
                 self.calc_turns()
