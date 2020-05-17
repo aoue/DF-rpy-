@@ -1,6 +1,6 @@
 
 
-#collection of all the screens needed for the battle.
+#collection of screens used in the battle.
 
 #------ally side positions------#
 #px: 275 + 125*(point.get_x()), , 385 + 65*(point.get_y())
@@ -40,25 +40,32 @@ screen show_units(pl, el):
         add el[i].get_icon() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
         text el[i].get_name() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
 
-screen show_damage(showlist):
+screen show_damage(showlist, move, unit):
     zorder 103
+
+
 
     for tup in showlist:
 
-        if tup[0].get_iff() == 1:
+        if tup[0].get_iff() == 1: #hit enemies
+            text move.get_title() pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
             text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
-        else:
+        else: #hit allies
+            text move.get_title() pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
             text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
 
     timer 1.0 action Hide("show_damage", transition = dissolve)
 
-screen show_heal(showlist):
+screen show_heal(showlist, move, unit):
     zorder 103
 
     for tup in showlist:
+
         if tup[0].get_iff() == 1:
+            text move.get_title() pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
             text "{color=327345}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
         else:
+            text move.get_title() pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
             text "{color=327345}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
 
     timer 1.0 action Hide("show_heal", transition = dissolve)
@@ -136,7 +143,6 @@ screen enemy_highlight(unit, cmove):
                     hover "images/combat/fx/tile e hover.png"
                     pos(275 + row*125, 5 + column*65)
                     action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
-
 
 screen ally_highlight(unit, cmove):
     zorder 101
@@ -260,7 +266,6 @@ screen enemy_highlight_extra(unit, cmove, row, column):
         add "tile_e_hovered" at e_tile_hover(row, column+1)
         add "tile_e_hovered" at e_tile_hover(row-1, column)
         add "tile_e_hovered" at e_tile_hover(row+1, column)
-
 
 screen ally_highlight_extra(unit, cmove, row, column):
     zorder 102

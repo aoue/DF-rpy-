@@ -70,7 +70,7 @@ label start:
     call tests
     #(for testing programming)
 
-    jump prologue
+    jump prologue_0
 
 label tests:
 

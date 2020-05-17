@@ -1,17 +1,10 @@
 ------the very next thing(s)------
 
-some more enemy moves (medium, light)
-some more enemies
+add a back button. two:
+-when a unit's selected
+-when a move's selected
 
-scale enemy units to player level? Or, enter a level variable for the unit to scale its stats.
-random naming for enemy copies.
-write random placement function for enemy units.
--not really random, but just make sure enemy units don't always end up in the same spots. front units should still end up in front.
-
-when showing damage, show if any stances activated or were applied or wore off
-also, show the name of the move used somewhere. allow it to be hovered so the player can learn about it.
-
-when hovering on a unit:
+when hovering on a unit: (show units screen. add a 'hovered' into the loop there. when hovered)
 -show hp out of max
 -show stamina out of max
 -show able of out max. (little boxes. filled in means able, empty with a bar through it means that able was spent.)
@@ -23,6 +16,10 @@ when hovering on a unit:
     -show power, hit, and damage type
     -show stamina drain
     -show able drain
+
+overworld map: towns and stuff.
+
+dungeon crawler.
 
 ------what needs doing-------
 

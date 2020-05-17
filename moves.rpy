@@ -131,7 +131,7 @@ init -3 python:
                         target.take_damage(unit, unit.calc_damage(target, self), showlist, battle)
 
             if len(showlist) > 0:
-                renpy.show_screen("show_damage", showlist)
+                renpy.show_screen("show_damage", showlist, self, unit)
         def do_heal(self, unit, nl):
             showlist = [] #list of tuples: (unit, damage)
 
@@ -141,7 +141,7 @@ init -3 python:
                         target.take_heal(unit, unit.calc_heal(target, self), showlist)
 
             if len(showlist) > 0:
-                renpy.show_screen("show_heal", showlist)
+                renpy.show_screen("show_heal", showlist, self, unit)
 
 
 

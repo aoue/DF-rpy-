@@ -11,11 +11,13 @@ label battle0:
         party_list = [boy_d, yve_d] #all units that are part of the party
 
 
-        baddie = unit_grunt(0, "vile grunt", 1, 3)
-        baddie2 = unit_grunt(0, "horrid grunt", 3, 3)
+        baddie = unit_jowler(0, "jowler", 1, 3)
+        baddie2 = unit_jowler(0, "jowler 2", 1, 0)
+        baddie3 = unit_jowler(0, "mean jowler", 2, 0)
+        baddie4 = unit_jowler(0, "stinkin' jowler", 4, 2)
 
         allow_save = False
-        enemy_list = [baddie, baddie2]
+        enemy_list = [baddie, baddie2, baddie3, baddie4]
         player_list = [] #list of units being sent into battle
 
         deployer = deployment(5)

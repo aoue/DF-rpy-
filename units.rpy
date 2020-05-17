@@ -255,17 +255,14 @@ init -1 python:
         def check_dead(self, battle):
             if self.get_hp() == 0:
                 self.set_able(0)
-                self.set_stamina(0)  #<-- too brutal? No it's fine. rez can heal some stamina.
+                self.set_stamina(0)
                 self.set_ooa(1)
                 self.set_icon("dead_icon")
 
                 if self.get_iff() == 1:
                     battle.get_enemymap().remove_unit(self)
+                    battle.get_el().remove(self)
 
-        def level_up(self):
-            #if self.get_exp() > constant * self.get_lvl():
-            #   level up!
-            pass
         def walk(self, battle):
             #move to an open, adjacent square. ends the unit's turn.
             sq = renpy.invoke_in_new_context(call_highlight_walk, self, battle) #tuple
@@ -278,12 +275,12 @@ init -1 python:
             self.set_able(self.get_able()-1)
 
         def wait(self):
-            self.set_stamina(int(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
+            self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
             self.set_able(0)
         def defend(self):
             #the unit must have full able points to do this.
             #regen some stam and set both physd and magd up.
-            self.set_stamina(int(min(self.get_stamina()+(0.1 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
+            self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
             self.get_stance().enter_defend()
             self.set_able(0)
         def get_aff_mod(self, target, ele):
@@ -591,7 +588,7 @@ init -1 python:
             self.able = 1 #lets the unit act each round
             self.staminamax = 60
             self.stamina = 60 #basically mana. some recovers each round.
-            self.restam = 15
+            self.restam = 10
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
@@ -633,7 +630,6 @@ init -1 python:
             #if requirement met, etc, append learnlist item, depending on focus (which we index by the focus' number to get the right list in our list of lists (learnkust). anyway, append the new move to movelist)
 
             pass
-
 
     class unit_boy(unit):
         def __init__(self):

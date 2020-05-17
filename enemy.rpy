@@ -126,20 +126,17 @@ init python:
         def take_turn(self, el, pl, battle):
             #decide what to do from the moves the unit knows.
             #renpy.say(None, "{}, reporting in".format(self.get_name()))
-            renpy.pause(1.0)
-
-            #heal the unit one with the least hp left. not percentage of hp, but hp. unit must be at least 40% damaged to be considered.
-
+            renpy.pause(2.0)
 
             #buff (if unit in el is not buffed)
             #TODO worry about it later
 
             if self.fatigue() > 0.7:
-                chosen = self.select_move(1)
-            elif self.fatigue() > 0.35:
-                chosen = self.select_move(2)
-            elif self.fatigue() > 0.1:
-                chosen = self.select_move(3)
+                chosen = self.select_move(3, battle) #heavy
+            elif self.fatigue() > 0.4:
+                chosen = self.select_move(2, battle) #medium
+            elif self.fatigue() > 0.2:
+                chosen = self.select_move(1, battle) #light
             else:
                 if self.get_able() == self.get_ablemax():
                     self.defend()
@@ -147,22 +144,103 @@ init python:
                     self.wait()
                 return
 
-            chosen.exert(self, pl, el, battle)
+            #if the unit tried to use a move, but was blocked. clearance was not obtained.
+            #-translate the unit towards the chosen position
+            if chosen == -1:
+                if self.get_able() == self.get_ablemax():
+                    self.defend()
+                else:
+                    self.wait()
+            elif chosen in range(0, 5):
+                if chosen > self.get_point().get_x():
+                    self.shift(battle, 1)
+                else:
+                    self.shift(battle, -1)
 
-        def select_move(self, effort):
+            else:
+                chosen.exert(self, pl, el, battle)
+
+        def shift(self, battle, direction):
+            #direction: move one to the right (1), or to the left (-1)
+            battle.get_enemymap().remove_unit(self)
+
+            #move unit
+            self.set_point(self.get_point().get_x() + direction, self.get_point().get_y())
+
+            #place unit  in map
+            battle.get_enemymap().place_unit(self)
+            self.set_able(self.get_able()-1)
+
+
+        def select_move(self, effort, battle):
             #we've decided to use a heavy move. Now we need to determine which one.
             #effort: heavy(1), medium(2), light(3)
             x = random.randint(1, 99)
+            #chosen = None
 
-            if self.get_point().get_y() < 4: #we're in front
+            if self.get_point().get_y() > 1: #we're in front
                 for move in self.get_moves():
-                    if move.get_rank() == 1 and move.get_weight() > x and move.get_effort() == effort:
-                        chosen = move
+                    if move.get_rank() == 2 and move.get_weight() > x and move.get_effort() <= effort:
+                        if move.e_check_clearance((self.get_point().get_x(), self.get_point().get_y()), battle) == 1:
+                            chosen = move
+                        else: #if we're blocked, we go for a walk.
+                            spotlist = []
+                            for i in range(self.get_point().get_x()+1, 5): #every spot to the right. if a spot is blocked, break.
+                                if battle.get_enemymap().search_map((i, self.get_point().get_y())) != None:
+                                    break
+                                elif move.e_check_clearance((i, self.get_point().get_y()), battle) == 1:
+                                        spotlist.append(i)
+
+                            for i in range(0, self.get_point().get_x()): #every spot to the left. if a spot is blocked, break.
+                                if battle.get_enemymap().search_map((self.get_point().get_x()-(i+1), self.get_point().get_y())) != None:
+                                    break
+                                elif move.e_check_clearance((self.get_point().get_x()-(i+1), self.get_point().get_y()), battle) == 1:
+                                        spotlist.append(i)
+
+                            #now we have each possible good spot. find the one closest to our unit's x
+                            min = 4
+                            if not spotlist:
+                                chosen = -1
+
+                            else:
+                                for spot in spotlist:
+                                    dif = self.get_point().get_x() - spot
+                                    if abs(dif) <= min:
+                                        dif = min
+                                        chosen = spot
+
 
             else: #we're in the back
                 for move in self.get_moves():
-                    if move.get_rank() == 2 and move.get_weight() > x and move.get_effort() == effort:
-                        chosen = move
+                    if move.get_rank() == 1 and move.get_weight() > x and move.get_effort() <= effort:
+                        if move.e_check_clearance((self.get_point().get_x(), self.get_point().get_y()), battle) == 1:
+                            chosen = move
+                        else: #if we're blocked, we go for a walk.
+                            spotlist = []
+                            for i in range(self.get_point().get_x()+1, 5): #every spot to the right. if a spot is blocked, break.
+                                if battle.get_enemymap().search_map((i, self.get_point().get_y())) != None:
+                                    break
+                                elif move.e_check_clearance((i, self.get_point().get_y()), battle) == 1:
+                                        spotlist.append(i)
+
+                            for i in range(0, self.get_point().get_x()): #every spot to the right. if a spot is blocked, break.
+                                if battle.get_enemymap().search_map((self.get_point().get_x()-(i+1), self.get_point().get_y())) != None:
+                                    break
+                                elif move.e_check_clearance((self.get_point().get_x()-(i+1), self.get_point().get_y()), battle) == 1:
+                                        spotlist.append(i)
+
+                            #now we have each possible good spot. find the one closest to our unit's x
+                            min = 4
+                            if not spotlist:
+                                chosen = -1
+
+                            else:
+                                for spot in spotlist:
+                                    dif = self.get_point().get_x() - spot
+                                    if abs(dif) <= min:
+                                        dif = min
+                                        chosen = spot
+
 
             return chosen
 
@@ -213,6 +291,53 @@ init python:
             self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
             self.is_buffed = 0 #0: in not buffed. 1: is buffed.
             self.discipline = (-2,2) #range that affects unit's priority. the smaller the range, the less random.
+
+
+    class unit_jowler(enemy_unit):
+        def __init__(self, lvl, name, x, y):
+            self.iff = 1
+            self.name = name
+            self.point = point(x, y) #instance of point class. coordinates for unit's position.
+            self.icon = "icon_jowler" #picture
+            self.ablemax = 1
+            self.able = 1 #lets the unit act each round
+            self.staminamax = 60
+            self.stamina = 60 #basically mana. some recovers each round.
+            self.restam = 5
+            self.lvl = lvl
+            self.evo = 0 #whether the unit is in evo mode
+
+            self.stance = stances() #unit's status effects
+            self.hpmax = 60
+            self.hp = 60 #current hp
+            self.dodgemax = 0
+            self.dodge = 0 #percent chance to dodge attacks.
+            self.hitmax = 0
+            self.hit = 0 #subtract from enemy's dodge
+            self.ooa = 0 #out of action. defeated.
+
+            self.aff = 0 # affinity. for super effective and stuff.
+            self.physa = 80 #physical attack
+            self.physd = 70 #physical defense
+            self.maga = 50 #magical attack
+            self.magd = 50 #magical defense
+
+            #moves:
+            self.moves = [e_claw(), e_jaws(), e_rush(), e_howl()]
+
+            #thinking:
+            self.pridef = 3 #default of innate initiative value. normal is 2 or 3 or so.
+            self.pri = 3 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
+            self.pri_type = 1 #0: decreases pri after acting, 1: increases pri after acting
+            self.pri_change = 2 #amount pri is inc/dec after acting
+            self.concern = 0.6 #when hp/hpmax < concern, unit priority is inc/dec
+            self.concern_change = 3 #when concern affects pri, this is by how much. + or -
+            self.healer = 0 #0: not healer, 1: is healer
+            self.healer_change = 0 #when there are hurt units, increase pri by this much
+            self.buffer = 0 #0: not buffer, 1: is buffer
+            self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
+            self.is_buffed = 0 #0: in not buffed. 1: is buffed.
+            self.discipline = (-5,5) #range that affects unit's priority. the smaller the range, the less random.
 
 
 

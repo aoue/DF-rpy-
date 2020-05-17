@@ -17,6 +17,7 @@ init -2 python:
             self.ad = -1 #adrenaline
             self.rally = -1 #rally
             self.defend = -1 #defend
+            self.howl = -1 #howl
             self.ex = 0 #exhausted
             self.ki = 0 #kindara
             self.sh = 0 #shatter point
@@ -79,6 +80,8 @@ init -2 python:
             return self.rally
         def get_defend(self):
             return self.defend
+        def get_howl(self):
+            return self.howl
 
         #setters
         def set_adrenaline(self, x):
@@ -117,6 +120,8 @@ init -2 python:
             self.rally = x
         def set_defend(self, x):
             self.defend = x
+        def set_howl(self, x):
+            self.howl = x
 
         #useful functions
         def get_attacking_stances(self, attack, hit, type):
@@ -195,6 +200,8 @@ init -2 python:
             if self.get_defend() == 0:
                 self.exit_defend()
 
+            if self.get_howl() == 0:
+                self.exit_howl()
 
 
         def dec_stances(self):
@@ -203,6 +210,7 @@ init -2 python:
             self.set_rally(max(self.get_rally() - 1, -1))
             self.set_bleeding(max(self.get_bleeding() - 1, -1))
             self.set_defend(max(self.get_defend() - 1, -1))
+            self.set_howl(max(self.get_howl() - 1, -1))
 
         #enter/exit stance pairs
         def enter_adrenaline(self, unit):
@@ -261,6 +269,16 @@ init -2 python:
         def exit_defend(self):
             self.set_physd(self.get_physd() - 0.5)
             self.set_magd(self.get_magd() - 0.5)
+
+        def enter_howl(self):
+            self.set_physa(self.get_physa() + 0.2)
+            self.set_hit(self.get_hit() + 0.2)
+            self.set_dodge(self.get_dodge() + 0.2)
+        def exit_howl(self):
+            self.set_physa(self.get_physa() - 0.2)
+            self.set_hit(self.get_hit() - 0.2)
+            self.set_dodge(self.get_dodge() - 0.2)
+
 
 
 

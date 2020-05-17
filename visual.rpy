@@ -110,6 +110,13 @@ init -555:
         0.5
         repeat
 
+    image icon_jowler:
+        "images/combat/units/jowler icon.png"
+        0.5
+        "images/combat/units/jowler icon 2.png"
+        0.5
+        repeat
+
     image icon_boy:
         "images/combat/units/mc icon.png"
         0.5
