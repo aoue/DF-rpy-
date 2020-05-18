@@ -1,10 +1,20 @@
+
+
+label map0:
+    python:
+        ow = overworld()
+        ow.show_overworld()
+
+
+
+
 label battle0:
     #this is a scripted event
 
     #do any deployment enabling/disabling
-    python:
-        #initialize all the units and helperss
 
+    python:
+        #initialize all the units and helpers
 
         boy_d = unit_boy()
         yve_d = unit_yve()

@@ -1,36 +1,3 @@
-#--LEGEND--#
-#self.name = "vile grunt"
-#self.point = point(0, 0) #instance of point class. coordinates for unit's position.
-#self.icon = "icon_grunt" #picture
-#self.deployable = 1 #whether you can field them
-#self.able = 1 #let's the unit act each round
-#self.stamina = 50 #basically mana. some recovers each round.
-#self.lvl = 0 #lvl, tracks stat increase and move learning. start at lvl 0.
-#self.exp = 0 #the unit's exp for leveling up
-#self.evo = 0 #whether the unit is in evo mode
-
-#self.hpmax = 300 + (20 *lvl) #max hp
-#self.hp = 300 + (20 *lvl)#current hp
-#self.dodgemax = 10 + (1 *lvl)#max dodge
-#self.dodge = 10 + (1 *lvl)#percent chance to dodge attacks.
-#self.hitmax = 10 #for hitting dodgers
-#self.hit = 10 #for hitting dodgers
-#self.ooa = 0 #out of action. defeated.
-#self.dead = 0 #dead. not a battle stat.
-
-#self.aff = 0 #9 total. 0 through 8.
-#self.physa = 80 + (3 *lvl)#physical attack
-#self.physd = 80 + (3 *lvl)#physical defense
-#self.maga = 80 + (1 *lvl)#magical attack
-#self.magd = 80 + (2 *lvl)#magical defense
-#self.stance = [0] * 5 #times however many stances there are
-
-#self.pattern = 3 #3/3
-#self.move1 = fyaya #its a child object of the move class
-#self.moves = [] #its all the moves the unit has equipped
-#self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
-#self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
-
 #--------------------------------
 #self.pattern = 0 #how many moves the unit has
 # 1: 5/1
@@ -83,7 +50,9 @@ init -1 python:
             self.ablemax = 2 #max of able
             self.able = 2 #let's the unit act each round
             self.staminamax = 50 #stamina max
-            self.stamina = 50 #basically mana. some recovers each round.
+            self.stamina = 50 #stamina. some recovers each round.
+            self.enerygymax = 10 #mana. necessary for the best moves
+            self.energy = 10 #does not recover each round.
             self.restam = 15 #the amount of stamina that recovers each round
             self.lvl = 0 #what level the unit's at.
             self.exp = 0 #the unit's exp for leveling up
@@ -141,6 +110,10 @@ init -1 python:
             return self.staminamax
         def get_stamina(self):
             return self.stamina
+        def get_energymax(self):
+            return self.energymax
+        def get_energy(self):
+            return self.energy
         def get_restam(self):
             return self.restam
         def get_lvl(self):
@@ -209,6 +182,10 @@ init -1 python:
             self.staminamax = staminamax
         def set_stamina(self, stamina):
             self.stamina = stamina
+        def set_energymax(self, energymax):
+            self.energymax = energymax
+        def set_energy(self, energy):
+            self.energy = energy
         def set_restam(self, restam):
             self.restam = restam
         def set_lvl(self, lvl):
@@ -481,9 +458,9 @@ init -1 python:
             spread = random.randint(230, 255) /255.0
             #spread = 1 #for testing buffs
 
-            heal = max(int(((astats + cmove.get_power()) / dstats) * cmove.get_power() * spread), 0)
+            heal = max((((astats + cmove.get_power()) / dstats) * cmove.get_power() * spread), 0)
 
-            return heal
+            return int(heal)
         def take_heal(self, dealer, heal, showlist):
             #check stances: i.e. reciprocal
 
@@ -588,6 +565,8 @@ init -1 python:
             self.able = 1 #lets the unit act each round
             self.staminamax = 60
             self.stamina = 60 #basically mana. some recovers each round.
+            self.enerygymax = 15 #mana. necessary for the best moves
+            self.energy = 15 #does not recover each round.
             self.restam = 10
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up
@@ -644,6 +623,8 @@ init -1 python:
             self.able = 1 #let's the unit act each round
             self.staminamax = 50
             self.stamina = 50 #basically mana. some recovers each round.
+            self.enerygymax = 10 #mana. necessary for the best moves
+            self.energy = 10 #does not recover each round.
             self.restam = 10
             self.lvl = 0 #unit's level
             self.exp = 0 #the unit's exp for leveling up
@@ -718,6 +699,8 @@ init -1 python:
             self.able = 1 #lets the unit act each round
             self.staminamax = 60
             self.stamina = 60 #basically mana. some recovers each round.
+            self.enerygymax = 10 #mana. necessary for the best moves
+            self.energy = 10 #does not recover each round.
             self.restam = 10
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up
@@ -766,6 +749,8 @@ init -1 python:
             self.able = 1 #lets the unit act each round
             self.staminamax = 50
             self.stamina = 50 #basically mana. some recovers each round.
+            self.enerygymax = 10 #mana. necessary for the best moves
+            self.energy = 10 #does not recover each round.
             self.restam = 10
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up

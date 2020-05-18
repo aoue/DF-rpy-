@@ -26,6 +26,7 @@ init -3 python:
             self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
             self.clearance_type = 0 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
             self.stamina_drain = 0 #the amount of stamina the unit loses using this move
+            self.energy_drain = 0 #the amount of enerygy the unit loses using this move
             self.able_drain = 0 #the amount of able the unit loses using this move
             self.power = 0 #affects damage
             self.hit = 0 #affects dodging
@@ -48,6 +49,8 @@ init -3 python:
             return self.clearance_type
         def get_stamina_drain(self):
             return self.stamina_drain
+        def get_energy_drain(self):
+            return self.energy_drain
         def get_able_drain(self):
             return self.able_drain
         def get_power(self):
@@ -110,6 +113,7 @@ init -3 python:
                 #place unit  in map
                 battle.get_enemymap().place_unit(unit)
         def drain(self, unit):
+            unit.set_energy(unit.get_energy() - self.get_energy_drain())
             unit.set_stamina(max(unit.get_stamina()-self.get_stamina_drain(), 0))
             dif = unit.get_able() - self.get_able_drain()
 
@@ -160,6 +164,7 @@ init -3 python:
             self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
             self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
             self.stamina_drain = 15 #the amount of stamina the unit loses using this move
+            self.energy_drain = 0
             self.able_drain = 1 #the amount of able the unit loses using this move
             self.power = 20 #affects damage
             self.hit = 0 #affects dodging
@@ -196,6 +201,7 @@ init -3 python:
             self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
             self.clearance_type = 0 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
             self.stamina_drain = 30 #the amount of stamina the unit loses using this move
+            self.energy_drain = 1
             self.able_drain = 2 #the amount of able the unit loses using this move
             self.power = 35 #affects damage
             self.hit = -5 #affects dodging
@@ -231,6 +237,7 @@ init -3 python:
             self.clearance = (0,-1) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
             self.clearance_type = 1 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
             self.stamina_drain = 15 #the amount of stamina the unit loses using this move
+            self.energy_drain = 1
             self.able_drain = 1 #the amount of able the unit loses using this move
             self.power = 0 #affects damage
             self.hit = 0 #affects dodging
@@ -262,6 +269,7 @@ init -3 python:
             self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
             self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
             self.stamina_drain = 40 #the amount of stamina the unit loses using this move
+            self.energy_drain = 2
             self.able_drain = 2 #the amount of able the unit loses using this move
             self.power = 50 #affects damage
             self.hit = 0 #affects dodging
@@ -297,6 +305,7 @@ init -3 python:
             self.clearance = (0,0)
             self.clearance_type = 2
             self.stamina_drain = 15
+            self.energy_drain = 0
             self.able_drain = 1
             self.power = 20
             self.hit = 0
@@ -330,7 +339,8 @@ init -3 python:
             self.iff = 0
             self.clearance = (0,0)
             self.clearance_type = 2
-            self.stamina_drain = 35
+            self.stamina_drain = 30
+            self.energy_drain = 1
             self.able_drain = 0
             self.power = 50
             self.hit = 5
@@ -365,6 +375,7 @@ init -3 python:
             self.clearance = (0,1)
             self.clearance_type = 0
             self.stamina_drain = 20
+            self.energy_drain = 0
             self.able_drain = 1
             self.power = 10
             self.hit = 0
@@ -397,6 +408,7 @@ init -3 python:
             self.clearance = (0,0)
             self.clearance_type = 2
             self.stamina_drain = 20
+            self.energy_drain = 1
             self.able_drain = 1
             self.power = 0
             self.hit = 0
@@ -447,6 +459,7 @@ init -3 python:
             self.clearance = (0,0)
             self.clearance_type = 2
             self.stamina_drain = 15
+            self.energy_drain = 0
             self.able_drain = 1
             self.power = 15
             self.hit = 0
@@ -479,6 +492,7 @@ init -3 python:
             self.clearance = (0,0)
             self.clearance_type = 2
             self.stamina_drain = 30
+            self.energy_drain = 0
             self.able_drain = 1
             self.power = 15
             self.hit = -40
@@ -515,6 +529,7 @@ init -3 python:
             self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
             self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
             self.stamina_drain = 20 #the amount of stamina the unit loses using this move
+            self.energy_drain = 1
             self.able_drain = 1 #the amount of able the unit loses using this move
             self.power = 15 #affects damage/heals
             self.hit = 0 #affects dodging

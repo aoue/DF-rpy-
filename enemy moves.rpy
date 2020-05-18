@@ -51,6 +51,20 @@ init -2 python:
         def get_targeting(self):
             return self.targeting
         #useful functions
+        def e_drain(self, unit):
+            unit.set_stamina(max(unit.get_stamina()-self.get_stamina_drain(), 0))
+            dif = unit.get_able() - self.get_able_drain()
+
+            if dif < 0: #if the drain is greater than the unit's able
+                dif = abs(dif) #take abs of dif
+                for i in range(0, dif): #for each able drain greater than unit's able, drain 5 extra stam
+                    unit.set_stamina(max(unit.get_stamina()-5, 0))
+                    dif -= 1
+
+            if unit.get_stamina() == 0: #if the unit is at 0 stamina, set them as exhausted
+                unit.get_stance().set_exhausted(1)
+            unit.set_able(dif)
+
         def e_check_clearance(self, stuple, battle):
 
             #make sure the board has enough room to accomodate the unit
@@ -187,7 +201,7 @@ init -2 python:
             #battle: the battle class
 
             #moves cost stamina and able
-            self.drain(unit)
+            self.e_drain(unit)
             self.translate(unit, battle)
 
             #targeting.
@@ -226,7 +240,7 @@ init -2 python:
             #battle: the battle class
 
             #moves cost stamina and able
-            self.drain(unit)
+            self.e_drain(unit)
             self.translate(unit, battle)
 
             #targeting.
@@ -265,7 +279,7 @@ init -2 python:
             #battle: the battle class
 
             #moves cost stamina and able
-            self.drain(unit)
+            self.e_drain(unit)
             self.translate(unit, battle)
 
             #targeting.
@@ -304,7 +318,7 @@ init -2 python:
             #battle: the battle class
 
             #moves cost stamina and able
-            self.drain(unit)
+            self.e_drain(unit)
             self.translate(unit, battle)
 
             #targeting.

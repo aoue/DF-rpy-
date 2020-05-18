@@ -222,9 +222,6 @@ init -2 python:
             #-increase current hp by (1.5*max hp + 5*lvl)
             unit.set_hp(self.get_ad_loss())
 
-            #-increase hit mod by .25
-            self.set_hit(self.get_hit() + 0.25)
-
             #-increase physa mod by .15
             self.set_physa(self.get_physa() + 0.5)
         def exit_adrenaline(self, unit):
@@ -233,9 +230,6 @@ init -2 python:
             #if above max health thanks to adrenaline hp buff, remove hp buff.
             if unit.get_hp() > unit.get_hpmax():
                 unit.set_hp(max(unit.get_hpmax(), unit.get_hp() - self.get_ad_loss()))
-
-            #-decrease hit mod by .25 or something
-            self.set_hit(self.get_hit() - 0.25)
 
             #-decrease physa mod by .15 or something
             self.set_physa(self.get_physa() - 0.5)
@@ -247,7 +241,7 @@ init -2 python:
             self.set_hit(self.get_hit() + 0.25)
 
             #physa mod up by .1
-            self.set_physa(self.get_physa() + 0.15)
+            self.set_physa(self.get_physa() + 0.25)
         def exit_rally(self):
             #call to exit unit from rally state
 
@@ -255,7 +249,7 @@ init -2 python:
             self.set_hit(self.get_hit() - 0.25)
 
             #physa mod down by .1
-            self.set_physa(self.get_physa() - 0.5)
+            self.set_physa(self.get_physa() - 0.25)
 
         def enter_bleeding(self):
             pass

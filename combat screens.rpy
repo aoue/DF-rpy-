@@ -23,13 +23,13 @@ screen combatinfo(pl, el, pt, et, rounds, ph):
         yalign 0.6
         spacing 2
         for unit in pl:
-            text "{}: {} ({}%) [[{}] stam={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
+            text "{}: {} ({}%) [[{}] s={}, e={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina(), unit.get_energy())
     vbox: #enemy stats/info
         xalign 0.0
         yalign 0.1
         spacing 2
         for unit in el:
-            text "{}: {} ({}%) [[{}] stam={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
+            text "{}: {} ({}%) [[{}] s={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
 
 screen show_units(pl, el):
     zorder 99
@@ -42,11 +42,7 @@ screen show_units(pl, el):
 
 screen show_damage(showlist, move, unit):
     zorder 103
-
-
-
     for tup in showlist:
-
         if tup[0].get_iff() == 1: #hit enemies
             text move.get_title() pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
             text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
@@ -58,9 +54,7 @@ screen show_damage(showlist, move, unit):
 
 screen show_heal(showlist, move, unit):
     zorder 103
-
     for tup in showlist:
-
         if tup[0].get_iff() == 1:
             text move.get_title() pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
             text "{color=327345}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
@@ -92,26 +86,26 @@ screen pick_move(unit, battle):
         vbox:
             text "Selected: " + unit.get_name()
             spacing 10
-            for i in range(0, len(unit.get_moves())):
-                if unit.get_moves()[i] == None:
+            for move in unit.get_moves():
+                if move == None:
                     pass
-                elif (unit.get_point().get_y() in range(0, 3)) and unit.get_moves()[i].get_rank() == 1:
-                    if unit.get_stamina() >= unit.get_moves()[i].get_stamina_drain() and unit.get_moves()[i].check_clearance(unit, battle) == 1:
-                        textbutton unit.get_moves()[i].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
+                elif (unit.get_point().get_y() in range(0, 3)) and move.get_rank() == 1:
+                    if unit.get_stamina() >= move.get_stamina_drain() and move.check_clearance(unit, battle) == 1 and unit.get_energy() >= move.get_energy_drain():
+                        textbutton move.get_title() action Function(unit.use_move, move, unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
                     else:
-                        text "{} (unable)".format(unit.get_moves()[i].get_title())#unselectable, but still shown
+                        text "{} (unable)".format(move.get_title()) #unselectable, but still shown
 
-                elif (unit.get_point().get_y() in range(3, 5)) and unit.get_moves()[i].get_rank() == 2:
-                    if unit.get_stamina() >= unit.get_moves()[i].get_stamina_drain() and unit.get_moves()[i].check_clearance(unit, battle) == 1:
-                        textbutton unit.get_moves()[i].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
+                elif (unit.get_point().get_y() in range(3, 5)) and move.get_rank() == 2:
+                    if unit.get_stamina() >= move.get_stamina_drain() and move.check_clearance(unit, battle) == 1 and unit.get_energy() >= move.get_energy_drain():
+                        textbutton move.get_title() action Function(unit.use_move, move, unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
                     else:
-                        text "{} (unable)".format(unit.get_moves()[i].get_title())#unselectable, but still shown
+                        text "{} (unable)".format(move.get_title())#unselectable, but still shown
 
             if unit.get_evo() == 1:
-                if unit.get_stamina() >= unit.get_moves()[i].get_stamina_drain() and unit.get_moves()[i].check_clearance(unit, battle) == 1:
-                    textbutton unit.get_moves()[7].get_title() action Function(unit.use_move, unit.get_moves()[i], unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
+                if unit.get_stamina() >= move.get_stamina_drain() and move.check_clearance(unit, battle) == 1 and unit.get_energy() >= move.get_energy_drain():
+                    textbutton unit.get_moves()[7].get_title() action Function(unit.use_move, move, unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
                 else:
-                    text "{} (unable)".format(unit.get_moves()[i].get_title())#unselectable, but still shown
+                    text "{} (unable)".format(move.get_title())#unselectable, but still shown
 
             textbutton "Walk" action Function(unit.walk, battle), Return
 

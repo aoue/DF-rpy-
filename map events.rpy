@@ -1,25 +1,23 @@
-#these are for blue (do not advance story/take time) events that are reached from the maps.
-#three sections: Act I, Act II, Act III
-
-#some formulas to create a quick'n'easy event:
-#--switch pov.
-#--circles revolve and two characters who don't normally interact get a chance to.
-#--
+#three types of events:
+#red: advance story line. required.
+#blue: just talking and rel. skip if you really want to.
+#green: you get moves/something out of this. skip at your own peril.
 
 
+##----- Technical -----##
 
-##----- ACT I -----##
+label music_save: #saves the music that was playing outside. starts playing it again afterwards.
+    $songname = renpy.music.get_playing(channel="music")
+    stop music
+    "[[...]"
+    play music songname #play the song that was playing before the call.
+
+label fail:
+    "map jump failed."
+    return
 
 
-
-
-##----- ACT II -----##
-
-
-
-
-##----- ACT III -----##
-
+##----- Prologue -----##
 
 
 
@@ -27,8 +25,29 @@
 
 
 
-##NOTE
-#are we even going to use this? maybe we'll reorganize later.
+
+##----- Chapter I -----##
+##----- Chapter II -----##
+##----- Chapter III -----##
+##----- Chapter IV -----##
+##----- Chapter V -----##
+##----- Chapter VI -----##
+##----- Chapter VII -----##
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

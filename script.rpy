@@ -1,5 +1,4 @@
 #dimensions are 1280 x 720.
-#^no they are not, but it's close
 
 ###things that cannot be afforded forgetfulness:
 # act 1 may end up not being long enough. two weeks is definitely too long, but maybe a day or two more would be good. these extra days would be filler in the middle focused on building up nice sentiments for the player and the gang, they would have to be before the mountain climbing. (don't worry about it for now, this is a question to readdress later)
@@ -74,13 +73,13 @@ label start:
 
 label tests:
 
-    #map test
-    #call screen map_nav_town(map_unlocks, map_jumps, map_descriptions)
-
     #actions test
     #show screen special_actions_overlay
     #"actions test"
     #"second click"
+
+    #map test
+    #call map0 from _call_map0
 
     #combat test
     call battle0 from _call_battle0
