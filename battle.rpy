@@ -107,17 +107,7 @@ init -2 python:
         def refresh_visuals(self):
             renpy.show_screen("combatinfo", self.get_pl(), self.get_el(), self.get_pable(), self.get_eable(), self.get_rounds(), self.get_phase())
             renpy.show_screen("show_units", self.get_pl(), self.get_el())
-        def new_round(self):
-            renpy.say(None, "new round")
-            for unit in self.get_pl():
-                if unit.get_ooa() == 0:
-                    unit.set_able(unit.get_ablemax()) #refresh able
-                    unit.get_stance().refresh_stamina(unit) #restam
 
-            for unit in self.get_el():
-                if unit.get_ooa() == 0:
-                    unit.set_able(unit.get_ablemax())
-                    unit.get_stance().refresh_stamina(unit) #restam
         #--settings
         def prebattle_settings(self):
             config.rollback_enabled = False
@@ -126,25 +116,45 @@ init -2 python:
         def postbattle_settings(self):
             renpy.block_rollback()
             config.rollback_enabled = True
+            renpy.hide_screen("show_units")
             renpy.hide_screen("combatinfo")
+            renpy.hide(self.get_bg())
         def game_over(self):
             pass
             #return to title screen
 
         #--combat round. uses everything
+        def new_round(self):
+            renpy.say(None, "new round")
+            for unit in self.get_pl():
+                if unit.get_ooa() == 0:
+                    unit.set_able(unit.get_ablemax()) #refresh able
+                    unit.get_stance().refresh_stamina(unit) #restam
+                    unit.get_stance().turn_start(unit)
+
+            for unit in self.get_el():
+                if unit.get_ooa() == 0:
+                    unit.set_able(unit.get_ablemax())
+                    unit.get_stance().refresh_stamina(unit) #restam
+                    unit.get_stance().turn_start(unit)
+
         def player_turn(self):
             #show available moves.
             #click on move. pick target location.
             #resolve damage, etc.
-            chosen = renpy.call_screen("order_unit", self.get_pl())
-            chosen.get_stance().turn_start(chosen)
-            renpy.call_screen("pick_move", chosen, self)
 
+            turn_over = 0
+            cancel_assist = 0
+            while cancel_assist == turn_over:
+                chosen = renpy.call_screen("order_unit", self.get_pl())
+                renpy.call_screen("pick_move", chosen, self)
+                turn_over = chosen.get_turn_over()
+                self.calc_turns()
+                self.refresh_visuals()
 
         def enemy_turn(self):
             chosen = None
             nl = copy_list(self.get_el())
-
             #calc priority of each unit. the one with the highest priority will be
             for eunit in nl:
                 if eunit.get_ooa() == 0 and eunit.get_able() > 0:
@@ -152,15 +162,12 @@ init -2 python:
                     chosen = eunit
                     nl.remove(eunit)
                     break
-
             for eunit in nl:
                 if eunit.get_ooa() == 0 and eunit.get_able() > 0:
                     x = eunit.calc_priority(self.get_el())
                     if max < x:
                         max = x
                         chosen = eunit
-
-            chosen.get_stance().turn_start(chosen)
             chosen.take_turn(self.get_el(), self.get_pl(), self)
 
         def combat_round(self):
@@ -171,7 +178,7 @@ init -2 python:
             for unit in self.get_el():
                 self.get_enemymap().place_unit(unit)
 
-            while self.get_rounds > 0: #for the whole fight
+            while self.get_rounds != 0: #for the whole fight
                 self.calc_turns()
 
                 while self.get_ableleft() > 0: #for one round
@@ -181,9 +188,8 @@ init -2 python:
                         self.refresh_visuals()
 
                         self.player_turn()
-
-                        self.calc_turns()
-                        self.refresh_visuals()
+                        #self.calc_turns()
+                        #self.refresh_visuals()
 
                     if self.is_battle_over() == 1:
                         self.postbattle_settings()
@@ -203,7 +209,7 @@ init -2 python:
                         self.postbattle_settings()
                         return
 
-                self.set_rounds(max(self.get_rounds()-1,0)) #proceed to next round
+                self.set_rounds(self.get_rounds()-1) #proceed to next round
                 if self.is_battle_over() == 1:
                     self.postbattle_settings()
                     return
@@ -211,6 +217,9 @@ init -2 python:
 
 
             self.postbattle_settings()
+
+
+
 
 
 #target picking functions

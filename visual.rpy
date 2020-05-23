@@ -73,6 +73,62 @@ init -555:
     #------enemy side positions------#
     #px: 275 + 125*(point.get_x()), , 5 + 65*(point.get_y())
 
+    ##party screen
+    image party_b:
+        "overworld/party_button.png"
+    image party_h:
+        "overworld/party_button_hover.png"
+    image party_bg:
+        "party/party_bg.jpg"
+    image yve_pose:
+        "party/yve_pose.png"
+    image boy_pose:
+        "party/boy_pose.png"
+    image party_prev:
+        "party/prev.png"
+    image party_next:
+        "party/next.png"
+    image party_prev_h:
+        "party/prev_h.png"
+    image party_next_h:
+        "party/next_h.png"
+
+    ##direction screen
+    image direction_b:
+        "overworld/direction_button.png"
+    image direction_h:
+        "overworld/direction_button_hover.png"
+
+    ##hub screen
+    image hub_b:
+        "overworld/hub_button.png"
+    image hub_h:
+        "overworld/hub_button_hover.png"
+
+    ##overworld screen
+    image prologue_bg:
+        "overworld/prologue.jpg"
+    image party_icon:
+        "dungeon/party_icon.png"
+
+    ##dungeon screen
+    image dungeon_bg:
+        "dungeon/test_bg.jpg"
+    image dungeon_icon:
+        "overworld/dungeon_icon.png"
+    image dungeon_icon_h:
+        "overworld/dungeon_icon_h.png"
+    image room:
+        "dungeon/room_unexplored.png"
+    image room_ex:
+        "dungeon/room_explored.png"
+    image room_hover:
+        "dungeon/room_hover.png"
+    image hall_h:
+        "dungeon/hallway_horizontal.png"
+    image hall_v:
+        "dungeon/hallway_vertical.png"
+
     #face imgs. for deployment screen.
     image face_boy:
         "combat/face/deploy mc.png"

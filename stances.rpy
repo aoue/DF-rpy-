@@ -21,12 +21,9 @@ init -2 python:
             self.ex = 0 #exhausted
             self.ki = 0 #kindara
             self.sh = 0 #shatter point
-
-            #self.re = 0 #reciprocal. if a foe attacks you, they heal equal to the damage. if an ally heals you, they take damage equal to the heal.
-
-            #DOTs
             self.be = -1 #bleeding
 
+            #self.re = 0 #reciprocal. if a foe attacks you, they heal equal to the damage. if an ally heals you, they take damage equal to the heal.
             #self.bl = 0 #bloodhungry
             #self.mr = 0 #martyr
 
@@ -124,6 +121,28 @@ init -2 python:
             self.howl = x
 
         #useful functions
+        def post_battle(self):
+            #reset stances.
+
+            self.set_adrenaline(-1)
+            self.set_rally(-1)
+            self.set_defend(-1)
+            self.set_howl(-1)
+            self.set_exhausted(0)
+            self.set_kindara(0)
+            self.set_shatter(0)
+
+            self.set_bleeding(-1)
+
+            self.set_hp_regen(1.0)
+            self.set_st_regen(1.0)
+            self.set_dodge(1.0)
+            self.set_hit(1.0)
+            self.set_physa(1.0)
+            self.set_physd(1.0)
+            self.set_maga(1.0)
+            self.set_magd(1.0)
+
         def get_attacking_stances(self, attack, hit, type):
             #attack = unit's attack
             #hit = unit's hit
@@ -236,20 +255,20 @@ init -2 python:
 
         def enter_rally(self):
             #call to enter unit into rally state
-
-            #hit mod up by .25
-            self.set_hit(self.get_hit() + 0.25)
-
+            #hit mod up by .1
+            self.set_hit(self.get_hit() + 0.1)
             #physa mod up by .1
-            self.set_physa(self.get_physa() + 0.25)
+            self.set_physa(self.get_physa() + 0.1)
+            #maga mod up by .1
+            self.set_maga(self.get_maga() + 0.1)
         def exit_rally(self):
             #call to exit unit from rally state
-
-            #hit mod down by .25
-            self.set_hit(self.get_hit() - 0.25)
-
+            #hit mod down by .1
+            self.set_hit(self.get_hit() - 0.1)
             #physa mod down by .1
-            self.set_physa(self.get_physa() - 0.25)
+            self.set_physa(self.get_physa() - 0.1)
+            #maga mod up by .1
+            self.set_maga(self.get_maga() - 0.1)
 
         def enter_bleeding(self):
             pass
@@ -259,10 +278,8 @@ init -2 python:
         def enter_defend(self):
             self.set_defend(1)
             self.set_physd(self.get_physd() + 0.5)
-            self.set_magd(self.get_magd() + 0.5)
         def exit_defend(self):
             self.set_physd(self.get_physd() - 0.5)
-            self.set_magd(self.get_magd() - 0.5)
 
         def enter_howl(self):
             self.set_physa(self.get_physa() + 0.2)

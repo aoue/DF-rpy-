@@ -11,10 +11,11 @@
 screen combatinfo(pl, el, pt, et, rounds, ph):
     #display battle information: turns left for each, rounds, hp, positions, etc
     vbox: #round/turns info
-        xalign 0.9
+        xalign 0.8
         yalign 0.02
         spacing 1
-        text "rounds left : [rounds]"
+        if rounds > 0:
+            text "rounds left : [rounds]"
         text "player turns left : [pt]"
         text "enemy turns left : [et]"
         text "phase: [ph]"
@@ -114,6 +115,8 @@ screen pick_move(unit, battle):
             else:
                 textbutton "Wait" action Function(unit.wait), Return
 
+            textbutton "Cancel" action Return()
+
 screen enemy_highlight(unit, cmove):
     zorder 101
 
@@ -137,6 +140,10 @@ screen enemy_highlight(unit, cmove):
                     hover "images/combat/fx/tile e hover.png"
                     pos(275 + row*125, 5 + column*65)
                     action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
+
+    frame:
+        area (530, 340, 100, 40)
+        textbutton "Cancel" action Return(-1)
 
 screen ally_highlight(unit, cmove):
     zorder 101

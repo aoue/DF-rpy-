@@ -308,12 +308,10 @@ screen quick_menu():
 
             if allow_save == True:
                 textbutton _("Save") action ShowMenu('save')
-
-            textbutton _("Load") action ShowMenu('load')
-            if allow_save == True:
+                textbutton _("Load") action ShowMenu('load')
                 textbutton _("Q.Save") action QuickSave()
-
-            textbutton _("Q.Load") action QuickLoad()
+                textbutton _("Q.Load") action QuickLoad()
+                
             textbutton _("Prefs") action ShowMenu('preferences')
 
 

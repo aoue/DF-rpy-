@@ -79,10 +79,10 @@ label tests:
     #"second click"
 
     #map test
-    #call map0 from _call_map0
+    call map0 from _call_map0
 
     #combat test
-    call battle0 from _call_battle0
+    #call battle0 from _call_battle0  #<--- broken
 
 
 

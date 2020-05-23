@@ -33,6 +33,11 @@ init python:
             self.maga = 80 #magical attack
             self.magd = 80 #magical defense
 
+            #gear
+            self.weapon = None
+            self.armour = None
+            self.acc = None
+
             #moves:
             #self.pattern = 3 #3/3 enemies don't need pattern
             moves = []
@@ -275,6 +280,11 @@ init python:
             self.maga = 70 #magical attack
             self.magd = 70 #magical defense
 
+            #gear
+            self.weapon = None
+            self.armour = None
+            self.acc = None
+
             #moves:
             self.moves = [e_claw()]
 
@@ -291,7 +301,6 @@ init python:
             self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
             self.is_buffed = 0 #0: in not buffed. 1: is buffed.
             self.discipline = (-2,2) #range that affects unit's priority. the smaller the range, the less random.
-
 
     class unit_jowler(enemy_unit):
         def __init__(self, lvl, name, x, y):
@@ -317,10 +326,15 @@ init python:
             self.ooa = 0 #out of action. defeated.
 
             self.aff = 0 # affinity. for super effective and stuff.
-            self.physa = 80 #physical attack
-            self.physd = 70 #physical defense
-            self.maga = 50 #magical attack
+            self.physa = 60 #physical attack
+            self.physd = 55 #physical defense
+            self.maga = 40 #magical attack
             self.magd = 50 #magical defense
+
+            #gear
+            self.weapon = beast_claw()
+            self.armour = beast_skin()
+            self.acc = None
 
             #moves:
             self.moves = [e_claw(), e_jaws(), e_rush(), e_howl()]

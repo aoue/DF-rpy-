@@ -1,10 +1,11 @@
 # here is the junk for the deployment screen:
 
-screen deploy_screen(deployer):
+screen deploy_screen(deployer, party_list):
+
     if deployer.get_dc() > 0 and deployer.get_dc() <= deployer.get_dm():
         button:
             xalign 0.5 yalign 0.05
-            text "Deploy Team ({} selected)".format(deployer.get_dc())
+            text "Deploy Team ({}/{} selected)".format(deployer.get_dc(), deployer.get_dm())
             action Return()
         button:
             xalign 0.5
@@ -29,7 +30,7 @@ screen deploy_screen(deployer):
                     action Function(deployer.deploy_unit, unit) hovered Function(deployer.browse, unit) unhovered Hide("deploy_browse")
 
 
-screen choose_deploy_loc():
+screen choose_deploy_loc(player_list):
     #select which unit to order from available units that have yet to act. returns rank of unit.
 
     for y in range(0, 5): #column
@@ -72,23 +73,60 @@ screen deploy_browse(unit):
 init python:
     #each pilot's unlock status initialization:
     class deployment():
-        def __init__(self, deploymax):
+        def __init__(self, deploymax, party):
             self.deploycounter = 0
             self.deploymax = deploymax
+            self.party = party #list of all units that can be sent into battle
+            self.player = [] #list of units being sent into battle
+
+            ##load up the last deployed crew
+
         #setters
         def set_dc(self, dc):
             self.deploycounter = dc
         def set_dm(self, dm):
             self.deploycounter = dm
+        def set_player(self, hold):
+            self.player = hold
         #getters
         def get_dc(self):
             return self.deploycounter
         def get_dm(self):
             return self.deploymax
+        def get_party(self):
+            return self.party
+        def get_player(self):
+            return self.player
+
 
         #actually handle deployment
         def browse(self, unit):
             renpy.show_screen("deploy_browse", unit)
+
+
+        def remember_deployment(self, hold, xlist, ylist):
+            if not hold:
+                pass
+            else:
+                for x in range(0, len(hold)):
+                    if x == self.get_dm():
+                        break
+                    if hold[x].get_ooa() == 0:
+                        hold[x].set_deployable(0)
+                        hold[x].get_point().set_x(xlist[x])
+                        hold[x].get_point().set_y(ylist[x])
+
+                        self.get_player().append(hold[x])
+                        self.set_dc(self.get_dc()+1)
+
+            self.deploy()
+
+        def deploy(self):
+            renpy.show("deployfield0")
+            for unit in self.get_player():
+                renpy.show(unit.icon, at_list=[deploypos(320 + unit.get_point().get_x() * 120, 135 + unit.get_point().get_y() * 65)])
+
+            renpy.call_screen("deploy_screen", self, self.get_party())
 
         def deploy_unit(self, unit):
             if self.get_dc() < self.get_dm():
@@ -96,12 +134,12 @@ init python:
 
                 #call screen that places unit on the map, and set point.x, point.y accordingly
                 dtuple = renpy.invoke_in_new_context(self.select_deploy_loc)
-                #dtuple = renpy.invoke_in_new_context("choose_deploy_loc") #TODO unicode object is not callable, which means you're treating a string as if it were a function.
-                unit.point.set_x(dtuple[0])
-                unit.point.set_y(dtuple[1])
+                unit.get_point().set_x(dtuple[0])
+                unit.get_point().set_y(dtuple[1])
 
-                player_list.append(unit)
-                renpy.show(player_list[self.get_dc()].icon, at_list=[deploypos(320 + unit.get_point().get_x() * 120, 135 + unit.get_point().get_y() * 65)])
+                self.get_player().append(unit)
+
+                renpy.show(self.get_player()[self.get_dc()].icon, at_list=[deploypos(320 + unit.get_point().get_x() * 120, 135 + unit.get_point().get_y() * 65)])
             else:
                 renpy.notify("You've already deployed the maximum number of units.")
 
@@ -111,14 +149,14 @@ init python:
 
         def reset_deployment(self):
             self.set_dc(0)
-            for i in range(0, len(player_list)):
-                player_list[i].set_deployable(1)
-                renpy.hide(player_list[i].icon)
-            del player_list[:]
+            for i in range(0, len(self.get_player())):
+                self.get_player()[i].set_deployable(1)
+                renpy.hide(self.get_player()[i].icon)
+            del self.get_player()[:]
 
 
         def select_deploy_loc(self):
-            dtuple = renpy.call_screen("choose_deploy_loc")
+            dtuple = renpy.call_screen("choose_deploy_loc", self.get_player())
             return dtuple
 
 

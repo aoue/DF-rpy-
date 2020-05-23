@@ -18,6 +18,7 @@ init -3 python:
     #--- MOVES ---
     class move():
         def __init__(self):
+            self.status_only = 0 #1: the move does no damage, affects only status. ex: adrenaline.
             self.flavour = "{i}flavour text/move description{/i}"
             self.title = "move"
             self.rank = 0 #can be 0 (anywhere), 1 (front), or 2 (back).
@@ -33,6 +34,8 @@ init -3 python:
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
             self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
         #getters
+        def get_status_only(self):
+            return self.status_only
         def get_flavour(self):
             return self.flavour
         def get_title(self):
@@ -132,7 +135,7 @@ init -3 python:
             for target in nl:
                 if target != None:
                     if target.get_ooa() == 0:
-                        target.take_damage(unit, unit.calc_damage(target, self), showlist, battle)
+                        target.take_damage(unit, int(unit.calc_damage(target, self)), showlist, battle)
 
             if len(showlist) > 0:
                 renpy.show_screen("show_damage", showlist, self, unit)
@@ -147,16 +150,14 @@ init -3 python:
             if len(showlist) > 0:
                 renpy.show_screen("show_heal", showlist, self, unit)
 
-
-
-
     #--- Yve ---
     class spear(move):
         #single target,
         #low damage
         #low stam, low able
         def __init__(self):
-            self.flavour = "{i}Hit with the point.{/i}"
+            self.status_only = 0
+            self.flavour = "{i}The noblest weapon.{/i}"
             self.title = "Spear"
             self.rank = 1 #can be 1, or 2. determines where the move can be used
             self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
@@ -193,7 +194,8 @@ init -3 python:
         #low damage
         #med stam, med able
         def __init__(self):
-            self.flavour = "{i}Pierce through.{/i}"
+            self.status_only = 0
+            self.flavour = "{i}Strike through.{/i}"
             self.title = "Pierce"
             self.rank = 1 #can be 1, or 2. determines where the move can be used
             self.type = 3 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
@@ -229,7 +231,8 @@ init -3 python:
         #heal some hp, can go over max. dodge up, hit up. fades after 4? turns
         #low stam, med able
         def __init__(self):
-            self.flavour = "{i}Quicken the senses.{/i}"
+            self.status_only = 1
+            self.flavour = "{i}Quicken the senses.{p}The unit's hit, physical attack, and health all increase.{/i}"
             self.title = "Adrenaline"
             self.rank = 2 #can be 1, or 2. determines where the move can be used
             self.type = 0 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
@@ -261,6 +264,7 @@ init -3 python:
         #med damage
         #med stam, low able
         def __init__(self):
+            self.status_only = 0
             self.flavour = "{i}I am a storm.{/i}"
             self.title = "Ice Whirl"
             self.rank = 1 #can be 1, or 2. determines where the move can be used
@@ -297,6 +301,7 @@ init -3 python:
     class sword(move):
         #sword. single target. front rank. light damage. light cost.
         def __init__(self):
+            self.status_only = 0
             self.flavour = "{i}Strike with the sword.{/i}"
             self.title = "Sword"
             self.rank = 1
@@ -332,6 +337,7 @@ init -3 python:
     class flourish(move):
         #flourish. single target. front rank. heavy damage. heavy stamina cost. no able cost.
         def __init__(self):
+            self.status_only = 0
             self.flavour = "{i}A fast, accurate blow.{/i}"
             self.title = "Flourish"
             self.rank = 1
@@ -342,7 +348,7 @@ init -3 python:
             self.stamina_drain = 30
             self.energy_drain = 1
             self.able_drain = 0
-            self.power = 50
+            self.power = 40
             self.hit = 5
             self.damage_type = 0
             self.element = 0
@@ -367,6 +373,7 @@ init -3 python:
     class form6(move):
         #Twelve Forms - VI. 1x1. front rank. retreats 2.
         def __init__(self):
+            self.status_only = 0
             self.flavour = "{i}Twelve Forms - Form VI.{/i}"
             self.title = "Form VI"
             self.rank = 1
@@ -396,11 +403,11 @@ init -3 python:
             targetlist = [target]
             self.do_damage(unit, targetlist, battle)
 
-
     class rally(move):
         #rally. 3x3 (allies). hit up, physa up. back rank. light cost.
         def __init__(self):
-            self.flavour = "{i}Rally together.{/i}"
+            self.status_only = 1
+            self.flavour = "{i}The unit rallies their teammates, increasing hit and attack.{/i}"
             self.title = "Rally"
             self.rank = 2
             self.type = 13
@@ -451,6 +458,7 @@ init -3 python:
     class shoot(move):
         #shoot. single target. back rank. light damage. light cost.
         def __init__(self):
+            self.status_only = 0
             self.flavour = "{i}Shoot carefully.{/i}"
             self.title = "Shoot"
             self.rank = 2
@@ -484,7 +492,8 @@ init -3 python:
     class suppress(move):
         #suppress. 2x2. terrible hit. back rank.
         def __init__(self):
-            self.flavour = "{i}A swift, innacurate burst.{/i}"
+            self.status_only = 0
+            self.flavour = "{i}A wide, innacurate burst.{/i}"
             self.title = "Suppress"
             self.rank = 2
             self.type = 7
@@ -494,7 +503,7 @@ init -3 python:
             self.stamina_drain = 30
             self.energy_drain = 0
             self.able_drain = 1
-            self.power = 15
+            self.power = 20
             self.hit = -40
             self.damage_type = 0
             self.element = 0
@@ -521,7 +530,8 @@ init -3 python:
     class first_aid(move):
         #first aid. very light heal, stops bleeding. light cost.
         def __init__(self):
-            self.flavour = "{i}Basic magical care.{/i}"
+            self.status_only = 1
+            self.flavour = "{i}Basic magical care, even by talentless, is better than nothing..{/i}"
             self.title = "First Aid"
             self.rank = 2 #can be 1, or 2. determines where the move can be used
             self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
@@ -531,7 +541,7 @@ init -3 python:
             self.stamina_drain = 20 #the amount of stamina the unit loses using this move
             self.energy_drain = 1
             self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 15 #affects damage/heals
+            self.power = 30 #affects damage/heals
             self.hit = 0 #affects dodging
             self.damage_type = 1 #0: deals physical damage, 1: deals magical damage
             self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs

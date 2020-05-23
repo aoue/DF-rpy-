@@ -46,12 +46,13 @@ init -1 python:
             self.face = "face_boy" #deploy picture
             self.face_h = "face_boy_hover" #deploy picture, hovered
             self.icon = "mechicon_mc" #picture
+            self.pose = "yve_pose" #party picture. battle cut-in as well?
             self.deployable = 1 #whether you can field them
             self.ablemax = 2 #max of able
             self.able = 2 #let's the unit act each round
             self.staminamax = 50 #stamina max
             self.stamina = 50 #stamina. some recovers each round.
-            self.enerygymax = 10 #mana. necessary for the best moves
+            self.energymax = 10 #mana. necessary for the best moves
             self.energy = 10 #does not recover each round.
             self.restam = 15 #the amount of stamina that recovers each round
             self.lvl = 0 #what level the unit's at.
@@ -74,7 +75,12 @@ init -1 python:
             self.maga = 0 #magical attack
             self.magd = 0 #magical defense
 
+            self.weapon = None #weapon
+            self.armour = None #armour
+            self.acc = None #accessory
+
             #moves:
+            self.foc = 0 #int, means different things to different char.
             self.pattern = 3 #3/3
             self.move1 = hit(move)
             self.move2 = hit(move)
@@ -88,6 +94,8 @@ init -1 python:
             self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
 
         #getters
+        def get_turn_over(self):
+            return self.turn_over
         def get_iff(self):
             return self.iff
         def get_name(self):
@@ -100,6 +108,8 @@ init -1 python:
             return self.face_h
         def get_icon(self):
             return self.icon
+        def get_pose(self):
+            return self.pose
         def get_deployable(self):
             return self.deployable
         def get_ablemax(self):
@@ -150,6 +160,16 @@ init -1 python:
             return self.maga
         def get_magd(self):
             return self.magd
+        def get_equip_types(self):
+            return self.equip_types
+        def get_weapon(self):
+            return self.weapon
+        def get_armour(self):
+            return self.armour
+        def get_acc(self):
+            return self.acc
+        def get_focus(self):
+            return self.foc
         def get_pattern(self):
             return self.pattern
         def get_moves(self):
@@ -161,6 +181,8 @@ init -1 python:
         def get_flavour(self, i):
             return self.flavour[i]
         #setters
+        def set_turn_over(self, turn_over):
+            self.turn_over = turn_over
         def set_name(self, name):
             self.name = name
         def set_point(self, x, y):
@@ -220,8 +242,16 @@ init -1 python:
             self.maga = val
         def set_magd(self, val):
             self.magd = val
+        def set_weapon(self, weapon):
+            self.weapon = weapon
+        def set_armour(self, armour):
+            self.armour = armour
+        def set_acc(self, acc):
+            self.acc = acc
         def set_stance(self, i, duration):
             self.stance[i] = duration
+        def set_focos(self, focus):
+            self.foc = focus
         def set_pattern(self, pattern):
             self.pattern = pattern
         def set_moves(self, i, move):
@@ -229,6 +259,14 @@ init -1 python:
         def set_flavour(self, i, flavour):
             self.flavour[i] = flavour
         #useful functions
+        def post_battle(self):
+            #after a battle in the dungeon crawler portion.
+            if self.get_hp() > self.get_hpmax():
+                self.set_hp(self.get_hpmax())
+            self.set_stamina(self.get_staminamax())
+            self.set_able(self.get_ablemax())
+            self.set_deployable(1)
+            self.get_stance().post_battle()
         def check_dead(self, battle):
             if self.get_hp() == 0:
                 self.set_able(0)
@@ -239,7 +277,6 @@ init -1 python:
                 if self.get_iff() == 1:
                     battle.get_enemymap().remove_unit(self)
                     battle.get_el().remove(self)
-
         def walk(self, battle):
             #move to an open, adjacent square. ends the unit's turn.
             sq = renpy.invoke_in_new_context(call_highlight_walk, self, battle) #tuple
@@ -250,16 +287,17 @@ init -1 python:
             self.get_point().set_y(sq[1])
             battle.get_allymap().place_unit(self)
             self.set_able(self.get_able()-1)
-
         def wait(self):
             self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
             self.set_able(0)
+            self.set_turn_over(1)
         def defend(self):
             #the unit must have full able points to do this.
             #regen some stam and set both physd and magd up.
             self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
             self.get_stance().enter_defend()
             self.set_able(0)
+            self.set_turn_over(1)
         def get_aff_mod(self, target, ele):
             #used in calc damage.
             #ele = affinity of the attacking move
@@ -477,12 +515,16 @@ init -1 python:
             #power = move's power. int
 
             #see if we're dealing with physical or magical damage. returns tuples of (attack, hit) , (defense, dodge)
-            if cmove.get_damage_type() == 0:
+            if cmove.get_damage_type() == 0: #physical damage
                 astats = self.get_stance().get_attacking_stances(self.get_physa(), self.get_hit(), cmove.get_damage_type())
                 dstats = target.get_stance().get_defending_stances(target.get_physd(), target.get_dodge(), cmove.get_damage_type())
-            else:
+                wep = self.get_weapon().get_phys()
+                arm = target.get_armour().get_phys()
+            else: #magical damage
                 astats = self.get_stance().get_attacking_stances(self.get_maga(), self.get_hit(), cmove.get_damage_type())
                 dstats = target.get_stance().get_defending_stances(target.get_magd(), target.get_dodge(), cmove.get_damage_type())
+                wep = self.get_weapon().get_mag()
+                arm = target.get_armour().get_mag()
 
 
             #even if the unit has kindara on, it will still try to dodge.
@@ -494,7 +536,7 @@ init -1 python:
             #spread = 1 #for testing
 
             #actual damage calculation
-            damage = astats[0] * (cmove.get_power() + self.get_lvl()) / dstats[0] * aff_mod * spread
+            damage = (astats[0]+wep) * (cmove.get_power() + self.get_lvl()) / (dstats[0]+arm) * aff_mod * spread
 
             return int(damage)
         def take_damage(self, dealer, damage, showlist, battle):
@@ -546,10 +588,12 @@ init -1 python:
                 pass
                 #nl = [...] #create the targeted spots yourself. it affects a set area on allied board.
 
+            if sq == -1:
+                return
+
             #the move handles the rest
+            self.set_turn_over(1)
             cmove.exert(self, sq, battle)
-
-
 
     #playable units (in order)
     class unit_yve(unit):
@@ -560,17 +604,20 @@ init -1 python:
             self.face = "face_yve"
             self.face_h = "face_yve_hover"
             self.icon = "icon_yve" #picture
+            self.pose = "yve_pose"
             self.deployable = 1 #whether you can field them
             self.ablemax = 1
             self.able = 1 #lets the unit act each round
             self.staminamax = 60
             self.stamina = 60 #basically mana. some recovers each round.
-            self.enerygymax = 15 #mana. necessary for the best moves
+            self.energymax = 15 #mana. necessary for the best moves
             self.energy = 15 #does not recover each round.
             self.restam = 10
             self.lvl = 0
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
+
+            self.turn_over = 0 #0: turn not over, 1: turn is over.
 
             self.stance = stances() #unit's status effects
             self.hpmax = 130 #max hp
@@ -583,31 +630,37 @@ init -1 python:
             self.dead = 0 #dead. not a battle stat.
 
             self.aff = 4 #affinity. for super effective and stuff.
-            self.physa = 110 #physical attack
-            self.physd = 110 #physical defense
-            self.maga = 90 #magical attack
-            self.magd = 90 #magical defense
+            self.physa = 70 #physical attack
+            self.physd = 70 #physical defense
+            self.maga = 50 #magical attack
+            self.magd = 50 #magical defense
+
+            #gear
+            self.equip_types = (3, 1, 0) #armour, weapon, acc
+            self.weapon = folding_spear() #weapon
+            self.armour = folding_armour() #armour
+            self.acc = None #accessory
 
             #moves:
+            self.foc = "Wanderer"
             self.pattern = 2 #2/4
             self.move1 = spear()
             self.move2 = pierce()
             self.move3 = adrenaline()
-            self.move4 = None
+            self.move4 = flourish()
             self.move5 = None
             self.move6 = None
             self.move7 = None
             #lists
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped
             self.learnlist = [whirl()] #all moves the unit can learn. list of lists, one list per focus.
-            self.movelist = [spear(), pierce(), adrenaline()] #all moves the unit has learned. used for equipping unequipping moves.
+            self.movelist = [whirl()] #all moves the unit has learned, but that are unequipped.
 
         def level_up():
             #see above
 
             #get learnlist.
             #if requirement met, etc, append learnlist item, depending on focus (which we index by the focus' number to get the right list in our list of lists (learnkust). anyway, append the new move to movelist)
-
             pass
 
     class unit_boy(unit):
@@ -618,18 +671,20 @@ init -1 python:
             self.face = "face_boy"
             self.face_h = "face_boy_hover"
             self.icon = "icon_boy" #picture
+            self.pose = "boy_pose"
             self.deployable = 1 #whether you can field them
             self.ablemax = 1 #
             self.able = 1 #let's the unit act each round
             self.staminamax = 50
             self.stamina = 50 #basically mana. some recovers each round.
-            self.enerygymax = 10 #mana. necessary for the best moves
+            self.energymax = 10 #mana. necessary for the best moves
             self.energy = 10 #does not recover each round.
             self.restam = 10
             self.lvl = 0 #unit's level
             self.exp = 0 #the unit's exp for leveling up
             self.evo = 0 #whether the unit is in evo mode
-            self.foc = 0 #determines weighting in the level up and some moves learned.
+
+            self.turn_over = 0 #0: turn not over, 1: turn is over.
 
             self.stance = stances() #unit's status effects
             self.hpmax = 100 #max hp
@@ -642,12 +697,18 @@ init -1 python:
             self.dead = 0 #dead. not a battle stat.
 
             self.aff = 0 #affinity. for super effective and stuff.
-            self.physa = 90 #physical attack
-            self.physd = 90 #physical defense
-            self.maga = 90 #magical attack
-            self.magd = 90 #magical defense
+            self.physa = 50 #physical attack
+            self.physd = 50 #physical defense
+            self.maga = 50 #magical attack
+            self.magd = 50 #magical defense
+
+            self.equip_types = (1,2,0)#armour/weapon/acc
+            self.weapon = screwbox() #weapon
+            self.armour = smock_armour() #armour
+            self.acc = None #accessory
 
             #moves:
+            self.foc = "Assistant"
             self.pattern = 3 #3/3
             self.move1 = form6()
             self.move2 = suppress()
@@ -687,7 +748,6 @@ init -1 python:
 
 
     #temp units
-
     class unit_federal(unit):
         def __init__(self):
             self.iff = 0
@@ -699,7 +759,7 @@ init -1 python:
             self.able = 1 #lets the unit act each round
             self.staminamax = 60
             self.stamina = 60 #basically mana. some recovers each round.
-            self.enerygymax = 10 #mana. necessary for the best moves
+            self.energymax = 10 #mana. necessary for the best moves
             self.energy = 10 #does not recover each round.
             self.restam = 10
             self.lvl = 0
@@ -749,7 +809,7 @@ init -1 python:
             self.able = 1 #lets the unit act each round
             self.staminamax = 50
             self.stamina = 50 #basically mana. some recovers each round.
-            self.enerygymax = 10 #mana. necessary for the best moves
+            self.energymax = 10 #mana. necessary for the best moves
             self.energy = 10 #does not recover each round.
             self.restam = 10
             self.lvl = 0
