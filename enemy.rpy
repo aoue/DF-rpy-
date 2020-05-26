@@ -45,8 +45,7 @@ init python:
             #thinking:
             self.pridef = 0 #default of innate initiative value. normal is 2 or 3 or so.
             self.pri = 0 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
-            self.pri_type = 0 #0: decreases pri after acting, 1: increases pri after acting. 2: doesn't change
-            self.pri_change = 0 #0: dec pri after acting, 1: inc pri after acting.
+            self.pri_change = 0 #changes by this value after acting
             self.concern = 0 #when hp/hpmax < concern, unit priority is inc/dec
             self.concern_change = 0 #when concern affects pri, this is by how much. + or -
             self.healer = 0 #0: not healer, 1: is healer
@@ -54,7 +53,7 @@ init python:
             self.buffer = 0 #0: not buffer, 1: is buffer
             self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
             self.is_buffed = 0 #0: in not buffed. 1: is buffed.
-            self.discipline = (0,0) #range that affects unit's priority. the smaller the range, the less random. left side should be negative, right side should be positive. should be symmetric.
+            self.discipline = (0,0) #range that affects unit's priority. the smaller the range, the less random.
 
         #getters
         def get_pridef(self):
@@ -97,13 +96,12 @@ init python:
             pri = self.get_pri()
 
             #modify unit's pri value based on when they act
-            if self.get_pri_type() == 0:
-                if self.get_pri() <= -5 or self.get_pri() >= 15:
-                    self.set_pri(self.get_pridef())
-                else:
-                    self.set_pri(self.get_pri() - self.get_pri_change())
-            elif self.get_pri_type() == 1:
+
+            if self.get_pri() <= -2*self.get_pridef() or self.get_pri() >= 3*self.get_pridef():
+                self.set_pri(self.get_pridef())
+            else:
                 self.set_pri(self.get_pri() + self.get_pri_change())
+
 
             #healer logic
             if self.get_healer() == 1:
@@ -140,7 +138,7 @@ init python:
                 chosen = self.select_move(3, battle) #heavy
             elif self.fatigue() > 0.4:
                 chosen = self.select_move(2, battle) #medium
-            elif self.fatigue() > 0.2:
+            elif self.fatigue() > 0.1:
                 chosen = self.select_move(1, battle) #light
             else:
                 if self.get_able() == self.get_ablemax():
@@ -178,7 +176,7 @@ init python:
 
 
         def select_move(self, effort, battle):
-            #we've decided to use a heavy move. Now we need to determine which one.
+            #we've decided to use an [effort] move. Now we need to determine which one.
             #effort: heavy(1), medium(2), light(3)
             x = random.randint(1, 99)
             #chosen = None
@@ -206,7 +204,6 @@ init python:
                             min = 4
                             if not spotlist:
                                 chosen = -1
-
                             else:
                                 for spot in spotlist:
                                     dif = self.get_point().get_x() - spot
@@ -238,7 +235,6 @@ init python:
                             min = 4
                             if not spotlist:
                                 chosen = -1
-
                             else:
                                 for spot in spotlist:
                                     dif = self.get_point().get_x() - spot
@@ -249,76 +245,24 @@ init python:
 
             return chosen
 
-
-    #enemy units (in order of appearance)
-    class unit_grunt(enemy_unit):
-        def __init__(self, lvl, name, x, y):
-            self.iff = 1
-            self.name = name
-            self.point = point(x, y) #instance of point class. coordinates for unit's position.
-            self.icon = "icon_grunt" #picture
-            self.ablemax = 1
-            self.able = 1 #lets the unit act each round
-            self.staminamax = 60
-            self.stamina = 60 #basically mana. some recovers each round.
-            self.restam = 5
-            self.lvl = lvl
-            self.evo = 0 #whether the unit is in evo mode
-
-            self.stance = stances() #unit's status effects
-            self.hpmax = 80
-            self.hp = 80 #current hp
-            self.dodgemax = 0
-            self.dodge = 0 #percent chance to dodge attacks.
-            self.hitmax = 0
-            self.hit = 0 #subtract from enemy's dodge
-            self.ooa = 0 #out of action. defeated.
-
-            self.aff = 0 # affinity. for super effective and stuff.
-            self.physa = 80 #physical attack
-            self.physd = 80 #physical defense
-            self.maga = 70 #magical attack
-            self.magd = 70 #magical defense
-
-            #gear
-            self.weapon = None
-            self.armour = None
-            self.acc = None
-
-            #moves:
-            self.moves = [e_claw()]
-
-            #thinking:
-            self.pridef = 1 #default of innate initiative value. normal is 2 or 3 or so.
-            self.pri = 1 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
-            self.pri_type = 0 #0: decreases pri after acting, 1: increases pri after acting
-            self.pri_change = 1 #amount pri is inc/dec after acting
-            self.concern = 0.5 #when hp/hpmax < concern, unit priority is inc/dec
-            self.concern_change = -2 #when concern affects pri, this is by how much. + or -
-            self.healer = 0 #0: not healer, 1: is healer
-            self.healer_change = 0 #when there are hurt units, increase pri by this much
-            self.buffer = 0 #0: not buffer, 1: is buffer
-            self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
-            self.is_buffed = 0 #0: in not buffed. 1: is buffed.
-            self.discipline = (-2,2) #range that affects unit's priority. the smaller the range, the less random.
-
+    ## -- enemy units -- ##
     class unit_jowler(enemy_unit):
-        def __init__(self, lvl, name, x, y):
+        def __init__(self, lvl, name, postup, able):
             self.iff = 1
             self.name = name
-            self.point = point(x, y) #instance of point class. coordinates for unit's position.
+            self.point = point(postup[0], postup[1], (1,1)) #instance of point class.
             self.icon = "icon_jowler" #picture
             self.ablemax = 1
-            self.able = 1 #lets the unit act each round
-            self.staminamax = 60
-            self.stamina = 60 #basically mana. some recovers each round.
+            self.able = able #lets the unit act each round
+            self.staminamax = 50
+            self.stamina = 50 #basically mana. some recovers each round.
             self.restam = 5
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
 
             self.stance = stances() #unit's status effects
-            self.hpmax = 60
-            self.hp = 60 #current hp
+            self.hpmax = 50
+            self.hp = 50 #current hp
             self.dodgemax = 0
             self.dodge = 0 #percent chance to dodge attacks.
             self.hitmax = 0
@@ -328,8 +272,8 @@ init python:
             self.aff = 0 # affinity. for super effective and stuff.
             self.physa = 60 #physical attack
             self.physd = 55 #physical defense
-            self.maga = 40 #magical attack
-            self.magd = 50 #magical defense
+            self.maga = 30 #magical attack
+            self.magd = 30 #magical defense
 
             #gear
             self.weapon = beast_claw()
@@ -340,12 +284,11 @@ init python:
             self.moves = [e_claw(), e_jaws(), e_rush(), e_howl()]
 
             #thinking:
-            self.pridef = 3 #default of innate initiative value. normal is 2 or 3 or so.
-            self.pri = 3 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
-            self.pri_type = 1 #0: decreases pri after acting, 1: increases pri after acting
+            self.pridef = 2 #default of innate initiative value. normal is 2 or 3 or so.
+            self.pri = 2 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
             self.pri_change = 2 #amount pri is inc/dec after acting
             self.concern = 0.6 #when hp/hpmax < concern, unit priority is inc/dec
-            self.concern_change = 3 #when concern affects pri, this is by how much. + or -
+            self.concern_change = -3 #when concern affects pri, this is by how much. + or -
             self.healer = 0 #0: not healer, 1: is healer
             self.healer_change = 0 #when there are hurt units, increase pri by this much
             self.buffer = 0 #0: not buffer, 1: is buffer
@@ -354,6 +297,55 @@ init python:
             self.discipline = (-5,5) #range that affects unit's priority. the smaller the range, the less random.
 
 
+    class unit_groskel(enemy_unit):
+        def __init__(self, lvl, name, postup, able):
+            self.iff = 1
+            self.name = name
+            self.point = point(postup[0], postup[1], (3,2)) #instance of point class.
+            self.icon = "icon_groskel" #picture
+            self.ablemax = 1
+            self.able = able #lets the unit act each round
+            self.staminamax = 100
+            self.stamina = 100 #basically mana. some recovers each round.
+            self.restam = 5
+            self.lvl = lvl
+            self.evo = 0 #whether the unit is in evo mode
+
+            self.stance = stances() #unit's status effects
+            self.hpmax = 500
+            self.hp = 400 #current hp
+            self.dodgemax = -30
+            self.dodge = -30 #percent chance to dodge attacks.
+            self.hitmax = 0
+            self.hit = 0 #subtract from enemy's dodge
+            self.ooa = 0 #out of action. defeated.
+
+            self.aff = 0 # affinity. for super effective and stuff.
+            self.physa = 65 #physical attack
+            self.physd = 50 #physical defense
+            self.maga = 40 #magical attack
+            self.magd = 50 #magical defense
+
+            #gear
+            self.weapon = horrible_claw()
+            self.armour = fatty_skin()
+            self.acc = None
+
+            #moves:
+            self.moves = [e_gobble(), e_clobber(), e_spew()]
+
+            #thinking: #TODO
+            self.pridef = -1 #default of innate initiative value. normal is 2 or 3 or so.
+            self.pri = -1 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
+            self.pri_change = -1 #amount pri is inc/dec after acting
+            self.concern = 0.2 #when hp/hpmax < concern, unit priority is inc/dec
+            self.concern_change = 10 #when concern affects pri, this is by how much. + or -
+            self.healer = 0 #0: not healer, 1: is healer
+            self.healer_change = 0 #when there are hurt units, increase pri by this much
+            self.buffer = 0 #0: not buffer, 1: is buffer
+            self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
+            self.is_buffed = 0 #0: in not buffed. 1: is buffed.
+            self.discipline = (-2,0) #range that affects unit's priority. the smaller the range, the less random.
 
 
 

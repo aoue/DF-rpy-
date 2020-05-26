@@ -5,8 +5,9 @@
 
 ## --- Legend --- ##
 #weapon type:
+    #0: enemy
     #1: spear (yve)
-    #2: trash (boy)
+    #2: tools (boy)
 
 
 
@@ -55,10 +56,9 @@ init python:
 
         #useful functions
         def use_passive(self):
-            if self.get_passive() == 1:
-                pass #do a thing.
+            pass #do a thing.
 
-    ##-- Spears --##
+    ## -- Spears -- ##
     class folding_spear(weapon):
         def __init__(self):
             self.img = "folding_spear"
@@ -73,13 +73,11 @@ init python:
             self.aff = 0
             self.passive = 0
 
-        def use_passive(self):
-            if self.get_passive() == 1:
-                pass
+    ## -- Tools -- ##
     class screwbox(weapon):
         def __init__(self):
             self.title = "Screwbox"
-            self.flavour = "A box full of quarter inch, squarehead screws."
+            self.flavour = "Squareheads."
             self.flag = 2
             self.type = 2
             self.phys = 5
@@ -88,12 +86,7 @@ init python:
             self.aff = 0
             self.passive = 0
 
-        def use_passive(self):
-            if self.get_passive() == 1:
-                pass
-
-
-    ## -- Enemy Weapon --##
+    ## -- Enemy Weapons --##
     class beast_claw(weapon):
         def __init__(self):
             #self.img = "folding_spear"
@@ -101,35 +94,30 @@ init python:
             self.title = "Beast Claw"
             self.flavour = "Claws, attached to the foot of a beast."
             self.flag = 2
-            self.type = 1
+            self.type = 0
             self.phys = 20
             self.mag = 0
             self.hit = 0
             self.aff = 0
             self.passive = 0
 
-        def use_passive(self):
-            if self.get_passive() == 1:
-                pass
+    class horrible_claw(weapon):
+        def __init__(self):
+            #self.img = "folding_spear"
+            #self.img_h = "folding_spear_h"
+            self.title = "Horrible Claw"
+            self.flavour = "Horrible claws, stuck with blood and vomit."
+            self.flag = 2
+            self.type = 0
+            self.phys = 20
+            self.mag = 0
+            self.hit = 0
+            self.aff = 0
+            self.passive = 0
 
 
-init:
-    #some images for the map
 
-    image folding_spear:
-        "gear/weapons/folding_spear.png"
-    image folding_spear_h:
-        "gear/weapons/folding_spear_h.png"
 
-    image folding_armour:
-        "gear/armour/folding_armour.png"
-    image folding_armour_h:
-        "gear/armour/folding_armour_h.png"
-
-    image bascule_armour:
-        "gear/armour/bascule_armour.png"
-    image bascule_armour_h:
-        "gear/armour/bascule_armour_h.png"
 
 
 

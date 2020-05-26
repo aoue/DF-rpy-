@@ -42,26 +42,48 @@ screen show_units(pl, el):
         text el[i].get_name() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
 
 screen show_damage(showlist, move, unit):
+    #showlist: list of tuples: (unit, damage)
     zorder 103
     for tup in showlist:
         if tup[0].get_iff() == 1: #hit enemies
             text move.get_title() pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
-            text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+            text "{color=ff0000}-[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
         else: #hit allies
             text move.get_title() pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
-            text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
+            text "{color=ff0000}-[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
 
     timer 1.0 action Hide("show_damage", transition = dissolve)
 
+screen show_dot(showlist):
+    #showlist: list of tuples: (unit, damage)
+    zorder 103
+    for tup in showlist:
+        if tup[0].get_iff() == 1:
+            if tup[1] < 0:
+                text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+            else:
+                text "{color=327345}+[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+
+        else:
+            if tup[1] < 0:
+                text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
+            else:
+                text "{color=327345}+[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
+
+    timer 1.0 action Hide("show_dot", transition = dissolve)
+
+
 screen show_heal(showlist, move, unit):
+    #showlist: list of tuples: (unit, heal)
+
     zorder 103
     for tup in showlist:
         if tup[0].get_iff() == 1:
             text move.get_title() pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
-            text "{color=327345}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+            text "{color=327345}+[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
         else:
             text move.get_title() pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
-            text "{color=327345}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
+            text "{color=327345}+[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
 
     timer 1.0 action Hide("show_heal", transition = dissolve)
 
@@ -164,13 +186,20 @@ screen ally_highlight(unit, cmove):
                     pos(275 + row*125, 385 + column*65)
                     action Return((row, column)) hovered Function(ally_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
 
+    frame:
+        area (530, 340, 100, 40)
+        textbutton "Cancel" action Return(-1)
+
 screen walk_highlight(unit, battle):
     #move 1 square in any direction. respect borders, respect collision.
     #this means take account of the grid
 
-    #grid checking positions:
-
     zorder 101
+    #cancel button:
+    frame:
+        area (530, 340, 100, 40)
+        textbutton "Cancel" action Return(-1)
+
     python:
         dtuple = (unit.get_point().get_x(), unit.get_point().get_y())
 

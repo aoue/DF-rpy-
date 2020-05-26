@@ -21,7 +21,11 @@ init -2 python:
             self.ex = 0 #exhausted
             self.ki = 0 #kindara
             self.sh = 0 #shatter point
+
+            #dots/hots
             self.be = -1 #bleeding
+            self.po = -1 #poison
+            self.dot = 0 #multiply unit's hpmax by this at start and subtract it from unit's current hp. each dot/hot adjusts this value.
 
             #self.re = 0 #reciprocal. if a foe attacks you, they heal equal to the damage. if an ally heals you, they take damage equal to the heal.
             #self.bl = 0 #bloodhungry
@@ -41,6 +45,10 @@ init -2 python:
             self.md = 1.0 #mag d
 
         #getters
+        def get_dot(self):
+            return self.dot
+        def get_poison(self):
+            return self.po
         def get_adrenaline(self):
             return self.ad
         def get_bloodhungry(self):
@@ -81,6 +89,10 @@ init -2 python:
             return self.howl
 
         #setters
+        def set_dot(self, x):
+            self.dot = x
+        def set_poison(self, x):
+            self.po = x
         def set_adrenaline(self, x):
             self.ad = x
         def set_bloodhungry(self, x):
@@ -133,6 +145,8 @@ init -2 python:
             self.set_shatter(0)
 
             self.set_bleeding(-1)
+            self.set_poison(-1)
+            #self.set_dot(0) #<--don't you love overworld poison damage? i know i do.
 
             self.set_hp_regen(1.0)
             self.set_st_regen(1.0)
@@ -158,7 +172,6 @@ init -2 python:
             hit = hit * self.get_hit()
 
             return attack, hit
-
         def get_defending_stances(self, defense, dodge, type):
             #defense = target's defense
             #dodge = target's dodge
@@ -175,7 +188,6 @@ init -2 python:
             dodge = dodge * self.get_dodge()
 
             return defense, dodge
-
         def refresh_stamina(self, unit):
             #stamina regen. first, calc it:
             st_regen = unit.get_restam()
@@ -194,8 +206,7 @@ init -2 python:
             if self.get_exhausted() == 1:
                 if unit.get_stamina() > (unit.get_staminamax() / 4):
                     self.set_exhausted(0)
-
-        def turn_start(self, unit):
+        def round_start(self, unit):
             #check:
             #hp regen/dots.
 
@@ -205,10 +216,13 @@ init -2 python:
 
             #if self.get_bleeding()[0] > 0:
             #    unit.set_hp(int(min(unit.get_hp() - (unit.get_hpmax()*self.get_bleeding[1]), unit.get_hpmax())))
+            if self.get_dot() != 0:
+                unit.set_hp(int(max(0, unit.get_hp() + (self.get_dot()*unit.get_hpmax()))))
 
 
             #check if still under the effect of various stances. if the unit is not, then exit stance.
             self.dec_stances()
+
 
             if self.get_adrenaline() == 0:
                 self.exit_adrenaline(unit)
@@ -222,14 +236,16 @@ init -2 python:
             if self.get_howl() == 0:
                 self.exit_howl()
 
-
+        def end_turn(self, unit):
+            #some stances are decremented at this time
+            self.set_defend(max(self.get_defend() - 1, -1))
         def dec_stances(self):
             #decrease (some) tracking stances by one. call this at the end of /start of new round
             self.set_adrenaline(max(self.get_adrenaline() - 1, -1))
             self.set_rally(max(self.get_rally() - 1, -1))
             self.set_bleeding(max(self.get_bleeding() - 1, -1))
-            self.set_defend(max(self.get_defend() - 1, -1))
             self.set_howl(max(self.get_howl() - 1, -1))
+            self.set_poison(max(self.get_poison() - 1, -1))
 
         #enter/exit stance pairs
         def enter_adrenaline(self, unit):
@@ -270,11 +286,6 @@ init -2 python:
             #maga mod up by .1
             self.set_maga(self.get_maga() - 0.1)
 
-        def enter_bleeding(self):
-            pass
-        def exit_bleeding(self):
-            pass
-
         def enter_defend(self):
             self.set_defend(1)
             self.set_physd(self.get_physd() + 0.5)
@@ -291,7 +302,20 @@ init -2 python:
             self.set_dodge(self.get_dodge() - 0.2)
 
 
+        #status enter/exit pairs
+        def enter_bleeding(self):
+            self.set_bleeding(duration)
+            self.set_dot(self.get_dot() - 0.1)
+        def exit_bleeding(self):
+            self.set_bleeding(-1)
+            self.set_dot(self.get_dot() + 0.1)
 
+        def enter_poison(self, duration):
+            self.set_poison(duration)
+            self.set_dot(self.get_dot() - 0.1)
+        def exit_poison(self):
+            self.set_poison(-1)
+            self.set_dot(self.get_dot() + 0.1)
 
 
 

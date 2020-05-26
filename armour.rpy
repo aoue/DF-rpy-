@@ -50,7 +50,7 @@ init python:
             if self.get_passive() == 1:
                 pass #do a thing.
 
-    # -- Flex Armour -- ##
+    # -- Heavy Armour -- ##
     class folding_armour(armour):
         def __init__(self):
             self.img = "folding_armour"
@@ -61,7 +61,7 @@ init python:
             self.type = 3
             self.phys = 10
             self.mag = 10
-            self.dodge = 20
+            self.dodge = 15
             self.aff = 0
             self.passive = 0
 
@@ -104,6 +104,24 @@ init python:
             if self.get_passive() == 1:
                 pass
 
+
+
+
+    ## -- Enemy Armour -- ##
+    class no_armour(armour):
+        def __init__(self):
+            self.title = "No armour."
+            self.flavour = "Nothing"
+            self.flag = 0
+            self.type = 0
+            self.phys = 0
+            self.mag = 0
+            self.dodge = 0
+            self.aff = 0
+            self.passive = 0
+
+        def use_passive(self):
+            pass
     class beast_skin(armour):
         def __init__(self):
             self.title = "Beast Skin"
@@ -119,10 +137,21 @@ init python:
         def use_passive(self):
             if self.get_passive() == 1:
                 pass
+    class fatty_skin(armour):
+        def __init__(self):
+            self.title = "Fatty Skin"
+            self.flavour = "Layers of stinking fat."
+            self.flag = 1
+            self.type = 1
+            self.phys = 10
+            self.mag = 5
+            self.dodge = 0
+            self.aff = 2 #vile
+            self.passive = 0
 
-
-
-
+        def use_passive(self):
+            if self.get_passive() == 1:
+                pass
 
 
 

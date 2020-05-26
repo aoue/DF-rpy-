@@ -105,7 +105,7 @@ init -3 python:
                 #move unit
                 unit.set_point(unit.get_point().get_x() + self.get_clearance()[0], unit.get_point().get_y() + self.get_clearance()[1])
 
-                #place unit  in map
+                #place unit in map
                 battle.get_allymap().place_unit(unit)
             else:
                 battle.get_enemymap().remove_unit(unit)
@@ -129,20 +129,24 @@ init -3 python:
             if unit.get_stamina() == 0: #if the unit is at 0 stamina, set them as exhausted
                 unit.get_stance().set_exhausted(1)
             unit.set_able(dif)
-        def do_damage(self, unit, nl, battle):
+        def do_damage(self, unit, targetlist, battle):
             showlist = [] #list of tuples: (unit, damage)
 
-            for target in nl:
+            targetlist = list(set(targetlist))
+
+            for target in targetlist:
                 if target != None:
                     if target.get_ooa() == 0:
                         target.take_damage(unit, int(unit.calc_damage(target, self)), showlist, battle)
 
             if len(showlist) > 0:
                 renpy.show_screen("show_damage", showlist, self, unit)
-        def do_heal(self, unit, nl):
-            showlist = [] #list of tuples: (unit, damage)
+        def do_heal(self, unit, targetlist):
+            showlist = [] #list of tuples: (unit, damage) #eliminate duplicate targets
 
-            for target in nl:
+            targetlist = list(set(targetlist))
+
+            for target in targetlist:
                 if target != None:
                     if target.get_ooa() == 0:
                         target.take_heal(unit, unit.calc_heal(target, self), showlist)

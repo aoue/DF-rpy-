@@ -21,17 +21,24 @@
 init -1 python:
     #--- POINT ---
     class point():
-        def __init__(self, x, y):
-            self.x = x
-            self.y = y
+        def __init__(self, x, y, (a,b)):
+            self.x = x #x coordinate of top left
+            self.y = y #y coordinate of top left
+            self.gros = (a,b) #dimensions of the unit
+
+        #setters
         def set_x(self, x):
             self.x = x
         def set_y(self, y):
             self.y = y
+
+        #getters
         def get_x(self):
             return self.x
         def get_y(self):
             return self.y
+        def get_gros(self):
+            return self.gros
         def get_tuple(self):
             return (self.x, self.y)
 
@@ -90,7 +97,6 @@ init -1 python:
             self.move6 = hit(move)
             self.move7 = hit(move)
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
-            self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
             self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
 
         #getters
@@ -250,21 +256,32 @@ init -1 python:
             self.acc = acc
         def set_stance(self, i, duration):
             self.stance[i] = duration
-        def set_focos(self, focus):
-            self.foc = focus
+        def set_focos(self, foc):
+            self.foc = foc
         def set_pattern(self, pattern):
             self.pattern = pattern
-        def set_moves(self, i, move):
-            self.move[i] = move
         def set_flavour(self, i, flavour):
             self.flavour[i] = flavour
         #useful functions
+        def level_up(self):
+            self.get_foc().level_up(self)
+        def end_turn(self):
+            self.set_turn_over(1)
+            self.get_stance().end_turn(self)
+        def gear_passives(self):
+            if self.get_weapon() != None:
+                self.get_weapon().use_passive()
+            if self.get_armour() != None:
+                self.get_armour().use_passive()
+            if self.get_acc() != None:
+                self.get_acc().use_passive()
         def post_battle(self):
             #after a battle in the dungeon crawler portion.
             if self.get_hp() > self.get_hpmax():
                 self.set_hp(self.get_hpmax())
             self.set_stamina(self.get_staminamax())
             self.set_able(self.get_ablemax())
+            self.set_dodge(self.get_dodgemax())
             self.set_deployable(1)
             self.get_stance().post_battle()
         def check_dead(self, battle):
@@ -272,6 +289,7 @@ init -1 python:
                 self.set_able(0)
                 self.set_stamina(0)
                 self.set_ooa(1)
+                self.get_stance().post_battle()
                 self.set_icon("dead_icon")
 
                 if self.get_iff() == 1:
@@ -281,12 +299,16 @@ init -1 python:
             #move to an open, adjacent square. ends the unit's turn.
             sq = renpy.invoke_in_new_context(call_highlight_walk, self, battle) #tuple
 
+            if sq == -1:
+                return
+
             battle.get_allymap().remove_unit(self)
 
             self.get_point().set_x(sq[0])
             self.get_point().set_y(sq[1])
             battle.get_allymap().place_unit(self)
             self.set_able(self.get_able()-1)
+            self.set_turn_over(1)
         def wait(self):
             self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
             self.set_able(0)
@@ -303,188 +325,10 @@ init -1 python:
             #ele = affinity of the attacking move
             #aff = affinity of the defender
 
-            aff = target.get_aff()
-            #normal affinitty
-            if ele == 0:
-                if aff == 0:
-                    mod = 1
-                elif aff == 1:
-                    mod = 0.75
-                elif aff == 2:
-                    mod = 0.75
-                elif aff == 3:
-                    mod = 0.5
-                elif aff == 4:
-                    mod = 1
-                elif aff == 5:
-                    mod = 1
-                elif aff == 6:
-                    mod = 1
-                elif aff == 7:
-                    mod = 1
-                elif aff == 8:
-                    mod = 0.75
-            #heroic affinity
-            elif ele == 1:
-                if aff == 0:
-                    mod = 0.75
-                elif aff == 1:
-                    mod = 0.5
-                elif aff == 2:
-                    mod = 1.5
-                elif aff == 3:
-                    mod = 0.75
-                elif aff == 4:
-                    mod = 1
-                elif aff == 5:
-                    mod = 1
-                elif aff == 6:
-                    mod = 1
-                elif aff == 7:
-                    mod = 1
-                elif aff == 8:
-                    mod = 0.75
-            #vile affinity
-            elif ele == 2:
-                if aff == 0:
-                    mod = 1
-                elif aff == 1:
-                    mod = 0.75
-                elif aff == 2:
-                    mod = 1.25
-                elif aff == 3:
-                    mod = 1.25
-                elif aff == 4:
-                    mod = 1.25
-                elif aff == 5:
-                    mod = 1
-                elif aff == 6:
-                    mod = 1.25
-                elif aff == 7:
-                    mod = 1.25
-                elif aff == 8:
-                    mod = 0.75
-            #earth affinity
-            elif ele == 3:
-                if aff == 0:
-                    mod = 1
-                elif aff == 1:
-                    mod = 1
-                elif aff == 2:
-                    mod = 1
-                elif aff == 3:
-                    mod = 0.5
-                elif aff == 4:
-                    mod = 1
-                elif aff == 5:
-                    mod = 1
-                elif aff == 6:
-                    mod = 1
-                elif aff == 7:
-                    mod = 1
-                elif aff == 8:
-                    mod = 1
-            #ice affinity
-            elif ele == 4:
-                if aff == 0:
-                    mod = 1
-                elif aff == 1:
-                    mod = 1
-                elif aff == 2:
-                    mod = 1
-                elif aff == 3:
-                    mod = 1
-                elif aff == 4:
-                    mod = 1.25
-                elif aff == 5:
-                    mod = 0.75
-                elif aff == 6:
-                    mod = 1.25
-                elif aff == 7:
-                    mod = 1
-                elif aff == 8:
-                    mod = 1.25
-            #fire affinity
-            elif ele == 5:
-                if aff == 0:
-                    mod = 1
-                elif aff == 1:
-                    mod = 1
-                elif aff == 2:
-                    mod = 1
-                elif aff == 3:
-                    mod = 0.5
-                elif aff == 4:
-                    mod = 1.25
-                elif aff == 5:
-                    mod = 0.75
-                elif aff == 6:
-                    mod = 0.5
-                elif aff == 7:
-                    mod = 1
-                elif aff == 8:
-                    mod = 1.5
-            #water affinity
-            elif ele == 6:
-                if aff == 0:
-                    mod = 1
-                elif aff == 1:
-                    mod = 1
-                elif aff == 2:
-                    mod = 1
-                elif aff == 3:
-                    mod = 1
-                elif aff == 4:
-                    mod = 0.75
-                elif aff == 5:
-                    mod = 1.25
-                elif aff == 6:
-                    mod = 0.75
-                elif aff == 7:
-                    mod = 1
-                elif aff == 8:
-                    mod = 1
-            #electric affinity
-            elif ele == 7:
-                if aff == 0:
-                    mod = 1
-                elif aff == 1:
-                    mod = 1
-                elif aff == 2:
-                    mod = 1
-                elif aff == 3:
-                    mod = 0.5
-                elif aff == 4:
-                    mod = 0.75
-                elif aff == 5:
-                    mod = 1
-                elif aff == 6:
-                    mod = 1.25
-                elif aff == 7:
-                    mod = 0.75
-                elif aff == 8:
-                    mod = 0.75
-            #metal affinity
-            elif ele == 8:
-                if aff == 0:
-                    mod = 1
-                elif aff == 1:
-                    mod = 1
-                elif aff == 2:
-                    mod = 1
-                elif aff == 3:
-                    mod = 1.25
-                elif aff == 4:
-                    mod = 1
-                elif aff == 5:
-                    mod = 1
-                elif aff == 6:
-                    mod = 1
-                elif aff == 7:
-                    mod = 1
-                elif aff == 8:
-                    mod = 0.75
-            return mod
+            #obviously, needs to be (re)done.
+
+            return 1
+
         def calc_heal(self, target, cmove):
             #self: dealer of the heals
             #target: recipient of the heals
@@ -547,7 +391,21 @@ init -1 python:
 
             if damage == -1: #dodge
                 showlist.append((self, "Dodge"))
+
+                #when a unit dodges, its dodge goes down
+                #when a unit it hit, its dodge goes up
+                #dodge is changed by the dodge_change variable??
+                #^can never go less that 0, or above dodgemax
+
+                #dodge go down
+                if self.get_dodgemax() > 0:
+                    self.set_dodge(max(self.get_dodge()-5, 0))
+
                 return
+
+            if self.get_dodgemax() > 0:
+                self.set_dodge(min(self.get_dodge()+5, self.get_dodgemax()))
+
 
             #look through stances: the order is important.
             if self.get_stance().get_exhausted() > 0: #if exhausted, take 1.2x damage
@@ -592,15 +450,15 @@ init -1 python:
                 return
 
             #the move handles the rest
-            self.set_turn_over(1)
             cmove.exert(self, sq, battle)
+            self.end_turn()
 
     #playable units (in order)
     class unit_yve(unit):
         def __init__(self):
             self.iff = 0
             self.name = "Yve"
-            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.point = point(-1, -1, (1,1)) #instance of point class. coordinates for unit's position.
             self.face = "face_yve"
             self.face_h = "face_yve_hover"
             self.icon = "icon_yve" #picture
@@ -642,7 +500,7 @@ init -1 python:
             self.acc = None #accessory
 
             #moves:
-            self.foc = "Wanderer"
+            self.foc = fighter_focus()
             self.pattern = 2 #2/4
             self.move1 = spear()
             self.move2 = pierce()
@@ -653,21 +511,13 @@ init -1 python:
             self.move7 = None
             #lists
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped
-            self.learnlist = [whirl()] #all moves the unit can learn. list of lists, one list per focus.
-            self.movelist = [whirl()] #all moves the unit has learned, but that are unequipped.
-
-        def level_up():
-            #see above
-
-            #get learnlist.
-            #if requirement met, etc, append learnlist item, depending on focus (which we index by the focus' number to get the right list in our list of lists (learnkust). anyway, append the new move to movelist)
-            pass
+            self.movelist = [] #all moves the unit has learned and that are unequipped.
 
     class unit_boy(unit):
         def __init__(self):
             self.iff = 0
             self.name = "Boy"
-            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.point = point(-1, -1, (1,1)) #instance of point class. coordinates for unit's position.
             self.face = "face_boy"
             self.face_h = "face_boy_hover"
             self.icon = "icon_boy" #picture
@@ -708,7 +558,7 @@ init -1 python:
             self.acc = None #accessory
 
             #moves:
-            self.foc = "Assistant"
+            self.foc = assistant_focus()
             self.pattern = 3 #3/3
             self.move1 = form6()
             self.move2 = suppress()
@@ -718,33 +568,7 @@ init -1 python:
             self.move6 = None
             self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
-            self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
             self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
-
-        def level_up():
-            #increase the following stats by an amount depending on:
-            # -the level. e.g. if lvl mod 2 = 0, do something. if lvl mod 5 = 0, do another.
-            # -the unit's focus (or no focus)
-
-            #always increase:
-            #lvl
-            #hpmax and hp
-            #physa
-            #physd
-            #maga
-            #magd
-            #dodgemax and dodge
-            #staminamax and stamina
-            #restam
-            #ablemax and able
-
-            #check if the unit learns a new move. depends of the level and on the unit's focus (or no focus)
-            #check if the unit's level mod 10 == 0. if yes, call change focus screen.
-
-            pass
-
-
-
 
 
     #temp units
@@ -752,7 +576,7 @@ init -1 python:
         def __init__(self):
             self.iff = 0
             self.name = "Federal"
-            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.point = point(-1, -1, (1,1)) #instance of point class. coordinates for unit's position.
             self.icon = "icon_federal" #picture
             self.deployable = 1 #whether you can field them
             self.ablemax = 1
@@ -792,17 +616,14 @@ init -1 python:
             self.move6 = None
             self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
-            self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
             self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
 
-        def level_up():
-            #see above
-            pass
+
     class unit_aide(unit):
         def __init__(self):
             self.iff = 0
             self.name = "Aide"
-            self.point = point(-1, -1) #instance of point class. coordinates for unit's position.
+            self.point = point(-1, -1, (1,1)) #instance of point class. coordinates for unit's position.
             self.icon = "icon_aide" #picture
             self.deployable = 1 #whether you can field them
             self.ablemax = 1
@@ -842,12 +663,9 @@ init -1 python:
             self.move6 = None
             self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
-            self.learnlist = [] #all moves the unit can learn. list of lists, one list per focus.
             self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
 
-        def level_up():
-            #see above
-            pass
+
 
 
 

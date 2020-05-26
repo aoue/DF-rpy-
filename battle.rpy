@@ -3,7 +3,7 @@ init -2 python:
     import random
     allow_save = True
 
-    #--- BATTLE ---
+    #--- BATTLE ---#
     class map():
         def __init__(self, nl):
             #self.map = [[None]*5, [None]*5] #the grid. fill a certain spot with a unit child object
@@ -18,19 +18,33 @@ init -2 python:
             return self.map
         def get_ul(self):
             return self.ul
-
+        #useful functions
         def remove_unit(self, unit):
             #finds the unit's spot, and sets it to None.
-            self.get_map()[unit.get_point().get_x()][unit.get_point().get_y()] = None
+            for i in range(0, unit.get_point().get_gros()[0]):
+                for x in range(0, unit.get_point().get_gros()[1]):
+                    self.get_map()[unit.get_point().get_x()+i][unit.get_point().get_y()+x] = None
 
         def place_unit(self, unit):
             #first look for the unit. if it's in the list, set the list object to none
             #index returns the 'index' of the unit we're looking for. so set = none by index
-            self.get_map()[unit.get_point().get_x()][unit.get_point().get_y()] = unit
+
+            for i in range(0, unit.get_point().get_gros()[0]):
+                for x in range(0, unit.get_point().get_gros()[1]):
+                    self.get_map()[unit.get_point().get_x()+i][unit.get_point().get_y()+x] = unit
 
         def search_map(self, dtuple):
             unit = self.get_map()[dtuple[0]][dtuple[1]]
             return unit
+
+        def random_empty(self):
+            #returns a random empty position
+            while True:
+                x = random.randint(0, 4)
+                y = random.randint(0, 4)
+
+                if self.search_map((x,y)) == None:
+                    return x,y
 
 
     class battle():
@@ -124,33 +138,57 @@ init -2 python:
             #return to title screen
 
         #--combat round. uses everything
+        def unit_dots(self):
+            showlist = [] #list of tuples: (unit, damage)
+
+            for unit in self.get_pl():
+                if unit.get_stance().get_dot() != 0:
+                    tup = (unit, int(unit.get_stance().get_dot()*unit.get_hpmax()))
+                    showlist.append(tup)
+
+            for unit in self.get_el():
+                if unit.get_stance().get_dot() != 0:
+                    tup = (unit, int(unit.get_stance().get_dot()*unit.get_hpmax()))
+                    showlist.append(tup)
+
+            if len(showlist) > 0:
+                renpy.show_screen("show_dot", showlist)
         def new_round(self):
             renpy.say(None, "new round")
+
+            self.unit_dots()
+
             for unit in self.get_pl():
                 if unit.get_ooa() == 0:
                     unit.set_able(unit.get_ablemax()) #refresh able
+                    unit.set_turn_over(0)
                     unit.get_stance().refresh_stamina(unit) #restam
-                    unit.get_stance().turn_start(unit)
+                    unit.get_stance().round_start(unit)
+                    unit.gear_passives()
 
             for unit in self.get_el():
                 if unit.get_ooa() == 0:
                     unit.set_able(unit.get_ablemax())
                     unit.get_stance().refresh_stamina(unit) #restam
-                    unit.get_stance().turn_start(unit)
+                    unit.get_stance().round_start(unit)
+                    unit.gear_passives()
+
+
 
         def player_turn(self):
-            #show available moves.
-            #click on move. pick target location.
-            #resolve damage, etc.
+            #choose unit
+            #choose move
+            #cancel if you're unsatisfied
 
-            turn_over = 0
-            cancel_assist = 0
-            while cancel_assist == turn_over:
+            while True:
                 chosen = renpy.call_screen("order_unit", self.get_pl())
                 renpy.call_screen("pick_move", chosen, self)
-                turn_over = chosen.get_turn_over()
                 self.calc_turns()
                 self.refresh_visuals()
+
+                if chosen.get_turn_over() == 1:
+                    return
+
 
         def enemy_turn(self):
             chosen = None
@@ -173,10 +211,10 @@ init -2 python:
         def combat_round(self):
             self.prebattle_settings()
 
-            for unit in self.get_pl():
-                self.get_allymap().place_unit(unit) #a hack. this is supposed to be done in the constructor. i can't figure out for the life of me why it isn't working. it stopped a unit from using first_aid() on another unit until the targeted unit had moved.
             for unit in self.get_el():
                 self.get_enemymap().place_unit(unit)
+            for unit in self.get_pl():
+                self.get_allymap().place_unit(unit)
 
             while self.get_rounds != 0: #for the whole fight
                 self.calc_turns()
@@ -219,6 +257,7 @@ init -2 python:
             self.postbattle_settings()
 
 
+#reinforcement placing function
 
 
 

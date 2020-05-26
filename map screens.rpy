@@ -21,6 +21,22 @@ screen party_view(party, i, ow):
     #background
     add ow.get_party_bg()
 
+    #character's stat block
+    vbox:
+        pos (272, 390)
+        text "HP = " + str(party[i].get_hp()) + "/" + str(party[i].get_hpmax())
+        text "EN = " + str(party[i].get_energy()) + "/" + str(party[i].get_energymax())
+        text "AB = " + str(party[i].get_able())
+        text "ST = " + str(party[i].get_stamina())
+        text "PA = " + str(party[i].get_physa()) + "+" + str(party[i].get_weapon().get_phys())
+        text "PD = " + str(party[i].get_physd()) + "+" + str(party[i].get_armour().get_phys())
+        text "MA = " + str(party[i].get_maga()) + "+" + str(party[i].get_weapon().get_mag())
+        text "MD = " + str(party[i].get_magd()) + "+" + str(party[i].get_armour().get_mag())
+        text "HI = " + str(party[i].get_hit()) + "+" + str(party[i].get_weapon().get_hit())
+        text "DO = " + str(party[i].get_dodge()) + "+" + str(party[i].get_armour().get_dodge())
+
+
+
     #close button
     textbutton "close" action Return pos (950, 10)
 
@@ -63,7 +79,7 @@ screen party_view(party, i, ow):
 
 
     #lvl and focus
-    text "Lvl " + str(party[i].get_lvl()) + " " +party[i].get_focus() pos (445, 20)
+    text "Lvl " + str(party[i].get_lvl()) + " " + party[i].get_focus().get_title() pos (445, 20)
 
     #next unit button on midtop right: (i += 1 OR if i+1 > len(party), i = 0). dissolve.
 
