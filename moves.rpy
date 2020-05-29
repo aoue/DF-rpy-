@@ -1,13 +1,18 @@
-#self.affinity = 0
+#self.element = 0
+# -1: use weapon element.
 # 0: normal
-# 1: heroic
-# 2: vile
-# 3: earth
-# 4: ice
-# 5: fire
-# 6: water
-# 7: lightning
-# 8: metal
+# 1: beast
+# 2: ice
+# 3: fire
+# 4: lightning
+# 5: earth
+# 6: metal
+# 7: vile
+# 8: heroic
+
+#self.dot = 0
+# 0: no dot
+# 1: poison
 #--------------------------------
 
 init -3 python:
@@ -21,19 +26,28 @@ init -3 python:
             self.status_only = 0 #1: the move does no damage, affects only status. ex: adrenaline.
             self.flavour = "{i}flavour text/move description{/i}"
             self.title = "move"
-            self.rank = 0 #can be 0 (anywhere), 1 (front), or 2 (back).
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.iff = 0 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 0 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 0 #the amount of stamina the unit loses using this move
-            self.energy_drain = 0 #the amount of enerygy the unit loses using this move
-            self.able_drain = 0 #the amount of able the unit loses using this move
-            self.power = 0 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.rank = 0 # can be 0 (anywhere), 1 (front), or 2 (back).
+            self.type = 1 # for targeting. each one means a different shape. legend on 'combat screens.rpy'
+            self.iff = 0 # for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
+            self.clearance = (0,0) #t he movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
+            self.clearance_type = 0 # 0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
+            self.stamina_drain = 0 # the amount of stamina the unit loses using this move
+            self.energy_drain = 0 # the amount of enerygy the unit loses using this move
+            self.able_drain = 0 # the amount of able the unit loses using this move
+            self.power = 0 # affects damage
+            self.hit = 0 # affects dodging
+            self.damage_type = 0 # 0: deals physical damage, 1: deals magical damage
+            self.element = -1 # damage element. -1 through 8. see spreadsheet or top of this docs
+            self.element_name = "" #shown in management, etc
+            self.dot = 0 # int. tells the do_damage function to apply a certain stance to hit units.
+            self.dot_duration = 0 # int. how long the applied dot will last.
         #getters
+        def get_element_name(self):
+            return self.element_name
+        def get_dot(self):
+            return self.dot
+        def get_dot_duration(self):
+            return self.dot_duration
         def get_status_only(self):
             return self.status_only
         def get_flavour(self):
@@ -129,7 +143,7 @@ init -3 python:
             if unit.get_stamina() == 0: #if the unit is at 0 stamina, set them as exhausted
                 unit.get_stance().set_exhausted(1)
             unit.set_able(dif)
-        def do_damage(self, unit, targetlist, battle):
+        def do_damage(self, unit, targetlist, battle, dot, duration):
             showlist = [] #list of tuples: (unit, damage)
 
             targetlist = list(set(targetlist))
@@ -137,7 +151,7 @@ init -3 python:
             for target in targetlist:
                 if target != None:
                     if target.get_ooa() == 0:
-                        target.take_damage(unit, int(unit.calc_damage(target, self)), showlist, battle)
+                        target.take_damage(unit, int(unit.calc_damage(target, self)), showlist, battle, dot, duration)
 
             if len(showlist) > 0:
                 renpy.show_screen("show_damage", showlist, self, unit)
@@ -152,7 +166,67 @@ init -3 python:
                         target.take_heal(unit, unit.calc_heal(target, self), showlist)
 
             if len(showlist) > 0:
-                renpy.show_screen("show_heal", showlist, self, unit)
+                renpy.show_screen("show_heal", showlist, self.get_title(), unit)
+
+    #--- Shared ---
+    class defend(move):
+        def __init__(self):
+            self.status_only = 1
+            self.flavour = "{i}Ready for an attack, raising physical defense.{/i}"
+            self.title = "Defend"
+            self.rank = 0
+            self.type = 0
+            self.iff = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 0
+            self.energy_drain = 0
+            self.able_drain = 0
+            self.power = 0
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 0
+            self.element_name = "-"
+            self.dot = 0
+            self.dot_duration = 0
+        def exert(self, unit, sq, battle):
+            unit.set_stamina(int(min(unit.get_stamina()+(0.25 * unit.get_staminamax() * unit.get_able()), unit.get_staminamax())))
+            unit.get_stance().enter_defend()
+            unit.set_able(0)
+
+    class walk(move):
+        def __init__(self):
+            self.status_only = 1
+            self.flavour = "{i}Walk to adjust position.{/i}"
+            self.title = "Walk"
+            self.rank = 0
+            self.type = 0
+            self.iff = -1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 0
+            self.energy_drain = 0
+            self.able_drain = 0
+            self.power = 0
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 0
+            self.element_name = "-"
+            self.dot = 0
+            self.dot_duration = 0
+        def exert(self, unit, battle):
+            #move to an open, adjacent square. ends the unit's turn.
+            sq = renpy.invoke_in_new_context(call_highlight_walk, unit, battle) #tuple
+
+            if sq == -1:
+                return
+
+            battle.get_allymap().remove_unit(unit)
+            unit.get_point().set_x(sq[0])
+            unit.get_point().set_y(sq[1])
+            battle.get_allymap().place_unit(unit)
+            unit.set_able(unit.get_able()-1)
+            unit.end_turn()
 
     #--- Yve ---
     class spear(move):
@@ -163,23 +237,26 @@ init -3 python:
             self.status_only = 0
             self.flavour = "{i}The noblest weapon.{/i}"
             self.title = "Spear"
-            self.rank = 1 #can be 1, or 2. determines where the move can be used
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.iff = 0 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 15 #the amount of stamina the unit loses using this move
+            self.rank = 1
+            self.type = 1
+            self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 15
             self.energy_drain = 0
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 20 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.able_drain = 1
+            self.power = 20
+            self.hit = 0
+            self.damage_type = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
+
+
+
 
             #moves cost stamina and able
             self.drain(unit)
@@ -191,7 +268,7 @@ init -3 python:
 
             #calc damage and deal it to the target
             #damage =
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     class pierce(move):
         #three squares in a row
@@ -201,21 +278,24 @@ init -3 python:
             self.status_only = 0
             self.flavour = "{i}Strike through.{/i}"
             self.title = "Pierce"
-            self.rank = 1 #can be 1, or 2. determines where the move can be used
-            self.type = 3 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.iff = 0 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 0 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 30 #the amount of stamina the unit loses using this move
+            self.rank = 1
+            self.type = 3
+            self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 0
+            self.stamina_drain = 30
             self.energy_drain = 1
-            self.able_drain = 2 #the amount of able the unit loses using this move
-            self.power = 35 #affects damage
-            self.hit = -5 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.able_drain = 2
+            self.power = 35
+            self.hit = -5
+            self.damage_type = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
+
             #sq: the clicked square
             self.drain(unit)
             self.translate(unit, battle)
@@ -228,7 +308,7 @@ init -3 python:
             target3 = battle.get_enemymap().search_map((r,c+2))
             targetlist = [target, target2, target3]
 
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     class adrenaline(move):
         #self
@@ -238,21 +318,24 @@ init -3 python:
             self.status_only = 1
             self.flavour = "{i}Quicken the senses.{p}The unit's hit, physical attack, and health all increase.{/i}"
             self.title = "Adrenaline"
-            self.rank = 2 #can be 1, or 2. determines where the move can be used
-            self.type = 0 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.iff = 1 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
-            self.clearance = (0,-1) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 1 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 15 #the amount of stamina the unit loses using this move
+            self.rank = 2
+            self.type = 0
+            self.iff = 1
+            self.clearance = (0,-1)
+            self.clearance_type = 1
+            self.stamina_drain = 15
             self.energy_drain = 1
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 0 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.able_drain = 1
+            self.power = 0
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 0
+            self.element_name = "-"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
+
             #sq: the clicked square
             self.drain(unit)
             self.translate(unit, battle)
@@ -263,6 +346,8 @@ init -3 python:
             else:
                 unit.get_stance().set_adrenaline(5)
 
+
+
     class whirl(move):
         #3x3 cross minus the center square
         #med damage
@@ -271,25 +356,23 @@ init -3 python:
             self.status_only = 0
             self.flavour = "{i}I am a storm.{/i}"
             self.title = "Ice Whirl"
-            self.rank = 1 #can be 1, or 2. determines where the move can be used
-            self.type = 27 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.iff = 0 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 40 #the amount of stamina the unit loses using this move
-            self.energy_drain = 2
-            self.able_drain = 2 #the amount of able the unit loses using this move
-            self.power = 50 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 4 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.rank = 1
+            self.type = 27
+            self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 40
+            self.energy_drain = 1
+            self.able_drain = 1
+            self.power = 50
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 2
+            self.element_name = "Ice"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.drain(unit)
             self.translate(unit, battle)
 
@@ -299,7 +382,7 @@ init -3 python:
             target5 = battle.get_enemymap().search_map((sq[0]+1,sq[1]))
             targetlist = [target2, target3, target4, target5]
 
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     #--- Federal ---
     class sword(move):
@@ -319,30 +402,25 @@ init -3 python:
             self.power = 20
             self.hit = 0
             self.damage_type = 0
-            self.element = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.drain(unit)
             self.translate(unit, battle)
 
-            #this move hits only the selected square.
             target = battle.get_enemymap().search_map(sq)
             targetlist = [target]
 
-            #calc damage and deal it to the target
-            #damage =
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     class flourish(move):
         #flourish. single target. front rank. heavy damage. heavy stamina cost. no able cost.
         def __init__(self):
             self.status_only = 0
-            self.flavour = "{i}A fast, accurate blow.{/i}"
+            self.flavour = "{i}A fast and powerful blow.{/i}"
             self.title = "Flourish"
             self.rank = 1
             self.type = 1
@@ -352,30 +430,25 @@ init -3 python:
             self.stamina_drain = 30
             self.energy_drain = 1
             self.able_drain = 0
-            self.power = 40
+            self.power = 45
             self.hit = 5
             self.damage_type = 0
-            self.element = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.drain(unit)
             self.translate(unit, battle)
 
-            #this move hits only the selected square.
             target = battle.get_enemymap().search_map(sq)
             targetlist = [target]
 
-            #calc damage and deal it to the target
-            #damage =
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     class form6(move):
-        #Twelve Forms - VI. 1x1. front rank. retreats 2.
+        #Twelve Forms - VI. 1x1. front rank. retreats 1.
         def __init__(self):
             self.status_only = 0
             self.flavour = "{i}Twelve Forms - Form VI.{/i}"
@@ -384,20 +457,20 @@ init -3 python:
             self.type = 1
             self.iff = 0
             self.clearance = (0,1)
-            self.clearance_type = 0
-            self.stamina_drain = 20
+            self.clearance_type = 1
+            self.stamina_drain = 10
             self.energy_drain = 0
             self.able_drain = 1
-            self.power = 10
+            self.power = 15
             self.hit = 0
             self.damage_type = 0
-            self.element = 0
+            self.element = -1
+            self.element_name = "Weapon"
+
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
             #moves cost stamina and able
             self.drain(unit)
             self.translate(unit, battle)
@@ -405,7 +478,7 @@ init -3 python:
             #this move hits only the selected square.
             target = battle.get_enemymap().search_map(sq)
             targetlist = [target]
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     class rally(move):
         #rally. 3x3 (allies). hit up, physa up. back rank. light cost.
@@ -425,13 +498,11 @@ init -3 python:
             self.hit = 0
             self.damage_type = 0
             self.element = 0
+            self.element_name = "-"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.drain(unit)
             self.translate(unit, battle)
 
@@ -449,15 +520,13 @@ init -3 python:
             target8 = battle.get_allymap().search_map((r+1,c+1))
             targetlist = [target0, target1, target2, target3, target4, target5, target6, target7, target8]
 
-            #apply buffs to any targets
-            #-physa up
-            #-hit up
 
             for target in targetlist:
                 if target != None:
-                    if target.get_stance().get_rally() <= 0: #if rally is not active on this unit, make it so.
+                    if target.get_stance().get_rally() < 0 and target.get_ooa() == 0:
                         target.get_stance().enter_rally()
-                    target.get_stance().set_rally(5) #set/refresh duration
+                    elif target.get_ooa() == 0:
+                        target.get_stance().set_rally(5) #set/refresh duration
 
     class shoot(move):
         #shoot. single target. back rank. light damage. light cost.
@@ -473,16 +542,15 @@ init -3 python:
             self.stamina_drain = 15
             self.energy_drain = 0
             self.able_drain = 1
-            self.power = 15
+            self.power = 20
             self.hit = 0
             self.damage_type = 0
-            self.element = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
             #moves cost stamina and able
             self.drain(unit)
             self.translate(unit, battle)
@@ -490,14 +558,14 @@ init -3 python:
             #this move hits only the selected square.
             target = battle.get_enemymap().search_map(sq)
             targetlist = [target]
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     #--- Federal Aide ---
     class suppress(move):
         #suppress. 2x2. terrible hit. back rank.
         def __init__(self):
             self.status_only = 0
-            self.flavour = "{i}A wide, innacurate burst.{/i}"
+            self.flavour = "{i}Spread and inaccurate firing.{/i}"
             self.title = "Suppress"
             self.rank = 2
             self.type = 7
@@ -510,14 +578,12 @@ init -3 python:
             self.power = 20
             self.hit = -40
             self.damage_type = 0
-            self.element = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.drain(unit)
             self.translate(unit, battle)
 
@@ -529,7 +595,7 @@ init -3 python:
             target2 = battle.get_enemymap().search_map((r,c+1))
             target3 = battle.get_enemymap().search_map((r+1,c+1))
             targetlist = [target0, target1, target2, target3]
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     class first_aid(move):
         #first aid. very light heal, stops bleeding. light cost.
@@ -537,31 +603,28 @@ init -3 python:
             self.status_only = 1
             self.flavour = "{i}Basic magical care, even by talentless, is better than nothing..{/i}"
             self.title = "First Aid"
-            self.rank = 2 #can be 1, or 2. determines where the move can be used
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.iff = 1 #for which board. 0: enemy board, 1: allied board. 2: enemy board, set location. 3: allied board, set location.
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 20 #the amount of stamina the unit loses using this move
+            self.rank = 2
+            self.type = 1
+            self.iff = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 20
             self.energy_drain = 1
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 30 #affects damage/heals
-            self.hit = 0 #affects dodging
-            self.damage_type = 1 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.able_drain = 1
+            self.power = 20 #heals
+            self.hit = 0
+            self.damage_type = 1
+            self.element = 0
+            self.element_name = "-"
+            self.dot = 0
+            self.dot_duration = 0
 
         def exert(self, unit, sq, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square
             self.drain(unit)
             self.translate(unit, battle)
 
-
-            #do stuff
             target = battle.get_allymap().search_map(sq)
             targetlist = [target]
-
-            #the game thinks the selected spot is none
 
             if target != None:
                 #heal a little. based on ma.
@@ -584,7 +647,7 @@ init -3 python:
 
 #---TO ADD ---
 #tori:
-#time warp: makes buffs run their course. set time remaining on target's buffs to half their current duration, or to 0 if current duration == 1.
+#time warp: makes buffs run their course. set time remaining on target's buffs to half their current duration, or to 0 if current duration == 1. ??. or expire all buffs/dots on selected units? cool.
 
 #boy:
 #screw: power = 3 or something. stam cost = 5 or something. purpose is to use up enemies kindara/shatter point/defensive stances, yeah.

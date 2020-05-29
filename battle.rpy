@@ -21,6 +21,7 @@ init -2 python:
         #useful functions
         def remove_unit(self, unit):
             #finds the unit's spot, and sets it to None.
+
             for i in range(0, unit.get_point().get_gros()[0]):
                 for x in range(0, unit.get_point().get_gros()[1]):
                     self.get_map()[unit.get_point().get_x()+i][unit.get_point().get_y()+x] = None
@@ -95,6 +96,8 @@ init -2 python:
         def set_ableleft(self, ableleft):
             self.ableleft = ableleft
         #--during battle
+        def move_browse_b(self, move):
+            renpy.show_screen("move_browse_b", move)
         def calc_pable(self):
             pable = 0
             for i in range(0, len(self.get_pl())):
@@ -163,14 +166,14 @@ init -2 python:
                     unit.set_able(unit.get_ablemax()) #refresh able
                     unit.set_turn_over(0)
                     unit.get_stance().refresh_stamina(unit) #restam
-                    unit.get_stance().round_start(unit)
+                    unit.get_stance().round_start(unit, self)
                     unit.gear_passives()
 
             for unit in self.get_el():
                 if unit.get_ooa() == 0:
                     unit.set_able(unit.get_ablemax())
                     unit.get_stance().refresh_stamina(unit) #restam
-                    unit.get_stance().round_start(unit)
+                    unit.get_stance().round_start(unit, self)
                     unit.gear_passives()
 
 

@@ -49,8 +49,8 @@ init python:
         #useful
         def get_baddies(self, dungeon):
             #needs dungeon to get threat level
-            baddie1 = unit_jowler(0, "jowler", 1, 3)
-            #baddie2 = unit_jowler(0, "jowler 2", 1, 0)
+            baddie1 = unit_jowler(0, "jowler", (0, 3), 1)
+            
             enemylist = [baddie1]#, baddie2]
             return enemylist
         def do_event(self, dungeon):

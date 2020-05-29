@@ -30,7 +30,8 @@ init -2 python:
             self.power = 0 #affects damage
             self.hit = 0 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
+            self.dot_duration = 0 #int. how long the applied dot will last.
 
             #additional variables
             self.weight = 0 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
@@ -191,7 +192,8 @@ init -2 python:
                         for i in range(column, column + self.get_aoe_area()[1]):
                             for x in range(row, row + self.get_aoe_area()[0]):
                                 if map.search_map((x, i)) != None:
-                                    targetlist.append(map.search_map((x, i)))
+                                        targetlist.append(map.search_map((x, i)))
+
 
                         if len(targetlist) > len(targetmaxlist):
                             targetmaxlist = targetlist
@@ -224,7 +226,9 @@ init -2 python:
             self.power = 15 #affects damage
             self.hit = 0 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.element = -1 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
+            self.dot_duration = 0 #int. how long the applied dot will last.
 
             #additional variables
             self.weight = 100 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
@@ -248,7 +252,7 @@ init -2 python:
             targetlist = [target]
 
             #calc damage and deal it to the target
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
     class e_jaws(enemy_move):
         def __init__(self):
             self.flavour = "{i}Terrible jaws.{/i}"
@@ -262,7 +266,9 @@ init -2 python:
             self.power = 23 #affects damage
             self.hit = -5 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.element = -1 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
+            self.dot_duration = 0 #int. how long the applied dot will last.
 
             #additional variables
             self.weight = 60 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
@@ -286,7 +292,7 @@ init -2 python:
             targetlist = [target]
 
             #calc damage and deal it to the target
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
     class e_rush(enemy_move):
         def __init__(self):
             self.flavour = "{i}Terrible Leap.{/i}"
@@ -300,7 +306,10 @@ init -2 python:
             self.power = 20 #affects damage
             self.hit = -20 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.element = -1 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.dot = 0
+            self.dot_duration = 0
+
 
             #additional variables
             self.weight = 100 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
@@ -324,7 +333,7 @@ init -2 python:
             targetlist = [target]
 
             #calc damage and deal it to the target
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
     class e_howl(enemy_move):
         def __init__(self):
             self.flavour = "{i}Terrible Howling.{/i}"
@@ -339,6 +348,8 @@ init -2 python:
             self.hit = 0 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
             self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
+            self.dot_duration = 0 #int. how long the applied dot will last.
 
             #additional variables
             self.weight = 20 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
@@ -374,7 +385,9 @@ init -2 python:
             self.power = 30 #affects damage
             self.hit = 0 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.element = 1 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
+            self.dot_duration = 0 #int. how long the applied dot will last.
 
             #additional variables
             self.weight = 80 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
@@ -398,7 +411,7 @@ init -2 python:
             targetlist = [target]
 
             #calc damage and deal it to the target
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
     class e_spew(enemy_move):
         def __init__(self):
             self.flavour = "{i}Spew poison.{/i}"
@@ -412,7 +425,9 @@ init -2 python:
             self.power = 20 #affects damage
             self.hit = 0 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.element = 7 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.dot = 1 #int. tells the do_damage function to apply a certain stance to hit units.
+            self.dot_duration = 3 #int. how long the applied dot will last.
 
             #additional variables
             self.weight = 100 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
@@ -436,12 +451,9 @@ init -2 python:
             targetlist = self.pick_target(pl, battle)
 
             #calc damage and deal it to the target
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
-            #apply poison
-            for target in targetlist:
-                if target.get_ooa() == 0:
-                    target.get_stance().enter_poison(3)
+
     class e_gobble(enemy_move):
         def __init__(self):
             self.flavour = "{i}Eats whatever's nearby.{/i}"
@@ -455,7 +467,9 @@ init -2 python:
             self.power = 20 #affects damage
             self.hit = 0 #affects dodging
             self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 2 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.element = 1 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.dot = 0
+            self.dot_duration = 0
 
             #additional variables
             self.weight = 100 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
@@ -507,13 +521,15 @@ init -2 python:
 
 
             #calc damage and deal it to the target
-            self.do_damage(unit, targetlist, battle)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
 
             #if the target is killed:
             if target.get_ooa() == 1:
                 unit.set_hp(min(unit.get_hp()+100,unit.get_hpmax()))
                 unit.set_stamina(min(unit.get_stamina()+75, unit.get_staminamax()))
+            else:
+                unit.set_stamina(min(unit.get_stamina()+25, unit.get_staminamax()))
 
 
 

@@ -1,4 +1,3 @@
-
 ###game settings###
 define config.has_autosave = True
 define config.autosave_slots = 6
@@ -26,7 +25,7 @@ init python:
 
 
 init -555:
-    #------vn display positions------#
+    #-- Display Positions --#
     transform maxleft:
         xalign 0.0
         yalign 1.0
@@ -58,10 +57,12 @@ init -555:
 
     #battle fx
     transform e_tile_hover(row, column):
-        pos(275 + (125*row), 5 + (65*column))
+        pos(265 + (124*row), -2 + (62*column))
 
     transform a_tile_hover(row, column):
-        pos(275 + (125*row), 385 + (65*column))
+        pos(265 + (124*row), 407 + (62*column))
+
+
 
 
     #px: 320 + 120*(point.get_x()), 135 + 65*(point.get_y())
@@ -80,10 +81,6 @@ init -555:
         "overworld/party_button_hover.png"
     image party_bg:
         "party/party_bg.jpg"
-    image yve_pose:
-        "party/yve_pose.png"
-    image boy_pose:
-        "party/boy_pose.png"
     image party_prev:
         "party/prev.png"
     image party_next:
@@ -93,7 +90,19 @@ init -555:
     image party_next_h:
         "party/next_h.png"
 
+    #poses
+    image pose_yve:
+        "party/poses/yve_pose.png"
+    image pose_boy:
+        "party/poses/boy_pose.png"
+    image pose_aide:
+        "party/poses/boy_pose.png"
+    image pose_federal:
+        "party/poses/boy_pose.png"
+
     ##direction screen
+    image direction_bg:
+        "direction/direction_bg.jpg"
     image direction_b:
         "overworld/direction_button.png"
     image direction_h:
@@ -106,10 +115,11 @@ init -555:
         "overworld/hub_button_hover.png"
 
     ##overworld screen
-    image prologue_bg:
-        "overworld/prologue.jpg"
+    image bg_chapter1:
+        "overworld/bg_chapter1.jpg"
     image party_icon:
         "dungeon/party_icon.png"
+
 
     ##dungeon screen
     image dungeon_bg:
@@ -138,6 +148,10 @@ init -555:
         "combat/face/deploy yve.png"
     image face_yve_hover:
         "combat/face/deploy yve hover.png"
+    image face_federal:
+        "combat/face/deploy mc.png"
+    image face_federal_hover:
+        "combat/face/deploy mc hover.png"
 
 
     #combat background images
@@ -146,6 +160,9 @@ init -555:
 
     image battlefield0:
         "images/combat/bg/battlefield0.jpg"
+    image battlefield_alt:
+        "images/combat/bg/battlefield1.jpg"
+
 
 
     #battle fxs
@@ -161,33 +178,40 @@ init -555:
 
     image icon_grunt:
         "images/combat/units/grunt icon.png"
-        0.5
-        "images/combat/units/grunt icon 2.png"
-        0.5
-        repeat
+        #0.5
+        #"images/combat/units/grunt icon 2.png"
+        #0.5
+        #repeat
 
     image icon_jowler:
         "images/combat/units/jowler icon.png"
-        0.5
-        "images/combat/units/jowler icon 2.png"
-        0.5
-        repeat
+        #0.5
+        #"images/combat/units/jowler icon 2.png"
+        #0.5
+        #repeat
     image icon_groskel:
         "images/combat/units/groskel icon.png"
 
     image icon_boy:
         "images/combat/units/mc icon.png"
-        0.5
-        "images/combat/units/mc icon 2.png"
-        0.5
-        repeat
+        #0.5
+        #"images/combat/units/mc icon 2.png"
+        #0.5
+        #repeat
 
     image icon_yve:
+
         "images/combat/units/yve icon.png"
-        0.5
-        "images/combat/units/yve icon 2.png"
-        0.5
-        repeat
+        #0.5
+        #"images/combat/units/yve icon 2.png"
+        #0.5
+        #repeat
+
+    image icon_federal:
+        "images/combat/units/federal icon.png"
+
+    image icon_federal_aide:
+        "images/combat/units/aide icon.png"
 
 
 

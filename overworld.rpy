@@ -9,12 +9,12 @@
 
 #-----ACT I index-----#
 #a certain item in the list always corresponds to the same physical location. It is as follows:
-# [0] = apartment
-# [1] = cafe(s)
-# [2] = library
-# [3] = dorms
-# [4] = (azalea) field
-# [5] = (no) street (in particular)
+# [0] = Chere Hotel (hotel)
+# [1] = Backstreet (becomes nai's office after first visit)
+# [2] = Saint Hope's (slums)
+# [4] =
+# [3] =
+# [5] =
 # [6] =
 # [7] =
 # etc
@@ -37,15 +37,22 @@ init python:
             self.images = [["face_boy", "dungeon_icon"]] #normal image for a location
             self.hovers = [["face_boy_hover", "dungeon_icon_h"]] #hover image for a location
             self.positions = [[(300, 400), (600, 500)]] #position for a location
-            self.bg = [["prologue_bg"]] #the background image.
+            self.bg = [["bg_chapter1"]] #the background image.
 
+            self.direction = direction()
 
             self.dungeon_prologue = dungeon(self) #prologue dungeon
             self.dungeons = [[self.dungeon_prologue]] #dungeons for each chapter
 
+        #setters
+        def set_view(self, view):
+            self.view = view
+
         #getters.
         def get_chapter(self):
             return self.chapter
+        def get_direction(self):
+            return self.direction
         def get_party(self):
             return self.party
         def get_party_bg(self):
@@ -83,6 +90,8 @@ init python:
             self.get_party().remove(unit)
             #centered text? unit.get_name() leaves the party!
         def party_view(self):
+            renpy.show_screen("inventory_view", self.get_inventory().get_arm(), self.get_party()[self.get_view()].get_equip_types()[0])
+            renpy.show_screen("move_view", self.get_party()[self.get_view()].get_movelist())
             renpy.call_screen("party_view", self.get_party(), self.get_view(), self)
         def next_party_unit(self, i):
             self.set_view(self.get_view() + i)
@@ -92,7 +101,7 @@ init python:
             elif self.get_view() < 0:
                 self.set_view(len(self.get_party())-1)
 
-            renpy.call_screen("party_view", self.get_party(), self.get_view(), self)
+            self.party_view()
 
         #inventory management
         def change_inventory_view(self, i):
@@ -104,7 +113,7 @@ init python:
                 viewlist = self.get_inventory().get_acc()
             else:
                 viewlist = self.get_inventory().get_ite()
-            renpy.show_screen("inventory_view", viewlist)
+            renpy.show_screen("inventory_view", viewlist, self.get_party()[self.get_view()].get_equip_types()[i])
         def swap_gear(self, unit, flag):
             new_gear = renpy.invoke_in_new_context(self.gear_view, flag, unit)
 
@@ -125,7 +134,7 @@ init python:
                 unit.set_acc(new_gear)
         def gear_view(self, flag, unit):
             renpy.show(self.get_party_bg())
-
+            renpy.show_screen("party_view", self.get_party(), self.get_view(), self)
             if flag == 1:
                 viewlist = ow.get_inventory().get_arm()
                 equip_type = unit.get_equip_types()[0]
@@ -144,43 +153,59 @@ init python:
             renpy.show_screen("gear_browse", gear)
 
         #move management
-        def put_move(self, unit, spot):
-            new_move = renpy.invoke_in_new_context(self.move_view, unit)
+        def put_move(self, unit, spot, rank):
+            new_move = renpy.invoke_in_new_context(self.move_view, unit, rank)
             if new_move == 0:
                 return
             unit.get_movelist().remove(new_move)
             unit.get_moves()[spot] = new_move
-        def swap_move(self, unit, spot):
-            new_move = renpy.invoke_in_new_context(self.move_view, unit)
+        def swap_move(self, unit, spot, rank):
+            new_move = renpy.invoke_in_new_context(self.move_view, unit, rank)
             if new_move == 0: #cancel button
                 return
 
             unit.get_movelist().append(unit.get_moves()[spot])
             unit.get_movelist().remove(new_move)
             unit.get_moves()[spot] = new_move
-        def move_view(self, unit):
+        def move_view(self, unit, rank):
             renpy.show(self.get_party_bg())
-            new_move = renpy.call_screen("move_swap", unit.get_movelist())
+            renpy.show_screen("party_view", self.get_party(), self.get_view(), self)
+            new_move = renpy.call_screen("move_swap", unit.get_movelist(), rank)
             renpy.hide(self.get_party_bg())
             return new_move
         def move_browse(self, move):
             renpy.show_screen("move_browse", move)
 
+        #direction
+        def change_direction_view(self, chapter, state):
+            renpy.invoke_in_new_context(self.direction_view, chapter, state)
+        def direction_view(self, chapter, state):
+            self.quest_view(self.get_direction().get_last_viewed())
+            renpy.call_screen("chapter_view", chapter, state, self)
+        def quest_view(self, quest):
+            self.get_direction().set_last_viewed(quest)
+            renpy.show_screen("quest_view", quest)
+
+
+
+
+
         #big shows
+        def show_ow_helpers(self):
+            renpy.transition(dissolve)
+            renpy.show_screen("overworld_helpers", self)
         def show_overworld(self):
-            #renpy.show(self.get_bg()[self.get_chapter()])
             renpy.call_screen("overworld_map", self.get_unlocked(), self.get_jumps(), self.get_descr(), self.get_images(), self.get_hovers(), self.get_positions(), self)
         def show_dungeon(self): #(self, floor)
             #for a dungeon 0. it will have to be preset.
             self.get_dungeons(0).set_party(self.get_party())
             self.get_dungeons(0).show_dungeon()
         def show_party(self):
-            #self.change_inventory_view(self.get_inventory().get_view()) #<-- not working
             renpy.invoke_in_new_context(self.party_view)
-
-
         def show_direction(self):
-            pass
+            self.quest_view(self.get_direction().get_last_viewed())
+            renpy.invoke_in_new_context(self.direction_view, self.get_chapter(), 0)
+
 
         def show_hub(self):
             pass

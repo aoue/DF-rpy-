@@ -8,6 +8,8 @@
     #0: enemy
     #1: spear (yve)
     #2: tools (boy)
+    #3: guns (nai, dg, aide)
+    #4: swords (federal, yve)
 
 
 
@@ -28,9 +30,12 @@ init python:
             self.mag = 0 #affects mag damage dealt. min 0.
             self.hit = 0 #affects hit %
             self.aff = 0 #affects damage affinity
+            self.aff_name = ""
             self.passive = 0 #0: no passive. 1: yes passive.
 
         #getters
+        def get_aff_name(self):
+            return self.aff_name
         def get_image(self):
             return self.img
         def get_image_h(self):
@@ -67,10 +72,11 @@ init python:
             self.flavour = "Simple spear that folds to a fraction of its size."
             self.flag = 2
             self.type = 1
-            self.phys = 30
+            self.phys = 25
             self.mag = 10
             self.hit = 5
             self.aff = 0
+            self.aff_name = "Normal"
             self.passive = 0
 
     ## -- Tools -- ##
@@ -84,36 +90,56 @@ init python:
             self.mag = 5
             self.hit = 0
             self.aff = 0
+            self.aff_name = "Normal"
             self.passive = 0
 
-    ## -- Enemy Weapons --##
+    ## -- Guns -- ##
+    class regulation_rifle(weapon):
+        def __init__(self):
+            self.title = "Regulation Rifle"
+            self.flavour = "A common gun that sees wide usage,"
+            self.flag = 2
+            self.type = 3
+            self.phys = 20
+            self.mag = 0
+            self.hit = 5
+            self.aff = 0
+            self.aff_name = "Normal"
+            self.passive = 0
+
+    ## -- Swords -- ##
+    class regulation_sabre(weapon):
+        def __init__(self):
+            self.title = "Regulation Sabre"
+            self.flavour = "A common sabre that sees wide usage,"
+            self.flag = 2
+            self.type = 4
+            self.phys = 30
+            self.mag = 0
+            self.hit = 10
+            self.aff = 0
+            self.aff_name = "Normal"
+            self.passive = 0
+
+
+
+    ## -- Beast weapons --##
     class beast_claw(weapon):
         def __init__(self):
             #self.img = "folding_spear"
             #self.img_h = "folding_spear_h"
             self.title = "Beast Claw"
-            self.flavour = "Claws, attached to the foot of a beast."
+            self.flavour = "Claws, hopefully attached to the end of a foot."
             self.flag = 2
             self.type = 0
             self.phys = 20
             self.mag = 0
             self.hit = 0
-            self.aff = 0
+            self.aff = 1
+            self.aff_name = "Beast"
             self.passive = 0
 
-    class horrible_claw(weapon):
-        def __init__(self):
-            #self.img = "folding_spear"
-            #self.img_h = "folding_spear_h"
-            self.title = "Horrible Claw"
-            self.flavour = "Horrible claws, stuck with blood and vomit."
-            self.flag = 2
-            self.type = 0
-            self.phys = 20
-            self.mag = 0
-            self.hit = 0
-            self.aff = 0
-            self.passive = 0
+
 
 
 

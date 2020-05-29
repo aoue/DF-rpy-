@@ -19,9 +19,12 @@ init python:
             self.mag = 0 #affects mag damage taken.
             self.dodge = 0 #affects dodge %
             self.aff = 0 #affects unit's affinity
+            self.aff_name = "" #aff name shown on party screen
             self.passive = 0 #0: no passive. 1: yes passive.
 
         #getters
+        def get_aff_name(self):
+            return self.aff_name
         def get_image(self):
             return self.img
         def get_image_h(self):
@@ -63,6 +66,7 @@ init python:
             self.mag = 10
             self.dodge = 15
             self.aff = 0
+            self.aff_name = "Normal"
             self.passive = 0
 
         def use_passive(self):
@@ -73,19 +77,33 @@ init python:
             self.img = "bascule_armour"
             self.img_h = "bascule_armour_h"
             self.title = "Bascule Armour"
-            self.flavour = "Thick armour worn underneath the clothes."
+            self.flavour = "Strong armour worn underneath the clothes."
             self.flag = 1
             self.type = 3
-            self.phys = 30
-            self.mag = 20
+            self.phys = 25
+            self.mag = 10
             self.dodge = -5
-            self.aff = 0
+            self.aff = 6
+            self.aff_name = "Metal"
             self.passive = 0
 
         def use_passive(self):
             if self.get_passive() == 1:
                 pass
 
+    ## -- Medium Armour -- ##
+    class regulation_armour(armour):
+        def __init__(self):
+            self.title = "Regulation Armour"
+            self.flavour = "Cost-effective armour used all over the world."
+            self.flag = 1
+            self.type = 2
+            self.phys = 15
+            self.mag = 15
+            self.dodge = 0
+            self.aff = 0
+            self.aff_name = "Normal"
+            self.passive = 0
 
     ## -- Light Armour -- ##
     class smock_armour(armour):
@@ -98,6 +116,7 @@ init python:
             self.mag = 0
             self.dodge = 5
             self.aff = 0
+            self.aff_name = "Normal"
             self.passive = 0
 
         def use_passive(self):
@@ -108,20 +127,6 @@ init python:
 
 
     ## -- Enemy Armour -- ##
-    class no_armour(armour):
-        def __init__(self):
-            self.title = "No armour."
-            self.flavour = "Nothing"
-            self.flag = 0
-            self.type = 0
-            self.phys = 0
-            self.mag = 0
-            self.dodge = 0
-            self.aff = 0
-            self.passive = 0
-
-        def use_passive(self):
-            pass
     class beast_skin(armour):
         def __init__(self):
             self.title = "Beast Skin"
@@ -131,7 +136,8 @@ init python:
             self.phys = 15
             self.mag = 5
             self.dodge = 10
-            self.aff = 0
+            self.aff = 1
+            self.aff_name = "Beast"
             self.passive = 0
 
         def use_passive(self):
@@ -140,13 +146,14 @@ init python:
     class fatty_skin(armour):
         def __init__(self):
             self.title = "Fatty Skin"
-            self.flavour = "Layers of stinking fat."
+            self.flavour = "Layers of thick fat."
             self.flag = 1
             self.type = 1
             self.phys = 10
-            self.mag = 5
+            self.mag = 10
             self.dodge = 0
-            self.aff = 2 #vile
+            self.aff = 1
+            self.aff_name = "Beast"
             self.passive = 0
 
         def use_passive(self):

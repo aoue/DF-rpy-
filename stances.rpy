@@ -146,7 +146,7 @@ init -2 python:
 
             self.set_bleeding(-1)
             self.set_poison(-1)
-            #self.set_dot(0) #<--don't you love overworld poison damage? i know i do.
+            self.set_dot(0) #<--don't you love overworld poison damage? i know i do.
 
             self.set_hp_regen(1.0)
             self.set_st_regen(1.0)
@@ -206,7 +206,7 @@ init -2 python:
             if self.get_exhausted() == 1:
                 if unit.get_stamina() > (unit.get_staminamax() / 4):
                     self.set_exhausted(0)
-        def round_start(self, unit):
+        def round_start(self, unit, battle):
             #check:
             #hp regen/dots.
 
@@ -218,6 +218,7 @@ init -2 python:
             #    unit.set_hp(int(min(unit.get_hp() - (unit.get_hpmax()*self.get_bleeding[1]), unit.get_hpmax())))
             if self.get_dot() != 0:
                 unit.set_hp(int(max(0, unit.get_hp() + (self.get_dot()*unit.get_hpmax()))))
+                unit.check_dead(battle)
 
 
             #check if still under the effect of various stances. if the unit is not, then exit stance.
@@ -250,15 +251,21 @@ init -2 python:
         #enter/exit stance pairs
         def enter_adrenaline(self, unit):
             #call this to enter the unit into adrenaline state.
+            self.set_adrenaline(1)
 
             #-set ad_loss equal to the hp gain
-            self.set_ad_loss(int(unit.get_hp() + (unit.get_hpmax()*0.5) + (10*unit.get_lvl())))
+            self.set_ad_loss(int(unit.get_hpmax()*0.5) + (10*unit.get_lvl()))
 
             #-increase current hp by (1.5*max hp + 5*lvl)
-            unit.set_hp(self.get_ad_loss())
+            unit.set_hp(unit.get_hp() + self.get_ad_loss())
 
-            #-increase physa mod by .15
+            #-increase physa mod by .5
             self.set_physa(self.get_physa() + 0.5)
+
+            #show
+            targetlist = [(unit, self.get_ad_loss())]
+            renpy.show_screen("show_heal", targetlist, "adrenaline", unit)
+
         def exit_adrenaline(self, unit):
             #call this to exit the unit from adrenaline state
 
@@ -266,7 +273,7 @@ init -2 python:
             if unit.get_hp() > unit.get_hpmax():
                 unit.set_hp(max(unit.get_hpmax(), unit.get_hp() - self.get_ad_loss()))
 
-            #-decrease physa mod by .15 or something
+            #-decrease physa mod by .5 or something
             self.set_physa(self.get_physa() - 0.5)
 
         def enter_rally(self):
@@ -302,8 +309,14 @@ init -2 python:
             self.set_dodge(self.get_dodge() - 0.2)
 
 
-        #status enter/exit pairs
-        def enter_bleeding(self):
+        #dot enter/exit pairs
+        def move_dot(self, unit, dot, duration):
+            if dot == 0:
+                return
+            elif dot == 1: #poison
+                self.enter_poison(duration)
+
+        def enter_bleeding(self, duration):
             self.set_bleeding(duration)
             self.set_dot(self.get_dot() - 0.1)
         def exit_bleeding(self):

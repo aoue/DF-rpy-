@@ -1,5 +1,3 @@
-
-
 #collection of screens used in the battle.
 
 #------ally side positions------#
@@ -24,33 +22,33 @@ screen combatinfo(pl, el, pt, et, rounds, ph):
         yalign 0.6
         spacing 2
         for unit in pl:
-            text "{}: {} ({}%) [[{}] s={}, e={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina(), unit.get_energy())
+            text "{}: {} ({}%) [[{}] s={}, e={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge_actual(), unit.get_able(), unit.get_stamina(), unit.get_energy())
     vbox: #enemy stats/info
         xalign 0.0
         yalign 0.1
         spacing 2
         for unit in el:
-            text "{}: {} ({}%) [[{}] s={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge(), unit.get_able(), unit.get_stamina())
+            text "{}: {} ({}%) [[{}] s={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge_actual(), unit.get_able(), unit.get_stamina())
 
 screen show_units(pl, el):
     zorder 99
-    for i in range(0, len(pl)):
-        add pl[i].get_icon() pos(275 + 125*pl[i].get_point().get_x(), 385 + 65*pl[i].get_point().get_y())
+    for unit in pl:
+        add unit.get_icon() pos(265 + 124*unit.get_point().get_x(), 407 + 62*unit.get_point().get_y())
 
-    for i in range(0, len(el)):
-        add el[i].get_icon() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
-        text el[i].get_name() pos(275 + 125*el[i].get_point().get_x(), 5 + 65*el[i].get_point().get_y())
+    for unit in el:
+        add unit.get_icon() pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
+        text unit.get_name() pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
 
 screen show_damage(showlist, move, unit):
     #showlist: list of tuples: (unit, damage)
     zorder 103
     for tup in showlist:
         if tup[0].get_iff() == 1: #hit enemies
-            text move.get_title() pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
-            text "{color=ff0000}-[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+            text move.get_title() pos(265 + 124*unit.get_point().get_x(), 415 + 62*unit.get_point().get_y())
+            text "{color=ff0000}-[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 5 + 62*tup[0].get_point().get_y())
         else: #hit allies
             text move.get_title() pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
-            text "{color=ff0000}-[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
+            text "{color=ff0000}-[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 415 + 62*tup[0].get_point().get_y())
 
     timer 1.0 action Hide("show_damage", transition = dissolve)
 
@@ -60,46 +58,43 @@ screen show_dot(showlist):
     for tup in showlist:
         if tup[0].get_iff() == 1:
             if tup[1] < 0:
-                text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+                text "{color=ff0000}[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 5 + 62*tup[0].get_point().get_y())
             else:
-                text "{color=327345}+[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+                text "{color=327345}+[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 5 + 62*tup[0].get_point().get_y())
 
         else:
             if tup[1] < 0:
-                text "{color=ff0000}[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
+                text "{color=ff0000}[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 415 + 62*tup[0].get_point().get_y())
             else:
-                text "{color=327345}+[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
+                text "{color=327345}+[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 415 + 62*tup[0].get_point().get_y())
 
     timer 1.0 action Hide("show_dot", transition = dissolve)
 
-
-screen show_heal(showlist, move, unit):
+screen show_heal(showlist, title, unit):
     #showlist: list of tuples: (unit, heal)
 
     zorder 103
     for tup in showlist:
         if tup[0].get_iff() == 1:
-            text move.get_title() pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
-            text "{color=327345}+[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 5 + 65*tup[0].get_point().get_y())
+            text titl pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
+            text "{color=327345}+[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 5 + 62*tup[0].get_point().get_y())
         else:
-            text move.get_title() pos(325 + 125*unit.get_point().get_x(), 385 + 65*unit.get_point().get_y())
-            text "{color=327345}+[tup[1]]{/color}" pos(325 + 125*tup[0].get_point().get_x(), 385 + 65*tup[0].get_point().get_y())
+            text title pos(265 + 124*unit.get_point().get_x(), 415 + 62*unit.get_point().get_y())
+            text "{color=327345}+[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 415 + 62*tup[0].get_point().get_y())
 
     timer 1.0 action Hide("show_heal", transition = dissolve)
 
 screen order_unit(pl):
     #select which unit to order from available units that have yet to act. returns rank of unit.
     zorder 100
-    for i in range (0, len(pl)):
-        if pl[i].get_able() > 0:
+    for unit in pl:
+        if unit.get_able() > 0:
             button:
-                pos(275 + 125*pl[i].get_point().get_x(), 385 + 65*pl[i].get_point().get_y())
-                text pl[i].get_name()
-                action Return(pl[i])
+                pos(265 + 124*unit.get_point().get_x(), 415 + 62*unit.get_point().get_y())
+                text unit.get_name()
+                action Return(unit)
 
 screen pick_move(unit, battle):
-    #show moves. top left of box is 900, 175
-    #TODO. show move description on hover. make it a long list thingy of symbols. we don't want it to be too large
 
     frame:
         xpadding 5
@@ -109,35 +104,51 @@ screen pick_move(unit, battle):
         vbox:
             text "Selected: " + unit.get_name()
             spacing 10
+
             for move in unit.get_moves():
                 if move == None:
                     pass
-                elif (unit.get_point().get_y() in range(0, 3)) and move.get_rank() == 1:
+                #correct position
+                elif (move.get_rank() == 0) or (unit.get_point().get_y() in range (0, 3) and move.get_rank() == 1 ) or (unit.get_point().get_y() in range (3, 5) and move.get_rank() == 2):
+
+                    #able to use move
                     if unit.get_stamina() >= move.get_stamina_drain() and move.check_clearance(unit, battle) == 1 and unit.get_energy() >= move.get_energy_drain():
-                        textbutton move.get_title() action Function(unit.use_move, move, unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
+                        textbutton move.get_title() action Function(unit.use_move, move, battle), Return hovered Function(battle.move_browse_b, move) unhovered Hide("move_browse_b")
+
+                    #unable to use move; tell the player why.
                     else:
-                        text "{} (unable)".format(move.get_title()) #unselectable, but still shown
+                        if move.check_clearance(unit, battle) == 0:
+                            text "{} (blocked)".format(move.get_title())
 
-                elif (unit.get_point().get_y() in range(3, 5)) and move.get_rank() == 2:
-                    if unit.get_stamina() >= move.get_stamina_drain() and move.check_clearance(unit, battle) == 1 and unit.get_energy() >= move.get_energy_drain():
-                        textbutton move.get_title() action Function(unit.use_move, move, unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
-                    else:
-                        text "{} (unable)".format(move.get_title())#unselectable, but still shown
+                        elif unit.get_energy() < move.get_energy_drain():
+                            text "{} (need energy)".format(move.get_title())
 
-            if unit.get_evo() == 1:
-                if unit.get_stamina() >= move.get_stamina_drain() and move.check_clearance(unit, battle) == 1 and unit.get_energy() >= move.get_energy_drain():
-                    textbutton unit.get_moves()[7].get_title() action Function(unit.use_move, move, unit.get_point().get_x(), unit.get_point().get_y(), battle), Return
-                else:
-                    text "{} (unable)".format(move.get_title())#unselectable, but still shown
+                        elif unit.get_stamina() < move.get_stamina_drain():
+                            text "{} (need stamina)".format(move.get_title())
 
-            textbutton "Walk" action Function(unit.walk, battle), Return
+            textbutton "Wait" action Function(unit.wait), Return
 
-            if unit.get_ablemax() == unit.get_able():
-                textbutton "Defend" action Function(unit.defend), Return
+            textbutton "Cancel" action Return
+
+screen move_browse_b(move):
+    zorder 101
+    frame: #obviously all the positioning aspects will have to be perfected.
+        background Solid("#0000007F") # for transparency. colour = rrggbbaa where red green blue alpha
+        area(910, 500, 300, 200)
+        ypadding 5
+        xpadding 10
+
+        vbox:
+            text move.get_title()
+            text move.get_flavour()
+            text "drain(a/s) = " + str(move.get_able_drain()) + "/" + str(move.get_stamina_drain())
+            if move.get_damage_type() == 0:
+                text "power = " + str(move.get_power()) + " (Physical)"
             else:
-                textbutton "Wait" action Function(unit.wait), Return
-
-            textbutton "Cancel" action Return()
+                text "power = " + str(move.get_power()) + " (Magical)"
+            if move.get_status_only() == 0:
+                text "hit bonus = " + str(move.get_hit())
+                text "affinity = " + str(move.get_element_name()) #<-- replace text with image. 
 
 screen enemy_highlight(unit, cmove):
     zorder 101
@@ -151,7 +162,7 @@ screen enemy_highlight(unit, cmove):
                         idle "images/combat/fx/tile.png"
                     else:
                         hover "images/combat/fx/tile e hover.png"
-                    pos(275 + row*125, 5 + column*65)
+                    pos(265 + (124*row), -2 + (62*column))
                     action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
 
     else:
@@ -160,7 +171,7 @@ screen enemy_highlight(unit, cmove):
                 imagebutton:
                     idle "images/combat/fx/tile.png"
                     hover "images/combat/fx/tile e hover.png"
-                    pos(275 + row*125, 5 + column*65)
+                    pos(265 + 124*row, -2 + 62*column)
                     action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
 
     frame:
@@ -174,7 +185,7 @@ screen ally_highlight(unit, cmove):
         imagebutton:
             idle "images/combat/fx/tile.png"
             hover "images/combat/fx/tile f hover.png"
-            pos(275 + unit.get_point().get_x()*125, 385 + unit.get_point().get_y()*65)
+            pos(265 + 124*unit.get_point().get_x(), 407 + 62*unit.get_point().get_y())
             action Return() #return tuple
 
     else:
@@ -183,7 +194,7 @@ screen ally_highlight(unit, cmove):
                 imagebutton:
                     idle "images/combat/fx/tile.png"
                     hover "images/combat/fx/tile f hover.png"
-                    pos(275 + row*125, 385 + column*65)
+                    pos(265 + (124*row), 407 + (62*column))
                     action Return((row, column)) hovered Function(ally_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
 
     frame:
@@ -212,28 +223,28 @@ screen walk_highlight(unit, battle):
         imagebutton:
             idle "images/combat/fx/tile.png"
             hover "images/combat/fx/tile f hover.png"
-            pos(275 + max(dtuple[0]-1,0)*125, 385 + dtuple[1]*65)
+            pos(265 + max(dtuple[0]-1,0)*124, 415 + dtuple[1]*62)
             action Return((max(dtuple[0]-1,0), dtuple[1]))
 
     if target2 == None:
         imagebutton:
             idle "images/combat/fx/tile.png"
             hover "images/combat/fx/tile f hover.png"
-            pos(275 + min(dtuple[0]+1,4)*125, 385 + dtuple[1]*65)
+            pos(265 + min(dtuple[0]+1,4)*124, 415 + dtuple[1]*62)
             action Return((min(dtuple[0]+1,4), dtuple[1]))
 
     if target3 == None:
         imagebutton:
             idle "images/combat/fx/tile.png"
             hover "images/combat/fx/tile f hover.png"
-            pos(275 + dtuple[0]*125, 385 + max(dtuple[1]-1, 0)*65)
+            pos(265 + dtuple[0]*124, 415 + max(dtuple[1]-1, 0)*62)
             action Return((dtuple[0], max(dtuple[1]-1, 0)))
 
     if target4 == None:
         imagebutton:
             idle "images/combat/fx/tile.png"
             hover "images/combat/fx/tile f hover.png"
-            pos(275 + dtuple[0]*125, 385 + min(dtuple[1]+1, 4)*65)
+            pos(265 + dtuple[0]*124, 415 + min(dtuple[1]+1, 4)*62)
             action Return((dtuple[0], min(dtuple[1]+1, 4)))
 
 
@@ -310,15 +321,3 @@ screen ally_highlight_extra(unit, cmove, row, column):
         for c in range(column, column+3):
             for r in range(row, row+3):
                 add "tile_f_hovered" at a_tile_hover(r, c)
-
-
-
-
-
-
-
-
-
-
-
-##eof

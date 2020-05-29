@@ -291,7 +291,7 @@ screen quick_menu():
     ## Ensure this appears on top of other screens.
     zorder 100
 
-    if quick_menu:
+    if not quick_menu:
 
         hbox:
             style_prefix "quick"
@@ -311,7 +311,7 @@ screen quick_menu():
                 textbutton _("Load") action ShowMenu('load')
                 textbutton _("Q.Save") action QuickSave()
                 textbutton _("Q.Load") action QuickLoad()
-                
+
             textbutton _("Prefs") action ShowMenu('preferences')
 
 

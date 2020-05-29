@@ -85,6 +85,11 @@ init python:
         def set_pri(self, pri):
             self.pri = pri
         #useful functions
+        def defend(self):
+            self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
+            self.get_stance().enter_defend()
+            self.set_able(0)
+
         def is_concerned(self):
             if float(self.get_hp()) / float(self.get_hpmax()) < self.get_concern():
                 return 1
@@ -129,7 +134,7 @@ init python:
         def take_turn(self, el, pl, battle):
             #decide what to do from the moves the unit knows.
             #renpy.say(None, "{}, reporting in".format(self.get_name()))
-            renpy.pause(2.0)
+            renpy.pause(1.5)
 
             #buff (if unit in el is not buffed)
             #TODO worry about it later
@@ -269,7 +274,7 @@ init python:
             self.hit = 0 #subtract from enemy's dodge
             self.ooa = 0 #out of action. defeated.
 
-            self.aff = 0 # affinity. for super effective and stuff.
+            self.aff = 1 # affinity. for super effective and stuff.
             self.physa = 60 #physical attack
             self.physd = 55 #physical defense
             self.maga = 30 #magical attack
@@ -298,13 +303,13 @@ init python:
 
 
     class unit_groskel(enemy_unit):
-        def __init__(self, lvl, name, postup, able):
+        def __init__(self, lvl, name, postup):
             self.iff = 1
             self.name = name
             self.point = point(postup[0], postup[1], (3,2)) #instance of point class.
             self.icon = "icon_groskel" #picture
             self.ablemax = 1
-            self.able = able #lets the unit act each round
+            self.able = 1 #lets the unit act each round
             self.staminamax = 100
             self.stamina = 100 #basically mana. some recovers each round.
             self.restam = 5
@@ -320,14 +325,14 @@ init python:
             self.hit = 0 #subtract from enemy's dodge
             self.ooa = 0 #out of action. defeated.
 
-            self.aff = 0 # affinity. for super effective and stuff.
+            self.aff = 1 # affinity. for super effective and stuff.
             self.physa = 65 #physical attack
             self.physd = 50 #physical defense
             self.maga = 40 #magical attack
             self.magd = 50 #magical defense
 
             #gear
-            self.weapon = horrible_claw()
+            self.weapon = beast_claw()
             self.armour = fatty_skin()
             self.acc = None
 
