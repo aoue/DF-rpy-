@@ -1,10 +1,13 @@
 
 init -2 python:
-    import random
     allow_save = True
 
+
+    ##save testing stuff##
+    config.use_cpickle = False
+
     #--- BATTLE ---#
-    class map():
+    class Map():
         def __init__(self, nl):
             #self.map = [[None]*5, [None]*5] #the grid. fill a certain spot with a unit child object
             self.map = [[None]*5, [None]*5, [None]*5, [None]*5, [None]*5] #the grid. fill a certain spot with a unit child object.
@@ -41,25 +44,26 @@ init -2 python:
         def random_empty(self):
             #returns a random empty position
             while True:
-                x = random.randint(0, 4)
-                y = random.randint(0, 4)
+                x = renpy.random.randint(0, 4)
+                y = renpy.random.randint(0, 4)
 
                 if self.search_map((x,y)) == None:
                     return x,y
 
 
-    class battle():
+    class Battle():
         def __init__(self, rounds, pl, el, bg):
             self.rounds = rounds #number of rounds the battle will last. negative for infinite.
             self.bg = bg
             self.phase = ""
             self.pl = pl
             self.el = el
-            pable = 0
-            eable = 0
-            ableleft = 0
-            self.allymap = map(pl)
-            self.enemymap = map(el)
+            self.pable = 0
+            self.eable = 0
+            self.ableleft = 0
+            self.last_turn = 1
+            self.allymap = Map(pl)
+            self.enemymap = Map(el)
 
         #getters
         def get_rounds(self):
@@ -78,6 +82,8 @@ init -2 python:
             return self.eable
         def get_ableleft(self):
             return self.ableleft
+        def get_last_turn(self):
+            return self.last_turn
         def get_allymap(self):
             return self.allymap
         def get_enemymap(self):
@@ -95,6 +101,8 @@ init -2 python:
             self.eable = eable
         def set_ableleft(self, ableleft):
             self.ableleft = ableleft
+        def set_last_turn(self, last):
+            self.last_turn = last
         #--during battle
         def move_browse_b(self, move):
             renpy.show_screen("move_browse_b", move)
@@ -146,12 +154,12 @@ init -2 python:
 
             for unit in self.get_pl():
                 if unit.get_stance().get_dot() != 0:
-                    tup = (unit, int(unit.get_stance().get_dot()*unit.get_hpmax()))
+                    tup = (unit, int(unit.get_stance().get_dot()*unit.get_hpmax_actual()))
                     showlist.append(tup)
 
             for unit in self.get_el():
                 if unit.get_stance().get_dot() != 0:
-                    tup = (unit, int(unit.get_stance().get_dot()*unit.get_hpmax()))
+                    tup = (unit, int(unit.get_stance().get_dot()*unit.get_hpmax_actual()))
                     showlist.append(tup)
 
             if len(showlist) > 0:
@@ -163,19 +171,18 @@ init -2 python:
 
             for unit in self.get_pl():
                 if unit.get_ooa() == 0:
-                    unit.set_able(unit.get_ablemax()) #refresh able
+                    unit.set_able(unit.get_ablemax_actual()) #refresh able
                     unit.set_turn_over(0)
                     unit.get_stance().refresh_stamina(unit) #restam
                     unit.get_stance().round_start(unit, self)
-                    unit.gear_passives()
+                    #unit.gear_passives()
 
             for unit in self.get_el():
                 if unit.get_ooa() == 0:
-                    unit.set_able(unit.get_ablemax())
+                    unit.set_able(unit.get_ablemax_actual())
                     unit.get_stance().refresh_stamina(unit) #restam
                     unit.get_stance().round_start(unit, self)
-                    unit.gear_passives()
-
+                    #unit.gear_passives()
 
 
         def player_turn(self):
@@ -224,19 +231,19 @@ init -2 python:
 
                 while self.get_ableleft() > 0: #for one round
 
-                    if self.get_pable() > 0: #player turn
+                    if (self.get_pable() > 0 and self.get_last_turn() == 1) or (self.get_pable() > 0 and self.get_eable() == 0): #player turn
                         self.set_phase("act")
                         self.refresh_visuals()
 
                         self.player_turn()
-                        #self.calc_turns()
-                        #self.refresh_visuals()
+
+                        self.set_last_turn(0)
 
                     if self.is_battle_over() == 1:
                         self.postbattle_settings()
                         return
 
-                    if self.get_eable() > 0: #enemy turn
+                    if (self.get_eable() > 0 and self.get_last_turn() == 0) or (self.get_eable() > 0 and self.get_pable() == 0): #enemy turn
                         self.set_phase("vile")
                         self.refresh_visuals()
 
@@ -245,6 +252,7 @@ init -2 python:
                         self.calc_turns()
                         self.refresh_visuals()
 
+                        self.set_last_turn(1)
 
                     if self.is_battle_over() == 1:
                         self.postbattle_settings()
@@ -254,6 +262,7 @@ init -2 python:
                 if self.is_battle_over() == 1:
                     self.postbattle_settings()
                     return
+
                 self.new_round() #reset for next round
 
 

@@ -1,27 +1,110 @@
 
 
+## -- OUT OF BATTLE SKILLS  -- ##
+screen oob_unit_tab(dungeon):
+    zorder 100
+    modal True
+
+    #adds the background
+    #add dungeon.get_bg()
+
+    textbutton "Close" action Hide("oob_unit_tab"), Hide("oob_move_select"), Hide("oob_target_select") pos (60, 0)
+
+    #shows a column of all units in party. click a unit to see/select a move to use
+    viewport:
+        xpos 60
+        ypos 25
+        mousewheel True
+        vbox:
+            #xpos 500
+            #ypos 400
+
+            for unit in dungeon.get_party():
+                textbutton unit.get_name() action Hide("oob_move_select"), Hide("oob_target_select"), Function(dungeon.out_of_battle_skills, unit)
+screen oob_move_select(dungeon, unit):
+    zorder 101
+    #modal True
+    text "Moves:"
+
+    #all the unit's known moves with oob = 1.
+    viewport:
+        area (700, 100, 100, 300)
+        vbox:
+            spacing 10
+            for move in unit.get_moves():
+                if move != None:
+                    if move.get_oob() == 1:
+                        if unit.get_energy() >= move.get_energy_drain():
+                            textbutton move.get_title() action Function(dungeon.out_of_battle_target, unit, move)
+                        else:
+                            textbutton move.get_title() action NullAction()
+
+            for move in unit.get_movelist():
+                if move != None:
+                    if move.get_oob() == 1:
+                        if unit.get_energy() >= move.get_energy_drain():
+                            textbutton move.get_title() action Function(dungeon.out_of_battle_target, unit, move)
+                        else:
+                            textbutton move.get_title() action NullAction()
+screen oob_target_select(dungeon, unit, move):
+    zorder 102
+    #modal True
+
+    viewport:
+        area (800, 100, 100, 300)
+        vbox:
+            spacing 10
+            for target in dungeon.get_party():
+                imagebutton:
+                    idle target.get_face()
+                    hover target.get_face_h()
+                    action Function(move.exert_oob, unit, target)
+
+
+
 ## -- DUNGEON SCREENS -- ##
 screen dungeon_map(dungeon, map, spot):
     #map: the connected net of rooms
     #spot: tuple of the party's position
 
-    #manage party button
+    #room menu/skills stuff
+    vbox:
+        yalign 0.05
+        xalign 1.0
+        spacing 10
+
+        ## -- left side menu -- ##
+        textbutton "skills" action Function(dungeon.out_of_battle_units) #out of battle skills menu
+
+        # room specific stuff
+        if dungeon.find_room().get_has_action() == 1:
+            if dungeon.find_room().get_is_exit() == 1:
+                textbutton dungeon.find_room().get_action_title() action Function(dungeon.exit_dungeon), Return
+            else:
+                textbutton dungeon.find_room().get_action_title() action Function(dungeon.find_room().room_action, dungeon)
+
+        if dungeon.find_room().get_fight() == 1:
+            textbutton "Find trouble" action Function(dungeon.find_trouble)
+
+        if dungeon.find_room().get_poi() == 1:
+            textbutton "Point of Interest" action Function(dungeon.find_room().poi_event(), dungeon)
+
+    #party stuff
     vbox:
         yalign 0.05
         xalign 0.0
         spacing 10
-
         #party button
         imagebutton:
             idle "party_b"
             hover "party_h"
             action Function(dungeon.get_master().show_party) #invoke in new context.
 
-        #change deployment and change hold list. useful if ambush/we skip deployment.
+        #change deployment and change hold list. useful if ambush/we skip deployment. do we still want this??
         #imagebutton: #TODO
 
         #show party vital statistics of current deployed team. if no deployed team, show first (up to) 5 units in the party.
-        if not dungeon.get_hold():
+        if not dungeon.get_hold()[0]:
             for x in range(0, min(len(dungeon.get_party()), 5)):
                 vbox:
                     text dungeon.get_party()[x].get_name() #change to portrait
@@ -34,9 +117,9 @@ screen dungeon_map(dungeon, map, spot):
                     text "Hp: "+str(unit.get_hp())+"/"+str(unit.get_hpmax()) #change to bar. on hover, see actual numbers.
                     text "En: "+str(unit.get_energy())+"/"+str(unit.get_energymax()) #change to bar. on hover, see actual numbers.
 
-    #make the map scrollable using the viewport
+    #map stuff
     viewport:
-        xpos 100 ypos 75 xysize (1000,625)
+        xpos 150 ypos 75 xysize (1000,625)
         child_size (len(map)*128, 500) #xlength = len(dungeon.get_map()*(xroomspace+connector space)). ylength = len(longest list)*(yroomspace+connector space)
         draggable True
         #mousewheel True
@@ -63,6 +146,9 @@ screen dungeon_map(dungeon, map, spot):
                                 action Function(dungeon.move_spot, room.get_x(), room.get_y())
 
                     if room.get_explored() == 1:
+                        #add room icon
+                        add room.get_icon() pos(room.get_dis_x() + 100, room.get_dis_y())
+
                         #draw the connector hallways
                         if room.get_connect()[0] == 1:
                             add "hall_v" pos (room.get_dis_x() + 64, room.get_dis_y() - 18) #top
@@ -79,12 +165,25 @@ screen dungeon_map(dungeon, map, spot):
         add "party_icon" pos (36 + dungeon.find_room().get_dis_x(), 3 + dungeon.find_room().get_dis_y())
 
 
+
 label room(dungeon):
     "room: [dungeon.spot_x], [dungeon.spot_y] event"
-    $dungeon.show_dungeon()
-
+    python:
+        dungeon.show_dungeon()
+    #return
 
 label test_dungeon_entrance:
-    "you enter the dungeon. bla blah can be anything."
+    #"you enter the dungeon. bla blah can be anything."
+
+    #in dungeon:
+    #0: entering
+    #1: inside
+    #2: leaving
+
     python:
-        ow.show_dungeon()
+        if ow.get_in_dungeon() == 2:
+            #renpy.hide_screen("dungeon_map")
+            ow.show_overworld()
+        else:
+            ow.show_dungeon()
+    #return

@@ -21,7 +21,7 @@ init -3 python:
     #any move that sets a stance first checks if the stance is already applied. If it is, the move only resets its duration.
 
     #--- MOVES ---
-    class move():
+    class Move():
         def __init__(self):
             self.status_only = 0 #1: the move does no damage, affects only status. ex: adrenaline.
             self.flavour = "{i}flavour text/move description{/i}"
@@ -41,7 +41,10 @@ init -3 python:
             self.element_name = "" #shown in management, etc
             self.dot = 0 # int. tells the do_damage function to apply a certain stance to hit units.
             self.dot_duration = 0 # int. how long the applied dot will last.
+            self.oob = 0 #0: cannot be used out of battle. #1: can be used out of battle.
         #getters
+        def get_oob(self):
+            return self.oob
         def get_element_name(self):
             return self.element_name
         def get_dot(self):
@@ -144,32 +147,50 @@ init -3 python:
                 unit.get_stance().set_exhausted(1)
             unit.set_able(dif)
         def do_damage(self, unit, targetlist, battle, dot, duration):
-            showlist = [] #list of tuples: (unit, damage)
+            showlist = []
 
             targetlist = list(set(targetlist))
 
             for target in targetlist:
-                if target != None:
+                if isinstance(target, tuple):
+                    showlist.append(target)
+                elif target != None:
                     if target.get_ooa() == 0:
                         target.take_damage(unit, int(unit.calc_damage(target, self)), showlist, battle, dot, duration)
 
             if len(showlist) > 0:
-                renpy.show_screen("show_damage", showlist, self, unit)
+                renpy.show_screen("show_damage", showlist, self.get_title(), unit)
         def do_heal(self, unit, targetlist):
-            showlist = [] #list of tuples: (unit, damage) #eliminate duplicate targets
+            showlist = []
 
             targetlist = list(set(targetlist))
 
             for target in targetlist:
-                if target != None:
+                if isinstance(target, tuple):
+                    showlist.append(target)
+                elif target != None:
                     if target.get_ooa() == 0:
-                        target.take_heal(unit, unit.calc_heal(target, self), showlist)
+                        target.take_heal(unit, unit.calc_heal(target, self), showlist) #appends to showlist inside here
 
             if len(showlist) > 0:
                 renpy.show_screen("show_heal", showlist, self.get_title(), unit)
 
+        #oob
+        def drain_oob(self, unit):
+            #drains a unit for the out of battle skill menu
+            unit.set_energy(unit.get_energy()-self.get_energy_drain())
+            if unit.get_energy() == 0:
+                renpy.hide_screen("oob_target_select")
+
+        def do_heal_oob(self, unit, targetlist):
+            #doing heals outside of battle
+            for target in targetlist:
+                if target.get_ooa() == 0:
+                    target.take_heal_oob(unit, unit.calc_heal(target, self)) #appends to showlist inside here
+
+
     #--- Shared ---
-    class defend(move):
+    class Defend(Move):
         def __init__(self):
             self.status_only = 1
             self.flavour = "{i}Ready for an attack, raising physical defense.{/i}"
@@ -189,12 +210,12 @@ init -3 python:
             self.element_name = "-"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
         def exert(self, unit, sq, battle):
-            unit.set_stamina(int(min(unit.get_stamina()+(0.25 * unit.get_staminamax() * unit.get_able()), unit.get_staminamax())))
+            unit.set_stamina(int(min(unit.get_stamina()+(0.25 * unit.get_staminamax_actual()), unit.get_staminamax_actual())))
             unit.get_stance().enter_defend()
             unit.set_able(0)
-
-    class walk(move):
+    class Walk(Move):
         def __init__(self):
             self.status_only = 1
             self.flavour = "{i}Walk to adjust position.{/i}"
@@ -214,6 +235,7 @@ init -3 python:
             self.element_name = "-"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
         def exert(self, unit, battle):
             #move to an open, adjacent square. ends the unit's turn.
             sq = renpy.invoke_in_new_context(call_highlight_walk, unit, battle) #tuple
@@ -229,7 +251,7 @@ init -3 python:
             unit.end_turn()
 
     #--- Yve ---
-    class spear(move):
+    class Spear(Move):
         #single target,
         #low damage
         #low stam, low able
@@ -252,25 +274,21 @@ init -3 python:
             self.element_name = "Weapon"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
-
-
-
-
             #moves cost stamina and able
             self.drain(unit)
             self.translate(unit, battle)
 
             #this move hits only the selected square.
-            target = battle.get_enemymap().search_map(sq)
-            targetlist = [target]
+            targetlist = []
+            targetlist.append(battle.get_enemymap().search_map(sq))
 
             #calc damage and deal it to the target
             #damage =
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-
-    class pierce(move):
+    class Pierce(Move):
         #three squares in a row
         #low damage
         #med stam, med able
@@ -293,9 +311,9 @@ init -3 python:
             self.element_name = "Weapon"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
-
             #sq: the clicked square
             self.drain(unit)
             self.translate(unit, battle)
@@ -303,14 +321,12 @@ init -3 python:
             r = sq[0]
             c = min(sq[1], 2)
 
-            target = battle.get_enemymap().search_map((r,c))
-            target2 = battle.get_enemymap().search_map((r,c+1))
-            target3 = battle.get_enemymap().search_map((r,c+2))
-            targetlist = [target, target2, target3]
+            targetlist = []
+            for i in range(0, 3):
+                targetlist.append(battle.get_enemymap().search_map((r, c+i)))
 
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-
-    class adrenaline(move):
+    class Adrenaline(Move):
         #self
         #heal some hp, can go over max. dodge up, hit up. fades after 4? turns
         #low stam, med able
@@ -333,6 +349,7 @@ init -3 python:
             self.element_name = "-"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
 
@@ -344,11 +361,8 @@ init -3 python:
             if unit.get_stance().get_adrenaline() <= 0:
                 unit.get_stance().enter_adrenaline(unit)
             else:
-                unit.get_stance().set_adrenaline(5)
-
-
-
-    class whirl(move):
+                unit.get_stance().set_adrenaline(4)
+    class Whirl(Move):
         #3x3 cross minus the center square
         #med damage
         #med stam, low able
@@ -371,21 +385,22 @@ init -3 python:
             self.element_name = "Ice"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
             self.drain(unit)
             self.translate(unit, battle)
 
-            target2 = battle.get_enemymap().search_map((sq[0],sq[1]-1))
-            target3 = battle.get_enemymap().search_map((sq[0],sq[1]+1))
-            target4 = battle.get_enemymap().search_map((sq[0]-1,sq[1]))
-            target5 = battle.get_enemymap().search_map((sq[0]+1,sq[1]))
-            targetlist = [target2, target3, target4, target5]
+            targetlist = []
+            targetlist.append(battle.get_enemymap().search_map((sq[0], sq[1]-1)))
+            targetlist.append(battle.get_enemymap().search_map((sq[0], sq[1]+1)))
+            targetlist.append(battle.get_enemymap().search_map((sq[0]-1, sq[1])))
+            targetlist.append(battle.get_enemymap().search_map((sq[0]+1, sq[1])))
 
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     #--- Federal ---
-    class sword(move):
+    class Sword(Move):
         #sword. single target. front rank. light damage. light cost.
         def __init__(self):
             self.status_only = 0
@@ -406,17 +421,17 @@ init -3 python:
             self.element_name = "Weapon"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
             self.drain(unit)
             self.translate(unit, battle)
 
-            target = battle.get_enemymap().search_map(sq)
-            targetlist = [target]
+            targetlist = []
+            targetlist.append(battle.get_enemymap().search_map(sq))
 
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-
-    class flourish(move):
+    class Flourish(Move):
         #flourish. single target. front rank. heavy damage. heavy stamina cost. no able cost.
         def __init__(self):
             self.status_only = 0
@@ -437,17 +452,17 @@ init -3 python:
             self.element_name = "Weapon"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
             self.drain(unit)
             self.translate(unit, battle)
 
-            target = battle.get_enemymap().search_map(sq)
-            targetlist = [target]
+            targetlist = []
+            targetlist.append(battle.get_enemymap().search_map(sq))
 
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-
-    class form6(move):
+    class Form6(Move):
         #Twelve Forms - VI. 1x1. front rank. retreats 1.
         def __init__(self):
             self.status_only = 0
@@ -469,6 +484,7 @@ init -3 python:
 
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
             #moves cost stamina and able
@@ -476,11 +492,11 @@ init -3 python:
             self.translate(unit, battle)
 
             #this move hits only the selected square.
-            target = battle.get_enemymap().search_map(sq)
-            targetlist = [target]
-            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
+            targetlist = []
+            targetlist.append(battle.get_enemymap().search_map(sq))
 
-    class rally(move):
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
+    class Rally(Move):
         #rally. 3x3 (allies). hit up, physa up. back rank. light cost.
         def __init__(self):
             self.status_only = 1
@@ -501,6 +517,7 @@ init -3 python:
             self.element_name = "-"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
             self.drain(unit)
@@ -509,17 +526,10 @@ init -3 python:
             r = min(sq[0], 2)
             c = min(sq[1], 2)
 
-            target0 = battle.get_allymap().search_map((r-1,c-1))
-            target1 = battle.get_allymap().search_map((r, c-1))
-            target2 = battle.get_allymap().search_map((r+1,c-1))
-            target3 = battle.get_allymap().search_map((r-1,c))
-            target4 = battle.get_allymap().search_map((r,c))
-            target5 = battle.get_allymap().search_map((r+1,c))
-            target6 = battle.get_allymap().search_map((r-1,c+1))
-            target7 = battle.get_allymap().search_map((r,c+1))
-            target8 = battle.get_allymap().search_map((r+1,c+1))
-            targetlist = [target0, target1, target2, target3, target4, target5, target6, target7, target8]
-
+            targetlist = []
+            for i in range(-1, 2):
+                for x in range(-1, 2):
+                    targetlist.append(battle.get_allymap().search_map((r+i,c+x)))
 
             for target in targetlist:
                 if target != None:
@@ -527,8 +537,7 @@ init -3 python:
                         target.get_stance().enter_rally()
                     elif target.get_ooa() == 0:
                         target.get_stance().set_rally(5) #set/refresh duration
-
-    class shoot(move):
+    class Shoot(Move):
         #shoot. single target. back rank. light damage. light cost.
         def __init__(self):
             self.status_only = 0
@@ -549,6 +558,7 @@ init -3 python:
             self.element_name = "Weapon"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
             #moves cost stamina and able
@@ -561,7 +571,7 @@ init -3 python:
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     #--- Federal Aide ---
-    class suppress(move):
+    class Suppress(Move):
         #suppress. 2x2. terrible hit. back rank.
         def __init__(self):
             self.status_only = 0
@@ -582,6 +592,7 @@ init -3 python:
             self.element_name = "Weapon"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 0
 
         def exert(self, unit, sq, battle):
             self.drain(unit)
@@ -596,12 +607,11 @@ init -3 python:
             target3 = battle.get_enemymap().search_map((r+1,c+1))
             targetlist = [target0, target1, target2, target3]
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-
-    class first_aid(move):
+    class First_aid(Move):
         #first aid. very light heal, stops bleeding. light cost.
         def __init__(self):
             self.status_only = 1
-            self.flavour = "{i}Basic magical care, even by talentless, is better than nothing..{/i}"
+            self.flavour = "{i}Basic care, even by the talentless, is better than nothing.{/i}"
             self.title = "First Aid"
             self.rank = 2
             self.type = 1
@@ -618,6 +628,7 @@ init -3 python:
             self.element_name = "-"
             self.dot = 0
             self.dot_duration = 0
+            self.oob = 1
 
         def exert(self, unit, sq, battle):
             self.drain(unit)
@@ -633,7 +644,13 @@ init -3 python:
 
             self.do_heal(unit, targetlist)
 
+        def exert_oob(self, unit, target):
+            if target.get_hp() != target.get_hpmax():
+                self.drain_oob(unit)
 
+                targetlist = [target]
+
+                self.do_heal_oob(unit, targetlist)
 
 
 
@@ -648,13 +665,16 @@ init -3 python:
 #---TO ADD ---
 #tori:
 #time warp: makes buffs run their course. set time remaining on target's buffs to half their current duration, or to 0 if current duration == 1. ??. or expire all buffs/dots on selected units? cool.
+#energy transfer. transfers stamina, energy to target.
 
 #boy:
 #screw: power = 3 or something. stam cost = 5 or something. purpose is to use up enemies kindara/shatter point/defensive stances, yeah.
 
 #yve:
 #flourish. heavy stam drain, but no able.
-#battlefield trance. increase able and stamina regen at the start of each round.
+#fast hit. more damage the more able units there are on the field.
+#double hit. hits twice. (while)
+#trance. increase able and stamina regen at the start of each round.
 
 #nai:
 #misdirect. target self or ally. lower priority so the enemy doesn't target you as often.

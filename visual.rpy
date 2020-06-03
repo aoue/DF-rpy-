@@ -103,6 +103,12 @@ init -555:
     ##direction screen
     image direction_bg:
         "direction/direction_bg.jpg"
+    image quest_check_e:
+        "direction/quest_check_empty.png"
+    image quest_check_s:
+        "direction/quest_check_checked.png"
+    image quest_check_f:
+        "direction/quest_check_crossed.png"
     image direction_b:
         "overworld/direction_button.png"
     image direction_h:
@@ -138,6 +144,18 @@ init -555:
         "dungeon/hallway_horizontal.png"
     image hall_v:
         "dungeon/hallway_vertical.png"
+
+    ##room icons
+    image exit_icon:
+        "dungeon/room icons/exit_icon.png"
+    image fullheal_cion:
+        "dungeon/room icons/fullheal_icon.png"
+    image event_icon:
+        "dungeon/room icons/event_icon.png"
+    image poi_icon:
+        "dungeon/room icons/poi_icon.png"
+    image fight_icon:
+        "dungeon/room icons/fight_icon.png"
 
     #face imgs. for deployment screen.
     image face_boy:

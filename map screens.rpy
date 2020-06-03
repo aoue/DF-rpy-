@@ -14,7 +14,7 @@ screen inventory_view(viewlist, equip_type):
         vbox:
             spacing 20
             for gear in viewlist:
-                if gear.get_type() == equip_type:
+                if gear.get_type() <= equip_type:
                     textbutton gear.get_title() action NullAction() hovered Function(ow.gear_browse, gear) unhovered Hide("gear_browse")
 screen move_view(viewlist):
     #move vp on the right.
@@ -51,16 +51,16 @@ screen party_view(party, i, ow):
     #character's stat block
     vbox:
         pos (250, 390)
-        text "HP = " + str(party[i].get_hp()) + "/" + str(party[i].get_hpmax())
-        text "EN = " + str(party[i].get_energy()) + "/" + str(party[i].get_energymax())
-        text "AB = " + str(party[i].get_able())
-        text "ST = " + str(party[i].get_stamina())
-        text "PA = " + str(party[i].get_physa()) + "+" + str(party[i].get_weapon().get_phys())
-        text "PD = " + str(party[i].get_physd()) + "+" + str(party[i].get_armour().get_phys())
-        text "MA = " + str(party[i].get_maga()) + "+" + str(party[i].get_weapon().get_mag())
-        text "MD = " + str(party[i].get_magd()) + "+" + str(party[i].get_armour().get_mag())
-        text "HI = " + str(party[i].get_hit()) + "+" + str(party[i].get_weapon().get_hit())
-        text "DO = " + str(party[i].get_dodge()) + "+" + str(party[i].get_armour().get_dodge())
+        text "HP = " + str(party[i].get_hp()) + "/" + str(party[i].get_hpmax_actual()) size 20
+        text "Energy = " + str(party[i].get_energy()) + "/" + str(party[i].get_energymax()) size 20
+        text "Able = " + str(party[i].get_ablemax_actual()) size 20
+        text "Stamina = " + str(party[i].get_staminamax_actual()) size 20
+        text "Phys atk = " + str(party[i].get_physa_actual()) size 20
+        text "Phys def = " + str(party[i].get_physd_actual()) size 20
+        text "Mag atk = " + str(party[i].get_maga_actual()) size 20
+        text "Mag def = " + str(party[i].get_magd_actual()) size 20
+        text "Hit = " + str(party[i].get_hit()) size 20
+        text "Dodge = " + str(party[i].get_dodgemax_actual()) size 20
 
 
     #change the category of gear the player is looking at.
@@ -83,7 +83,7 @@ screen party_view(party, i, ow):
 
         textbutton party[i].get_weapon().get_title() action Function(ow.swap_gear, party[i], 2) hovered Function(ow.gear_browse, party[i].get_weapon()) unhovered Hide("gear_browse")
 
-        textbutton party[i].get_weapon().get_title() action Return #replace with accessory
+        textbutton party[i].get_acc().get_title() action Function(ow.swap_gear, party[i], 3) hovered Function(ow.gear_browse, party[i].get_acc()) unhovered Hide("gear_browse")
 
     #previous unit and next unit buttons:
     imagebutton:
@@ -159,7 +159,7 @@ screen gear_swap(viewlist, equip_type):
     #inventory: overworld inventory object
     modal True
     zorder 105
-    textbutton "Cancel" action Return(0)
+    textbutton "Cancel" action Hide("gear_browse"), Return(0)
 
     viewport:
         xpos 20 ypos 60 xysize (160,625)
@@ -168,33 +168,39 @@ screen gear_swap(viewlist, equip_type):
 
         vbox:
             spacing 20
+
+            textbutton "Unequip" action Return(-1)
+
             for gear in viewlist:
                 if gear.get_type() == equip_type:
                     textbutton gear.get_title() action Return(gear) hovered Function(ow.gear_browse, gear) unhovered Hide("gear_browse")
+
 screen gear_browse(gear):
     zorder 101
     frame: #obviously all the positioning aspects will have to be perfected.
         background Solid("#0000007F") # for transparency. colour = rrggbbaa where red green blue alpha
-        area(530, 200, 300, 225)
+        area(530, 200, 300, 400)
         ypadding 5
         xpadding 10
 
         vbox:
-            text gear.get_title()
-            text gear.get_flavour()
-            text "physical power = " + str(gear.get_phys())
-            text "magic power = " + str(gear.get_mag())
-            if isinstance(gear, weapon) == True: #weapon
-                text "hit bonus = " + str(gear.get_hit())
-            else: #armour
-                text "dodge bonus = " + str(gear.get_dodge())
-            text "affinity = " + str(gear.get_aff()) #<-- replace text with image. affinities will be this way.
+            text "Hp = " + str(gear.get_hp()) size 20
+            text "Able = " + str(gear.get_able()) size 20
+            text "Stamina = " + str(gear.get_stamina()) size 20
+            text "Phys atk = " + str(gear.get_physa()) size 20
+            text "Phys def = " + str(gear.get_physd()) size 20
+            text "Mag atk = " + str(gear.get_maga()) size 20
+            text "Mag def = " + str(gear.get_magd()) size 20
+            text "Hit = " + str(gear.get_hit()) size 20
+            text "Dodge = " + str(gear.get_dodge()) size 20
+            text "affinity = " + str(gear.get_aff_name()) size 20
             if gear.get_passive() == 1:
-                text "I have a passive"
+                text "I have a passive" size 20
+
 screen move_swap(movelist, rank):
     modal True
     zorder 105
-    textbutton "Cancel" action Return(0) pos (1220, 30)
+    textbutton "Cancel" action Hide("move_browse"), Return(0) pos (1220, 30)
 
     viewport:
         xpos 1080 ypos 60 xysize (160,625)
@@ -233,78 +239,72 @@ screen move_browse(move):
 #TODO
 
 ## -- DIRECTION SCREENS -- ##
-screen chapter_view(chapter, state, overworld):
+screen chapter_view(chapter, overworld):
     zorder 100
 
-    #add overworld.get_bg() #background
     #add a background frame. the journal can just overlay over wherever you are.
-
-    hbox: #shows two buttons. click to switch between current and completed quests
-        xalign 0.4
-        yalign 0.1
-        if state == 0:
-            textbutton "View current" action NullAction()
-            textbutton "View completed" action Function(overworld.change_direction_view, chapter, 1)
-        else:
-            textbutton "View current" action Function(overworld.change_direction_view, chapter, 0)
-            textbutton "View completed" action NullAction()
+    add overworld.get_bg()
+    add overworld.get_direction().get_bg() pos(302, 97) #background
 
     vbox: #shows a column of clickable chapter icons on the left of the questbook. click to change chapter.
-        xalign 0.2
-        yalign 0.2
+        xpos 305
+        ypos 105
+
+        textbutton "Close" action Hide("quest_view"), Return
 
         for i in range(0, overworld.get_chapter()+1):
             if i == chapter:
-                textbutton "chapter [i]" action NullAction()
+                textbutton "chap [i]" action NullAction()
             else:
-                textbutton "chapter [i]" action Function(overworld.change_direction_view, i, state)
+                textbutton "chap [i]" action Function(overworld.change_direction_view, i)
 
     #shows a column on clickable quest titles. click to change viewed quest. answers to chapter view.
     viewport:
-        xalign 0.5
-        yalign 0.3
+        xpos 365
+        ypos 125
         mousewheel True
         #xpos 20 ypos 60 xysize (160,625)
-        #child_size(180, 670) #it may need to be bigger. that is no issue, just change the y value.
+        #child_size(180, 670) #it may need to be bigger. just multiply y by len of quest list.
 
         vbox:
             spacing 10
-            if state == 0: #view current quests
-                for quest in overworld.get_direction().get_current():
-                    if (quest.get_chapter() - 1) == chapter:
-                        textbutton quest.get_title() action Function(overworld.quest_view, quest)
-
-            else: #view completed quests
-                for quest in overworld.get_direction().get_completed():
-                    if (quest.get_chapter() - 1) == chapter:
-                        textbutton quest.get_title() action Function(overworld.quest_view, quest)
-
-
-
+            for quest in overworld.get_direction().get_current():
+                if (quest.get_chapter() - 1) == chapter:
+                    textbutton quest.get_teaser() action Function(overworld.quest_view, quest)
 screen quest_view(quest):
     zorder 101
     #for showing a particular quest. answers to chapter quests.
-    frame:
-        area(700, 300, 300, 400)
-        ypadding 5
-        xpadding 10
+
+    #title
+    if quest.get_progress() == -1:
+        text quest.get_title() + " [[completed]" pos (550, 130)
+    elif quest.get_progress() == -2:
+        text quest.get_title() + "[[failed]" pos (550, 130)
+    else:
+        text quest.get_title() pos (550, 130)
+
+    #expiry
+    text "Expiry: Chapter " + str(quest.get_chapter()) pos (850, 165)
+
+    viewport:
+        area (550, 200, 400, 600)
         vbox:
-            text quest.get_title()
-            text "Expires at the start of " + str(quest.get_chapter())
+            spacing 10
+            #title
 
-    #title at top
-    #requirements (str) with tick boxes.
-    #text "requirement one"
-    #if fulfilled:
-    #    add tick box checked
-    #else:
-    #    add tick box unchecked
+            for i in range(0, quest.get_progress()):
 
-    #for i in range(0, quest.get_progress()+1): #a list of flavou
-        #if i == quest.get_progress():
-            #text highlighted. #do this next
-        #else:
-            #text quest.get_flavour()[i] #greyed out. already been done.
+                if quest.get_progress() - i == 1: #next objective
+                    text quest.get_flavour()[i] + "[[next to do]" #highlighted
+                    hbox:
+                        text quest.get_requirement()[i]
+                        add "quest_check_e"
+
+                else: #already complete
+                    text quest.get_flavour()[i] + "[[completed]" #greyed out
+                    hbox:
+                        text quest.get_requirement()[i]
+                        add "quest_check_s"
 
 
 
@@ -312,7 +312,8 @@ screen quest_view(quest):
 ## -- MAIN OVERWORLD SCREENS -- ##
 screen overworld_helpers(overworld):
     #make these a mousearea thing:
-    #need to be much smaller buttons. tooltip too.
+
+    #if these guys get tooltips, they need some way to tell the screen where to show them
     vbox:
         yalign 0.4
         xalign 0
@@ -322,23 +323,20 @@ screen overworld_helpers(overworld):
             idle "party_b"
             hover "party_h"
             action Function(overworld.show_party) #invoke in new context
-            tooltip "Manage Party"
+            #tooltip "Manage Party"
 
         imagebutton: #direction button
             idle "direction_b"
             hover "direction_h"
             action Function(overworld.show_direction)
-            tooltip "Directions"
+            #tooltip "Directions"
 
         imagebutton: #hub button
             idle "hub_b"
             hover "hub_h"
             action Return #TODO later. after prologue. (the first hub will be nai's place.)
-            tooltip "Hub"
-    $ tooltip = GetTooltip()
-    if tooltip:
-        #text "[tooltip]" pos (posl[loc][0], posl[loc][1])
-        text "[tooltip]"
+            #tooltip "Hub"
+
 screen overworld_map(ul, jl, dl, il, hl, posl, overworld):
     #bg: background image
     #ul: list of unlocked locations. 1: unlocked, 0: not
@@ -367,10 +365,9 @@ screen overworld_map(ul, jl, dl, il, hl, posl, overworld):
             tooltip dl[loc]
 
 
-        $ tooltip = GetTooltip()
-        if tooltip:
-            #text "[tooltip]" pos (posl[loc][0], posl[loc][1])
-            text "[tooltip]"
+    $ tooltip = GetTooltip()
+    if tooltip:
+        text "[tooltip]" xalign 0.5 yalign 0.9 #just along the bottom of the screen
 
 
 

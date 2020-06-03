@@ -6,6 +6,8 @@
 #------enemy side positions------#
 #px: 275 + 125*(point.get_x()), , 5 + 65*(point.get_y())
 
+
+
 screen combatinfo(pl, el, pt, et, rounds, ph):
     #display battle information: turns left for each, rounds, hp, positions, etc
     vbox: #round/turns info
@@ -17,18 +19,23 @@ screen combatinfo(pl, el, pt, et, rounds, ph):
         text "player turns left : [pt]"
         text "enemy turns left : [et]"
         text "phase: [ph]"
+
+
     vbox: #player stats/info
         xalign 0.0
-        yalign 0.6
-        spacing 2
+        ypos (350)
+        spacing 10
+
         for unit in pl:
-            text "{}: {} ({}%) [[{}] s={}, e={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge_actual(), unit.get_able(), unit.get_stamina(), unit.get_energy())
+
+            text "{}: hp={}/{}\n dodge=[[{}/{}]% s={}/{} e={}/{}".format(unit.get_name(), unit.get_hp(), unit.get_hpmax_actual(), unit.get_dodge(), unit.get_dodgemax_actual(), unit.get_stamina(), unit.get_staminamax_actual(), unit.get_energy(), unit.get_energymax()) size 20
+
     vbox: #enemy stats/info
         xalign 0.0
-        yalign 0.1
+        yalign 0.0
         spacing 2
         for unit in el:
-            text "{}: {} ({}%) [[{}] s={}".format(unit.get_name(), unit.get_hp(), unit.get_dodge_actual(), unit.get_able(), unit.get_stamina())
+            text "{}: {} ({}%) [[{}] s={}".format(unit.get_name(), unit.get_hp(), unit.get_dodgemax_actual(), unit.get_able(), unit.get_stamina()) size 20
 
 screen show_units(pl, el):
     zorder 99
@@ -39,18 +46,55 @@ screen show_units(pl, el):
         add unit.get_icon() pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
         text unit.get_name() pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
 
-screen show_damage(showlist, move, unit):
-    #showlist: list of tuples: (unit, damage)
+screen show_damage(showlist, title, unit):
+    #showlist: list of four-tuples: (grid x, grid y, damage, iff)
     zorder 103
+
+    if unit.get_iff() == 0:
+        text title pos(265 + 124*unit.get_point().get_x(), 415 + 62*unit.get_point().get_y())
+    else:
+        text title pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
+
     for tup in showlist:
-        if tup[0].get_iff() == 1: #hit enemies
-            text move.get_title() pos(265 + 124*unit.get_point().get_x(), 415 + 62*unit.get_point().get_y())
-            text "{color=ff0000}-[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 5 + 62*tup[0].get_point().get_y())
-        else: #hit allies
-            text move.get_title() pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
-            text "{color=ff0000}-[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 415 + 62*tup[0].get_point().get_y())
+        if tup[3] == 1:
+            if tup[2] > 0:
+                text "-{}".format(tup[2]) color "ff0000" pos(265 + 124*tup[0], 5 + 62*tup[1])
+            add "tile_e_hovered" at e_tile_hover(tup[0], tup[1])
+        else:
+            if tup[2] > 0:
+                text "-{}".format(tup[2]) color "ff0000" pos(265 + 124*tup[0], 415 + 62*tup[1])
+            add "tile_e_hovered" at a_tile_hover(tup[0], tup[1])
 
     timer 1.0 action Hide("show_damage", transition = dissolve)
+
+screen show_heal(showlist, title, unit):
+    #showlist: list of four-tuples: (grid x, grid y, heal, iff)
+    zorder 103
+
+    if unit.get_iff() == 0:
+        text title pos(265 + 124*unit.get_point().get_x(), 415 + 62*unit.get_point().get_y())
+    else:
+        text title pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
+
+    for tup in showlist:
+        if tup[3] == 1:
+            if tup[2] > 0:
+                text "+{}".format(tup[2]) color "327345" pos(265 + 124*tup[0], 5 + 62*tup[1])
+            else:
+                text "+maxed" color "327345" pos(265 + 124*tup[0], 5 + 62*tup[1])
+
+            add "tile_f_hovered" at a_tile_hover(tup[0], tup[1])
+
+        else:
+            if tup[2] > 0:
+                text "+{}".format(tup[2]) color "327345" pos(265 + 124*tup[0], 415 + 62*tup[1])
+            else:
+                text "+maxed" color "327345" pos(265 + 124*tup[0], 415 + 62*tup[1])
+
+            add "tile_f_hovered" at a_tile_hover(tup[0], tup[1])
+
+
+    timer 1.0 action Hide("show_heal", transition = dissolve)
 
 screen show_dot(showlist):
     #showlist: list of tuples: (unit, damage)
@@ -69,20 +113,6 @@ screen show_dot(showlist):
                 text "{color=327345}+[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 415 + 62*tup[0].get_point().get_y())
 
     timer 1.0 action Hide("show_dot", transition = dissolve)
-
-screen show_heal(showlist, title, unit):
-    #showlist: list of tuples: (unit, heal)
-
-    zorder 103
-    for tup in showlist:
-        if tup[0].get_iff() == 1:
-            text titl pos(325 + 125*unit.get_point().get_x(), 5 + 65*unit.get_point().get_y())
-            text "{color=327345}+[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 5 + 62*tup[0].get_point().get_y())
-        else:
-            text title pos(265 + 124*unit.get_point().get_x(), 415 + 62*unit.get_point().get_y())
-            text "{color=327345}+[tup[1]]{/color}" pos(265 + 124*tup[0].get_point().get_x(), 415 + 62*tup[0].get_point().get_y())
-
-    timer 1.0 action Hide("show_heal", transition = dissolve)
 
 screen order_unit(pl):
     #select which unit to order from available units that have yet to act. returns rank of unit.
@@ -148,7 +178,7 @@ screen move_browse_b(move):
                 text "power = " + str(move.get_power()) + " (Magical)"
             if move.get_status_only() == 0:
                 text "hit bonus = " + str(move.get_hit())
-                text "affinity = " + str(move.get_element_name()) #<-- replace text with image. 
+                text "affinity = " + str(move.get_element_name()) #<-- replace text with image.
 
 screen enemy_highlight(unit, cmove):
     zorder 101

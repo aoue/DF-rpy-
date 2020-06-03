@@ -6,7 +6,7 @@
 
 
 init -10 python:
-    class foc():
+    class Focus():
         def __init__(self):
             self.title = "" #name of the focus
             self.flavour = "" #flavour of the focus shown to the player
@@ -17,7 +17,8 @@ init -10 python:
             self.hit_up = 0
             self.dodge_up = 0
 
-            self.learnlist = []  #all moves the unit can learn.
+
+            self.learnlist = []  #all moves the unit can learn under this focus
 
         def get_title(self):
             return self.title
@@ -26,7 +27,7 @@ init -10 python:
         #what to do when the unit levels up. handle it all here.
         pass
 
-    class fighter_focus(foc):
+    class Focus_fighter(Focus):
         def __init__(self):
             self.title = "Fighter"
             self.flavour = ""
@@ -37,9 +38,9 @@ init -10 python:
             self.hit_up = 0
             self.dodge_up = 0
 
-            self.learnlist = [whirl()]  #all moves the unit can learn.
+            self.learnlist = [Whirl()]  #all moves the unit can learn under this focus
 
-    class assistant_focus(foc):
+    class Focus_assistant(Focus):
         def __init__(self):
             self.title = "Fighter"
             self.flavour = ""
@@ -50,7 +51,7 @@ init -10 python:
             self.hit_up = 0
             self.dodge_up = 0
 
-            self.learnlist = [whirl()]  #all moves the unit can learn.
+            self.learnlist = []  #all moves the unit can learn under this focus
 
 
 

@@ -1,65 +1,37 @@
 ------the very next thing(s)------
 
-direction screen:
- -position the different things
- -make a frame for the background.
+unequip moves. in move swap, add a new button that swaps the move with None.
+-don't add the 'none equipment' to the inventory
 
-when hovering on a unit on the battlefield: (show units)
-draw a box around the unit's stats on the sidebar. so the player knows which stats refer to which unit.
-show detailed browse:
-    position (based on unit's position. it should be nearby.)
-    -show hit points out of max
-    -show energy out of max
-    -show stamina out of max
-    -show able of out max
-    -show dodge out of max
-    -show stances applied
-    -show move set
-        on move hover:
-        -call the move browse screen. we made it already.
+inventory mix up. it's probably something off with the flags. weapons -> armour, armour -> nothing.
 
-the unit's images should be smaller. it's hard to see the tile borders. (120 x 60)?
+when initializing a unit, set hp, dodge, etc, to the actual value. need to do for: federal, aide, jowler, groskel
 
-room icons. when a room is explored, show its icon variable on it. these mark certain types of rooms.
-if the room is not explored, show a question mark icon on it.
-special recurring room types:
- -entrance/exit
- -locked door
- -one time heal room
- -full heal room
- -staircase room
- -sleeping monster room (a boss that you don't have to fight immediately. you can come back for it.)
+only call a room's when entering if the room is not explored.
 
-dungeon map:
- -leave the map and return to the overworld.
- -call starting room event as soon as we enter the place.
- -use out of combat moves: heal, teleport, etc. (add variable to move: out of combat. then, for every move the unit knows, if out of combat == 1, then show move button.)
-
-focus and level up
--level cap? it would be increased by clearing achievements or something. i.e. kill 10 of this monster type, kill optional bosses, complete optional missions. of course,  it will increase as the story progresses too. it means the player can't just power level past any challenge in the mechanics.
+level up screen, focus, and level up.
+-level cap? it would be increased by clearing achievements or something. i.e. kill optional bosses, complete optional missions. of course,  it will increase as the story progresses too. it means the player can't just power level past any challenge in the mechanics.
 -level up screen, dramatic pose.
--if it's a choose your focus level-up. then do a very dramatic picture with buttons, one for each focus. "so-and-so stands at a crossroads."
+-if it's a choose your focus level-up. then do a very dramatic picture (press a to grab destiny) with buttons, one for each focus. "unit name stands at a crossroads."
     -when a focus is chosen, unlock a flashback for that character's backstory that can be viewed back at the hub. one flashback per focus per time chosen. the flashback has to do with the focus, obviously.
     -it should be clear that a focus influences story, in the way that the character responds.
 
-
-
-
 overworld map:
--direction: side quests, notes. quests are called 'directions.' notes are like things the characters observed, so the player doesn't have to remember everything. different notes will be taken by different characters. a little char building. Side bar: one tab for each chapter, and each chapter has a variety of missions, etc, across the top. Click a mission to see its page and any notes characters have taken.
--hub: where the group is gathered. join it to open a hub, where the player can click on characters to talk to them with the current POV character. click here to progress overworld state. click bottom tab to change rooms. see squad mates there.
+hub:
+ -room selection on the bottom
+ -crafting
+ -talk to all the other characters
+ -call meeting
+
+handler's textbox. on the side. shows up while the other textbox is still on screen. there can be two conversations ongoing at once.
+we can also use if for phone calls.
 
 move passives. Call:
 -start of round.
 -when a unit attacks
 -when a unit is attacked
 
-
-affinities. We need some more/just redo them maybe?
--beast
--armored <-- (u)
-
-for some reason, sometimes damage is dealt in floats. don't know why. fix it by returning the integer function of the damage value.
+for some reason, sometimes damage is dealt in floats. don't know why. fix it by returning the integer function of the damage value. might be in the round function for spread in the calculate damage function. That's my best guess.
 
 combat view:
 what there is now will not work. ideas:

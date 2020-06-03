@@ -1,7 +1,7 @@
 
 init python:
 
-    class inventory():
+    class Inventory():
         #class inventory.
         #four lists:
         #-armour
@@ -38,11 +38,6 @@ init python:
             else:
                 self.get_ite().append(gear)
 
-
-
-
-
-            #bisect.insort(nl, gear)
         def remove_gear(self, gear):
             if gear.get_flag() == 1:
                 self.get_arm().remove(gear)

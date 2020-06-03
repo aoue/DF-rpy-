@@ -16,7 +16,7 @@
 
 init -2 python:
     #--- ENEMY MOVES ---
-    class enemy_move(move):
+    class Enemy_move(Move):
         def __init__(self):
             self.flavour = "{i}str{/i}"
             self.title = "str"
@@ -108,18 +108,40 @@ init -2 python:
 
                     return 1
             return 0
+        def manage_target(self, iff, x, y, map, targetlist):
+            #searches map for position of (x,y)
+            #if none, then append to showlist:
+            #map: battle.get_enemymap() or battle.get_allymap()
+
+            if map.search_map((x, y)) == None:
+                if iff == 0:
+                    targetlist.append((x, y, -1, 1))
+                else:
+                    targetlist.append((x, y, -1, 0))
+
+            else:
+                targetlist.append(map.search_map((x,y)))
+        def non_tuple_items(self, nl):
+            #returns number of non-tuple items in a list
+            count = 0
+            for item in nl:
+                if isinstance(item, tuple) == False:
+                    count += 1
+            return count
+
         def pick_target(self, pl, battle):
 
             if pl[0].get_iff() == 0:
                 map = battle.get_allymap()
+                iff = 1
             else:
                 map = battle.get_enemymap()
+                iff = 0
 
             if self.get_aoe() == 0 and self.get_heal() == 0: #single target
-
                 if self.get_targeting() == 0: #random target:
                     while True:
-                        i = random.randint(0, len(pl)-1)
+                        i = renpy.random.randint(0, len(pl)-1)
                         if pl[i].get_ooa() == 0:
                             return pl[i]
                 elif self.get_targeting() == 1: #closest to front. in ties, randomly pick.
@@ -130,7 +152,7 @@ init -2 python:
                                 targetlist.append(map.search_map((row, column)))
 
                         if targetlist: #if list is not empty
-                            i = random.randint(0, len(targetlist)-1)
+                            i = renpy.random.randint(0, len(targetlist)-1)
                             return targetlist[i]
                 elif self.get_targeting() == 2: #closest to back. in ties, randomly pick.
                     targetlist = []
@@ -140,7 +162,7 @@ init -2 python:
                                 targetlist.append(map.search_map((row, column)))
 
                         if targetlist: #if list is not empty
-                            i = random.randint(0, len(targetlist)-1)
+                            i = renpy.random.randint(0, len(targetlist)-1)
                             return targetlist[i]
                 elif self.get_targeting() == 3: #lowest hp.
                     x = 999999
@@ -154,33 +176,31 @@ init -2 python:
 
                     if self.get_damage_type() == 0: #physical damage
                         for unit in pl:
-                            if unit.get_physd() < x and unit.get_ooa() == 0:
-                                x = unit.get_physd()
+                            if unit.get_physd_actual() < x and unit.get_ooa() == 0:
+                                x = unit.get_physd_actual()
                                 target = unit
                     else:
                         for unit in pl:
-                            if unit.get_magd() < x and unit.get_ooa() == 0:
-                                x = unit.get_physd()
+                            if unit.get_magd_actual() < x and unit.get_ooa() == 0:
+                                x = unit.get_magd_actual()
                                 target = unit
                     return target
 
             elif self.get_aoe() == 0 and self.get_heal() == 1: #single target heal
-                if self.get_healer() == 1 and self.get_stamina/self.get_staminamax() > 0.5:
-                    min = 999999
-                    for unit in el:
-                        if unit.get_ooa() == 0 and unit.get_hp()/unit.get_hpmax() <= 0.6:
-                            if unit.get_hp() < min:
-                                min = unit.get_hp()
-                                target = unit
+                pass
+                #if self.get_healer() == 1 and self.get_stamina/self.get_staminamax() > 0.5:
+                #    min = 999999
+                #    for unit in el:
+                #        if unit.get_ooa() == 0 and unit.get_hp()/unit.get_hpmax() <= 0.6:
+                #            if unit.get_hp() < min:
+                #                min = unit.get_hp()
+                #                target = unit
 
             elif self.get_aoe() == 1 and self.get_heal() == 0: #aoe attack
-
                 ##choosing aoe target area:
                 #for each square in every (row max - aoe length) in every (column max - target area height):
                     #tally all the units in the square taking the current square as top left.
                         #keep a running max
-
-
                 targetmaxlist = [] #list of max
 
                 #for each square:
@@ -191,20 +211,30 @@ init -2 python:
                         #generate an aoe for each area
                         for i in range(column, column + self.get_aoe_area()[1]):
                             for x in range(row, row + self.get_aoe_area()[0]):
-                                if map.search_map((x, i)) != None:
-                                        targetlist.append(map.search_map((x, i)))
+                                self.manage_target(iff, x, i, map, targetlist)
 
-
-                        if len(targetlist) > len(targetmaxlist):
+                                #now, we want to compare number of non-none items in targetlist to targetmaxlist
+                        if self.non_tuple_items(targetlist) > self.non_tuple_items(targetmaxlist):
                             targetmaxlist = targetlist
-                        elif targetlist != targetmaxlist and len(targetlist) == len(targetmaxlist):
+                        elif targetlist != targetmaxlist and self.non_tuple_items(targetlist) == self.non_tuple_items(targetmaxlist):
                             #50% chance to take new list, 50% to keep old:
-                            i = random.randint(0, 1)
+                            i = renpy.random.randint(0, 1)
                             if i == 1:
                                 targetmaxlist = targetlist
-
-
                 return targetmaxlist
+
+                #old:
+                #                if map.search_map((x, i)) != None:
+                #                        targetlist.append(map.search_map((x, i)))
+                #        if len(targetlist) > len(targetmaxlist):
+                #            targetmaxlist = targetlist
+                #        elif targetlist != targetmaxlist and len(targetlist) == len(targetmaxlist):
+                #            #50% chance to take new list, 50% to keep old:
+                #            i = renpy.random.randint(0, 1)
+                #            if i == 1:
+                #                targetmaxlist = targetlist
+                #
+                #return targetmaxlist
 
 
             else: #aoe heal
@@ -213,157 +243,119 @@ init -2 python:
 
 
     ## -- Beast Moves -- ##
-    class e_claw(enemy_move):
+    class E_claw(Enemy_move):
         def __init__(self):
             self.flavour = "{i}Filthy clawing.{/i}"
             self.title = "Claw"
-            self.rank = 2 #can be 0 (anywhere), 1 (back), or 2 (front).
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 15 #the amount of stamina the unit loses using this move
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 15 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = -1 #damage element. 0 through 8. see spreadsheet or top of this docs
-            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
-            self.dot_duration = 0 #int. how long the applied dot will last.
-
-            #additional variables
-            self.weight = 100 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
-            self.effort = 1 #1(light), 2(medium), 3(heavy). To help the enemy think.
-            self.aoe = 0 #0: not aoe, 1: is aoe
-            self.heal = 0 #0: not a healing move, 1: is a healing move
-            self.targeting = 1 #what is the move's preferred target.
+            self.rank = 2
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 15
+            self.able_drain = 1
+            self.power = 15
+            self.hit = 0
+            self.damage_type = 0
+            self.element = -1
+            self.dot = 0
+            self.dot_duration = 0
+            self.weight = 100
+            self.effort = 1
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 1
 
         def exert(self, unit, pl, el, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.e_drain(unit)
             self.translate(unit, battle)
 
-            #targeting.
-            #for this test, just target the first unit in pl
             target = self.pick_target(pl, battle)
             targetlist = [target]
-
-            #calc damage and deal it to the target
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-    class e_jaws(enemy_move):
+
+    class E_jaws(Enemy_move):
         def __init__(self):
             self.flavour = "{i}Terrible jaws.{/i}"
             self.title = "Jaws"
-            self.rank = 2 #can be 0 (anywhere), 1 (back), or 2 (front).
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 30 #the amount of stamina the unit loses using this move
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 23 #affects damage
-            self.hit = -5 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = -1 #damage element. 0 through 8. see spreadsheet or top of this docs
-            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
-            self.dot_duration = 0 #int. how long the applied dot will last.
-
-            #additional variables
-            self.weight = 60 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
-            self.effort = 3 #1(light), 2(medium), 3(heavy). To help the enemy think.
-            self.aoe = 0 #0: not aoe, 1: is aoe
-            self.heal = 0 #0: not a healing move, 1: is a healing move
-            self.targeting = 0 #what is the move's preferred target.
+            self.rank = 2
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 30
+            self.able_drain = 1
+            self.power = 23
+            self.hit = -5
+            self.damage_type = 0
+            self.element = -1
+            self.dot = 0
+            self.dot_duration = 0
+            self.weight = 60
+            self.effort = 3
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 0
 
         def exert(self, unit, pl, el, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.e_drain(unit)
             self.translate(unit, battle)
 
-            #targeting.
-            #for this test, just target the first unit in pl
             target = self.pick_target(pl, battle)
             targetlist = [target]
-
-            #calc damage and deal it to the target
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-    class e_rush(enemy_move):
+
+    class E_rush(Enemy_move):
         def __init__(self):
             self.flavour = "{i}Terrible Leap.{/i}"
             self.title = "Rush"
-            self.rank = 1 #can be 0 (anywhere), 1 (back), or 2 (front).
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.clearance = (0,3) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 0 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 20 #the amount of stamina the unit loses using this move
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 20 #affects damage
-            self.hit = -20 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = -1 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.rank = 1
+            self.type = 1
+            self.clearance = (0,3)
+            self.clearance_type = 0
+            self.stamina_drain = 20
+            self.able_drain = 1
+            self.power = 20
+            self.hit = -20
+            self.damage_type = 0
+            self.element = -1
             self.dot = 0
             self.dot_duration = 0
-
-
-            #additional variables
-            self.weight = 100 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
-            self.effort = 1 #1(light), 2(medium), 3(heavy). To help the enemy think.
-            self.aoe = 0 #0: not aoe, 1: is aoe
-            self.heal = 0 #0: not a healing move, 1: is a healing move
-            self.targeting = 2 #what is the move's preferred target.
+            self.weight = 100
+            self.effort = 1
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 2
 
         def exert(self, unit, pl, el, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.e_drain(unit)
             self.translate(unit, battle)
 
-            #targeting.
-            #for this test, just target the first unit in pl
             target = self.pick_target(pl, battle)
             targetlist = [target]
-
-            #calc damage and deal it to the target
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-    class e_howl(enemy_move):
+
+    class E_howl(Enemy_move):
         def __init__(self):
             self.flavour = "{i}Terrible Howling.{/i}"
             self.title = "Howl"
-            self.rank = 1 #can be 0 (anywhere), 1 (back), or 2 (front).
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 20 #the amount of stamina the unit loses using this move
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 0 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 0 #damage element. 0 through 8. see spreadsheet or top of this docs
-            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
-            self.dot_duration = 0 #int. how long the applied dot will last.
-
-            #additional variables
-            self.weight = 20 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
-            self.effort = 1 #1(light), 2(medium), 3(heavy). To help the enemy think.
-            self.aoe = 0 #0: not aoe, 1: is aoe
-            self.heal = 0 #0: not a healing move, 1: is a healing move
-            self.targeting = 1 #what is the move's preferred target.
+            self.rank = 1
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 20
+            self.able_drain = 1
+            self.power = 0
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 0
+            self.dot = 0
+            self.dot_duration = 0
+            self.weight = 20
+            self.effort = 1
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 1
 
         def exert(self, unit, pl, el, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.e_drain(unit)
             self.translate(unit, battle)
 
@@ -372,137 +364,139 @@ init -2 python:
             else:
                 unit.get_stance().set_howl(2)
 
-    class e_clobber(enemy_move):
+    class E_clobber(Enemy_move):
         def __init__(self):
             self.flavour = "{i}Clobbering.{/i}"
             self.title = "Clobber"
-            self.rank = 1 #can be 0 (anywhere), 1 (back), or 2 (front).
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 50 #the amount of stamina the unit loses using this move
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 30 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 1 #damage element. 0 through 8. see spreadsheet or top of this docs
-            self.dot = 0 #int. tells the do_damage function to apply a certain stance to hit units.
-            self.dot_duration = 0 #int. how long the applied dot will last.
-
-            #additional variables
-            self.weight = 80 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
-            self.effort = 2 #1(light), 2(medium), 3(heavy). To help the enemy think.
-            self.aoe = 0 #0: not aoe, 1: is aoe
-            self.heal = 0 #0: not a healing move, 1: is a healing move
-            self.targeting = 1 #what is the move's preferred target.
+            self.rank = 1
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 25
+            self.able_drain = 1
+            self.power = 35
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 1
+            self.dot = 0
+            self.dot_duration = 0
+            self.weight = 80
+            self.effort = 2
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 1
 
         def exert(self, unit, pl, el, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.e_drain(unit)
             self.translate(unit, battle)
 
-            #targeting.
-            #for this test, just target the first unit in pl
             target = self.pick_target(pl, battle)
             targetlist = [target]
-
-            #calc damage and deal it to the target
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-    class e_spew(enemy_move):
+
+    class E_spew(Enemy_move):
         def __init__(self):
             self.flavour = "{i}Spew poison.{/i}"
             self.title = "Spew"
-            self.rank = 1 #can be 0 (anywhere), 1 (back), or 2 (front).
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 40 #the amount of stamina the unit loses using this move
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 20 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 7 #damage element. 0 through 8. see spreadsheet or top of this docs
-            self.dot = 1 #int. tells the do_damage function to apply a certain stance to hit units.
-            self.dot_duration = 3 #int. how long the applied dot will last.
-
-            #additional variables
-            self.weight = 100 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
-            self.effort = 3 #1(light), 2(medium), 3(heavy). To help the enemy think.
-            self.aoe = 1 #0: not aoe, 1: is aoe
-            self.aoe_area = (3,3) #dimensions of target area
-            self.heal = 0 #0: not a healing move, 1: is a healing move
-            self.targeting = 1 #what is the move's preferred target.
+            self.rank = 1
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 40
+            self.able_drain = 1
+            self.power = 25
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 7
+            self.dot = 1
+            self.dot_duration = 3
+            self.weight = 100
+            self.effort = 3
+            self.aoe = 1
+            self.aoe_area = (3,3)
+            self.heal = 0
+            self.targeting = 1
 
         def exert(self, unit, pl, el, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
-
-            #moves cost stamina and able
             self.e_drain(unit)
             self.translate(unit, battle)
 
-            #targeting.
-            #for this test, just target the first unit in pl
             targetlist = self.pick_target(pl, battle)
-
-            #calc damage and deal it to the target
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
-
-    class e_gobble(enemy_move):
+    class E_call_jowlers(Enemy_move):
         def __init__(self):
-            self.flavour = "{i}Eats whatever's nearby.{/i}"
-            self.title = "Gobble"
-            self.rank = 1 #can be 0 (anywhere), 1 (back), or 2 (front).
-            self.type = 1 #for targeting. each one means a different shape. legend on 'combat screens.rpy'
-            self.clearance = (0,0) #the movement in the column and row direction that the unit will make. also, need to check that the move is possible for the unit to click on it.
-            self.clearance_type = 2 #0 for needs total clear path. 1 for needs only clear destination. 2 doesn't move.
-            self.stamina_drain = 0 #the amount of stamina the unit loses using this move
-            self.able_drain = 1 #the amount of able the unit loses using this move
-            self.power = 20 #affects damage
-            self.hit = 0 #affects dodging
-            self.damage_type = 0 #0: deals physical damage, 1: deals magical damage
-            self.element = 1 #damage element. 0 through 8. see spreadsheet or top of this docs
+            self.flavour = "{i}Calls 3 jowlers to join the fight.{/i}"
+            self.title = "Call Jowlers"
+            self.rank = 1
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 0
+            self.able_drain = 0
+            self.power = 0
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 1
             self.dot = 0
             self.dot_duration = 0
-
-            #additional variables
-            self.weight = 100 #more powerful moves have higher. max 100. min 1. a unit must have at least one (weight 1) move.
-            self.effort = 1 #1(light), 2(medium), 3(heavy). To help the enemy think.
-            self.aoe = 0 #0: not aoe, 1: is aoe
-            self.heal = 0 #0: not a healing move, 1: is a healing move
-            self.targeting = 3 #what is the move's preferred target.
+            self.weight = 100
+            self.effort = 1
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 3
 
         def exert(self, unit, pl, el, battle):
-            #unit: the unit doing the attack
-            #sq: the clicked square. tuple
-            #battle: the battle class
 
-            #moves cost stamina and able
             self.e_drain(unit)
             self.translate(unit, battle)
 
-            #targeting.
-            ##if there are no other units on the user's side, call for reinforcements.
-            #- 2 jowlers at the back (0,0)/(0,1) and (4,0)/(4,1)
-
             if len(el) == 1:
-                newbaddie = unit_jowler(0, "jowler", battle.get_enemymap().random_empty(), 0)
+                newbaddie = Unit_jowler(0, "jowler", battle.get_enemymap().random_empty(), 0)
                 el.append(newbaddie)
                 battle.get_enemymap().place_unit(newbaddie)
 
-                newbaddie2 = unit_jowler(0, "jowler 2", battle.get_enemymap().random_empty(), 0)
+                newbaddie2 = Unit_jowler(0, "jowler 2", battle.get_enemymap().random_empty(), 0)
                 el.append(newbaddie2)
                 battle.get_enemymap().place_unit(newbaddie2)
 
-                newbaddie3 = unit_jowler(0, "jowler 3", battle.get_enemymap().random_empty(), 0)
+                newbaddie3 = Unit_jowler(0, "jowler 3", battle.get_enemymap().random_empty(), 0)
                 el.append(newbaddie3)
                 battle.get_enemymap().place_unit(newbaddie3)
+
+                return
+
+
+    class E_gobble(Enemy_move):
+        def __init__(self):
+            self.flavour = "{i}Eats whatever's nearby.{/i}"
+            self.title = "Gobble"
+            self.rank = 1
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 0
+            self.able_drain = 1
+            self.power = 20
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 1
+            self.dot = 0
+            self.dot_duration = 0
+            self.weight = 100
+            self.effort = 1
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 3
+
+        def exert(self, unit, pl, el, battle):
+            self.e_drain(unit)
+            self.translate(unit, battle)
+
+            if len(el) == 1:
+                move_alt = E_call_jowlers()
+                move_alt.exert(unit, pl, el, battle)
+                unit.set_stamina(min(unit.get_stamina()+20, unit.get_staminamax()))
                 return
 
             #search own side for unit with lowest hp
@@ -518,8 +512,6 @@ init -2 python:
                 target = target
             targetlist = [target]
 
-
-
             #calc damage and deal it to the target
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
@@ -529,7 +521,7 @@ init -2 python:
                 unit.set_hp(min(unit.get_hp()+100,unit.get_hpmax()))
                 unit.set_stamina(min(unit.get_stamina()+75, unit.get_staminamax()))
             else:
-                unit.set_stamina(min(unit.get_stamina()+25, unit.get_staminamax()))
+                unit.set_stamina(min(unit.get_stamina()+30, unit.get_staminamax()))
 
 
 

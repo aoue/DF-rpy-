@@ -72,7 +72,7 @@ screen deploy_browse(unit):
 
 init python:
     #each pilot's unlock status initialization:
-    class deployment():
+    class Deployment():
         def __init__(self, deploymax, party):
             self.deploycounter = 0
             self.deploymax = deploymax

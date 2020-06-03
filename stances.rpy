@@ -4,7 +4,7 @@
 init -2 python:
 
     #--- STANCES ---
-    class stances():
+    class Stances():
         def __init__(self):
             #keeps track of what stances are applied to the unit.
             #the value of the stance is equal to its duration. decrement by 1 at the end of round
@@ -157,37 +157,6 @@ init -2 python:
             self.set_maga(1.0)
             self.set_magd(1.0)
 
-        def get_attacking_stances(self, attack, hit, type):
-            #attack = unit's attack
-            #hit = unit's hit
-            #type = move's type of damage (phys/mag)
-
-            if type == 0:
-                #phys damage
-                attack = attack * self.get_physa()
-            else:
-                #mag damage
-                attack = attack * self.get_maga()
-
-            hit = hit * self.get_hit()
-
-            return attack, hit
-        def get_defending_stances(self, defense, dodge, type):
-            #defense = target's defense
-            #dodge = target's dodge
-            #type = move's type of damage (phys/mag)
-
-            if type == 0:
-                #phys damage
-                defense = defense * self.get_physd()
-            else:
-                #mag damage
-                defense = defense * self.get_magd()
-
-
-            dodge = dodge * self.get_dodge()
-
-            return defense, dodge
         def refresh_stamina(self, unit):
             #stamina regen. first, calc it:
             st_regen = unit.get_restam()
@@ -200,11 +169,11 @@ init -2 python:
             #    st_regen = st_regen * self.get_exhausted()[1]
 
             #apply stamina regen
-            unit.set_stamina(int(min(unit.get_stamina() + st_regen, unit.get_staminamax())))
+            unit.set_stamina(int(min(unit.get_stamina() + st_regen, unit.get_staminamax_actual())))
 
             #-check if still exhausted. unit will no longer be exhausted if their stamina reaches a quarter of their max? that's what we're going with for now, anyway.
             if self.get_exhausted() == 1:
-                if unit.get_stamina() > (unit.get_staminamax() / 4):
+                if unit.get_stamina() > (unit.get_staminamax_actual() / 4):
                     self.set_exhausted(0)
         def round_start(self, unit, battle):
             #check:
@@ -217,7 +186,7 @@ init -2 python:
             #if self.get_bleeding()[0] > 0:
             #    unit.set_hp(int(min(unit.get_hp() - (unit.get_hpmax()*self.get_bleeding[1]), unit.get_hpmax())))
             if self.get_dot() != 0:
-                unit.set_hp(int(max(0, unit.get_hp() + (self.get_dot()*unit.get_hpmax()))))
+                unit.set_hp(int(max(0, unit.get_hp() + (self.get_dot()*unit.get_hpmax_actual()))))
                 unit.check_dead(battle)
 
 
@@ -237,6 +206,9 @@ init -2 python:
             if self.get_howl() == 0:
                 self.exit_howl()
 
+            if self.get_poison() == 0:
+                self.exit_poison()
+
         def end_turn(self, unit):
             #some stances are decremented at this time
             self.set_defend(max(self.get_defend() - 1, -1))
@@ -251,46 +223,36 @@ init -2 python:
         #enter/exit stance pairs
         def enter_adrenaline(self, unit):
             #call this to enter the unit into adrenaline state.
-            self.set_adrenaline(1)
+            self.set_adrenaline(5)
 
             #-set ad_loss equal to the hp gain
-            self.set_ad_loss(int(unit.get_hpmax()*0.5) + (10*unit.get_lvl()))
+            self.set_ad_loss(int(unit.get_hpmax_actual()*0.5) + (10*unit.get_lvl()))
 
             #-increase current hp by (1.5*max hp + 5*lvl)
             unit.set_hp(unit.get_hp() + self.get_ad_loss())
+
+            #unit.take_heal(self.get_ad_loss())
 
             #-increase physa mod by .5
             self.set_physa(self.get_physa() + 0.5)
 
             #show
-            targetlist = [(unit, self.get_ad_loss())]
-            renpy.show_screen("show_heal", targetlist, "adrenaline", unit)
+            targetlist = [(unit.get_point().get_x(), unit.get_point().get_y(), self.get_ad_loss(), unit.get_iff())]
+            renpy.show_screen("show_heal", targetlist, "", unit) #shows properly
 
         def exit_adrenaline(self, unit):
-            #call this to exit the unit from adrenaline state
-
             #if above max health thanks to adrenaline hp buff, remove hp buff.
-            if unit.get_hp() > unit.get_hpmax():
-                unit.set_hp(max(unit.get_hpmax(), unit.get_hp() - self.get_ad_loss()))
-
-            #-decrease physa mod by .5 or something
+            if unit.get_hp() > unit.get_hpmax_actual():
+                unit.set_hp(max(unit.get_hpmax_actual(), unit.get_hp() - self.get_ad_loss()))
             self.set_physa(self.get_physa() - 0.5)
 
         def enter_rally(self):
-            #call to enter unit into rally state
-            #hit mod up by .1
             self.set_hit(self.get_hit() + 0.1)
-            #physa mod up by .1
             self.set_physa(self.get_physa() + 0.1)
-            #maga mod up by .1
             self.set_maga(self.get_maga() + 0.1)
         def exit_rally(self):
-            #call to exit unit from rally state
-            #hit mod down by .1
             self.set_hit(self.get_hit() - 0.1)
-            #physa mod down by .1
             self.set_physa(self.get_physa() - 0.1)
-            #maga mod up by .1
             self.set_maga(self.get_maga() - 0.1)
 
         def enter_defend(self):
@@ -313,8 +275,13 @@ init -2 python:
         def move_dot(self, unit, dot, duration):
             if dot == 0:
                 return
-            elif dot == 1: #poison
-                self.enter_poison(duration)
+
+            #poison
+            elif dot == 1:
+                if self.get_poison() == -1:
+                    self.enter_poison(duration)
+                else:
+                    self.set_poison(duration)
 
         def enter_bleeding(self, duration):
             self.set_bleeding(duration)
@@ -325,10 +292,10 @@ init -2 python:
 
         def enter_poison(self, duration):
             self.set_poison(duration)
-            self.set_dot(self.get_dot() - 0.1)
+            self.set_dot(self.get_dot() - 0.05)
         def exit_poison(self):
             self.set_poison(-1)
-            self.set_dot(self.get_dot() + 0.1)
+            self.set_dot(self.get_dot() + 0.05)
 
 
 

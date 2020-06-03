@@ -1,14 +1,14 @@
 
 init python:
     #--- Enemies
-    class enemy_unit(unit):
+    class Enemy_unit(Unit):
         #they need some things the player units don't need
         #and don't need some things the player units do need
 
         def __init__(self, lvl, name, x, y):
             self.iff = 1 #all enemy units have iff of 1.
             self.name = name
-            self.point = point(x, y) #instance of point class. coordinates for unit's position.
+            self.point = Point(x, y, (1,1)) #instance of point class. coordinates for unit's position.
             self.icon = "icon_grunt" #picture
             self.ablemax = 1
             self.able = 1 #lets the unit act each round
@@ -18,7 +18,7 @@ init python:
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
 
-            self.stance = stances() #unit's status effects
+            self.stance = Stances() #unit's status effects
             self.hpmax = 80
             self.hp = 80 #current hp
             self.dodgemax = 0
@@ -86,16 +86,16 @@ init python:
             self.pri = pri
         #useful functions
         def defend(self):
-            self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
+            self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax_actual()), self.get_staminamax_actual())))
             self.get_stance().enter_defend()
             self.set_able(0)
 
         def is_concerned(self):
-            if float(self.get_hp()) / float(self.get_hpmax()) < self.get_concern():
+            if float(self.get_hp()) / float(self.get_hpmax_actual()) < self.get_concern():
                 return 1
             return 0
         def fatigue(self):
-            return float(self.get_stamina()) / float(self.get_staminamax())
+            return float(self.get_stamina()) / float(self.get_staminamax_actual())
         def calc_priority(self, el):
             #unit's innate pri value
             pri = self.get_pri()
@@ -113,7 +113,7 @@ init python:
                 for unit in el:
                     if unit == self:
                         pass
-                    elif unit.get_hp()/self.get_hpmax() < unit.get_concern():
+                    if unit.is_concerned() == 1:
                         pri += self.get_healer_change()
             #buffer logic
             if self.get_buffer() == 1:
@@ -128,13 +128,13 @@ init python:
                 pri += self.get_concern_change()
 
             #random priority calculated based on discipline
-            pri += random.randint(self.get_discipline()[0], self.get_discipline()[1])
+            pri += renpy.random.randint(self.get_discipline()[0], self.get_discipline()[1])
 
             return pri
         def take_turn(self, el, pl, battle):
             #decide what to do from the moves the unit knows.
-            #renpy.say(None, "{}, reporting in".format(self.get_name()))
-            renpy.pause(1.5)
+
+            renpy.pause(1.5) #so the player can see what's going on. should probably make turn speed adjustable.
 
             #buff (if unit in el is not buffed)
             #TODO worry about it later
@@ -183,7 +183,7 @@ init python:
         def select_move(self, effort, battle):
             #we've decided to use an [effort] move. Now we need to determine which one.
             #effort: heavy(1), medium(2), light(3)
-            x = random.randint(1, 99)
+            x = renpy.random.randint(1, 99)
             #chosen = None
 
             if self.get_point().get_y() > 1: #we're in front
@@ -251,11 +251,11 @@ init python:
             return chosen
 
     ## -- enemy units -- ##
-    class unit_jowler(enemy_unit):
+    class Unit_jowler(Enemy_unit):
         def __init__(self, lvl, name, postup, able):
             self.iff = 1
             self.name = name
-            self.point = point(postup[0], postup[1], (1,1)) #instance of point class.
+            self.point = Point(postup[0], postup[1], (1,1)) #instance of point class.
             self.icon = "icon_jowler" #picture
             self.ablemax = 1
             self.able = able #lets the unit act each round
@@ -265,7 +265,7 @@ init python:
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
 
-            self.stance = stances() #unit's status effects
+            self.stance = Stances() #unit's status effects
             self.hpmax = 50
             self.hp = 50 #current hp
             self.dodgemax = 0
@@ -281,12 +281,12 @@ init python:
             self.magd = 30 #magical defense
 
             #gear
-            self.weapon = beast_claw()
-            self.armour = beast_skin()
-            self.acc = None
+            self.weapon = Beast_claw()
+            self.armour = Beast_skin()
+            self.acc = None_accessory()
 
             #moves:
-            self.moves = [e_claw(), e_jaws(), e_rush(), e_howl()]
+            self.moves = [E_claw(), E_jaws(), E_rush(), E_howl()]
 
             #thinking:
             self.pridef = 2 #default of innate initiative value. normal is 2 or 3 or so.
@@ -302,11 +302,11 @@ init python:
             self.discipline = (-5,5) #range that affects unit's priority. the smaller the range, the less random.
 
 
-    class unit_groskel(enemy_unit):
+    class Unit_groskel(Enemy_unit):
         def __init__(self, lvl, name, postup):
             self.iff = 1
             self.name = name
-            self.point = point(postup[0], postup[1], (3,2)) #instance of point class.
+            self.point = Point(postup[0], postup[1], (3,2)) #instance of point class.
             self.icon = "icon_groskel" #picture
             self.ablemax = 1
             self.able = 1 #lets the unit act each round
@@ -316,7 +316,7 @@ init python:
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
 
-            self.stance = stances() #unit's status effects
+            self.stance = Stances() #unit's status effects
             self.hpmax = 500
             self.hp = 400 #current hp
             self.dodgemax = -30
@@ -332,12 +332,12 @@ init python:
             self.magd = 50 #magical defense
 
             #gear
-            self.weapon = beast_claw()
-            self.armour = fatty_skin()
-            self.acc = None
+            self.weapon = Beast_claw()
+            self.armour = Beast_skin()
+            self.acc = None_accessory()
 
             #moves:
-            self.moves = [e_gobble(), e_clobber(), e_spew()]
+            self.moves = [E_gobble(), E_clobber(), E_spew()]
 
             #thinking: #TODO
             self.pridef = -1 #default of innate initiative value. normal is 2 or 3 or so.

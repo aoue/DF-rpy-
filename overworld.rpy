@@ -21,14 +21,14 @@
 
 init python:
     #overworld map
-    class overworld():
+    class Overworld():
         def __init__(self):
             self.chapter = 0 #str. from 0 (prologue) to 8 (chapter 8). master key to control everything else.
 
             self.party = [] #all units in the party.
             self.party_bg = "party_bg"
             self.view = 0 #which unit we are looking at right now.
-            self.inventory = inventory()
+            self.inventory = Inventory()
 
             #--- lists of lists. each list inside corresponds to a chapter. all preset images in here. ---#
             self.unlocked = [[1, 1]] #whether the location can trigger an event.
@@ -39,9 +39,10 @@ init python:
             self.positions = [[(300, 400), (600, 500)]] #position for a location
             self.bg = [["bg_chapter1"]] #the background image.
 
-            self.direction = direction()
+            self.direction = Direction()
 
-            self.dungeon_prologue = dungeon(self) #prologue dungeon
+            self.in_dungeon = 0 #int. 0: in dungeon, 1: not in dungeon.
+            self.dungeon_prologue = Dungeon(self) #prologue dungeon
             self.dungeons = [[self.dungeon_prologue]] #dungeons for each chapter
 
         #setters
@@ -49,6 +50,8 @@ init python:
             self.view = view
 
         #getters.
+        def get_in_dungeon(self):
+            return self.in_dungeon
         def get_chapter(self):
             return self.chapter
         def get_direction(self):
@@ -62,6 +65,8 @@ init python:
         def get_inventory(self):
             return self.inventory
         #getters automatically return the chapter's list inside the larger list
+        def set_in_dungeon(self, x):
+            self.in_dungeon = x
         def set_view(self, view):
             self.view = view
         def get_unlocked(self):
@@ -119,19 +124,33 @@ init python:
 
             if new_gear == 0: #cancel button
                 return
+            elif new_gear == -1: #unequip
+                if flag == 1:
+                    self.get_inventory().add_gear(unit.get_armour())
+                    unit.set_armour(None_armour())
 
-            self.get_inventory().remove_gear(new_gear)
+                elif flag == 2:
+                    self.get_inventory().add_gear(unit.get_weapon())
+                    unit.set_weapon(None_weapon())
 
-            #put previously equipped gear into inventory and equip new gear
-            if flag == 1:
-                self.get_inventory().add_gear(unit.get_armour())
-                unit.set_armour(new_gear)
-            elif flag == 2:
-                self.get_inventory().add_gear(unit.get_weapon())
-                unit.set_weapon(new_gear)
+                elif flag == 3:
+                    self.get_inventory().add_gear(unit.get_acc())
+                    unit.set_acc(None_accessory())
+
             else:
-                self.get_inventory().add_gear(unit.get_acc())
-                unit.set_acc(new_gear)
+                self.get_inventory().remove_gear(new_gear)
+                #put previously equipped gear into inventory and equip new gear
+                if flag == 1:
+                    self.get_inventory().add_gear(unit.get_armour())
+                    unit.set_armour(new_gear)
+                elif flag == 2:
+                    self.get_inventory().add_gear(unit.get_weapon())
+                    unit.set_weapon(new_gear)
+                elif flag == 3:
+                    self.get_inventory().add_gear(unit.get_acc())
+                    unit.set_acc(new_gear)
+
+
         def gear_view(self, flag, unit):
             renpy.show(self.get_party_bg())
             renpy.show_screen("party_view", self.get_party(), self.get_view(), self)
@@ -177,34 +196,35 @@ init python:
             renpy.show_screen("move_browse", move)
 
         #direction
-        def change_direction_view(self, chapter, state):
-            renpy.invoke_in_new_context(self.direction_view, chapter, state)
-        def direction_view(self, chapter, state):
+        def change_direction_view(self, chapter):
+            renpy.invoke_in_new_context(self.direction_view, chapter)
+        def direction_view(self, chapter):
             self.quest_view(self.get_direction().get_last_viewed())
-            renpy.call_screen("chapter_view", chapter, state, self)
+            renpy.call_screen("chapter_view", chapter, self)
         def quest_view(self, quest):
+            renpy.hide_screen("quest_view")
             self.get_direction().set_last_viewed(quest)
             renpy.show_screen("quest_view", quest)
-
-
-
-
 
         #big shows
         def show_ow_helpers(self):
             renpy.transition(dissolve)
             renpy.show_screen("overworld_helpers", self)
         def show_overworld(self):
+            self.set_in_dungeon(0)
             renpy.call_screen("overworld_map", self.get_unlocked(), self.get_jumps(), self.get_descr(), self.get_images(), self.get_hovers(), self.get_positions(), self)
         def show_dungeon(self): #(self, floor)
             #for a dungeon 0. it will have to be preset.
+            self.set_in_dungeon(1)
             self.get_dungeons(0).set_party(self.get_party())
             self.get_dungeons(0).show_dungeon()
         def show_party(self):
             renpy.invoke_in_new_context(self.party_view)
         def show_direction(self):
+            renpy.transition(dissolve)
             self.quest_view(self.get_direction().get_last_viewed())
-            renpy.invoke_in_new_context(self.direction_view, self.get_chapter(), 0)
+            renpy.invoke_in_new_context(self.direction_view, self.get_chapter())
+            renpy.hide_screen("quest_view")
 
 
         def show_hub(self):
