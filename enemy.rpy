@@ -167,7 +167,6 @@ init python:
 
             else:
                 chosen.exert(self, pl, el, battle)
-
         def shift(self, battle, direction):
             #direction: move one to the right (1), or to the left (-1)
             battle.get_enemymap().remove_unit(self)
@@ -178,8 +177,6 @@ init python:
             #place unit  in map
             battle.get_enemymap().place_unit(self)
             self.set_able(self.get_able()-1)
-
-
         def select_move(self, effort, battle):
             #we've decided to use an [effort] move. Now we need to determine which one.
             #effort: heavy(1), medium(2), light(3)
@@ -259,20 +256,17 @@ init python:
             self.icon = "icon_jowler" #picture
             self.ablemax = 1
             self.able = able #lets the unit act each round
+            self.ooa = 0 #out of action. defeated.
             self.staminamax = 50
-            self.stamina = 50 #basically mana. some recovers each round.
             self.restam = 5
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
 
             self.stance = Stances() #unit's status effects
+
             self.hpmax = 50
-            self.hp = 50 #current hp
-            self.dodgemax = 0
-            self.dodge = 0 #percent chance to dodge attacks.
-            self.hitmax = 0
+            self.dodgemax = 10
             self.hit = 0 #subtract from enemy's dodge
-            self.ooa = 0 #out of action. defeated.
 
             self.aff = 1 # affinity. for super effective and stuff.
             self.physa = 60 #physical attack
@@ -284,9 +278,12 @@ init python:
             self.weapon = Beast_claw()
             self.armour = Beast_skin()
             self.acc = None_accessory()
-
             #moves:
             self.moves = [E_claw(), E_jaws(), E_rush(), E_howl()]
+
+            self.hp = self.get_hpmax_actual()
+            self.stamina = self.get_staminamax_actual()
+            self.dodge = self.get_dodgemax_actual()
 
             #thinking:
             self.pridef = 2 #default of innate initiative value. normal is 2 or 3 or so.
@@ -303,43 +300,43 @@ init python:
 
 
     class Unit_groskel(Enemy_unit):
-        def __init__(self, lvl, name, postup):
+        def __init__(self, lvl, name, postup, able):
             self.iff = 1
             self.name = name
             self.point = Point(postup[0], postup[1], (3,2)) #instance of point class.
             self.icon = "icon_groskel" #picture
             self.ablemax = 1
-            self.able = 1 #lets the unit act each round
+            self.able = able #lets the unit act each round
+            self.ooa = 0 #out of action. defeated.
             self.staminamax = 100
-            self.stamina = 100 #basically mana. some recovers each round.
             self.restam = 5
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
 
             self.stance = Stances() #unit's status effects
+
             self.hpmax = 500
-            self.hp = 400 #current hp
-            self.dodgemax = -30
-            self.dodge = -30 #percent chance to dodge attacks.
-            self.hitmax = 0
+            self.dodgemax = -50
             self.hit = 0 #subtract from enemy's dodge
-            self.ooa = 0 #out of action. defeated.
 
             self.aff = 1 # affinity. for super effective and stuff.
-            self.physa = 65 #physical attack
-            self.physd = 50 #physical defense
+            self.physa = 80 #physical attack
+            self.physd = 55 #physical defense
             self.maga = 40 #magical attack
-            self.magd = 50 #magical defense
+            self.magd = 40 #magical defense
 
             #gear
             self.weapon = Beast_claw()
             self.armour = Beast_skin()
             self.acc = None_accessory()
-
             #moves:
             self.moves = [E_gobble(), E_clobber(), E_spew()]
 
-            #thinking: #TODO
+            self.hp = self.get_hpmax_actual()
+            self.stamina = self.get_staminamax_actual()
+            self.dodge = self.get_dodgemax_actual()
+
+            #thinking:
             self.pridef = -1 #default of innate initiative value. normal is 2 or 3 or so.
             self.pri = -1 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
             self.pri_change = -1 #amount pri is inc/dec after acting

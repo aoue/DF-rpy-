@@ -464,6 +464,12 @@ init -1 python:
             elif cmove.get_iff() == 3:
                 pass
                 #nl = [...] #create the targeted spots yourself. it affects a set area on allied board.
+            elif cmove.get_iff() == -1:
+                #for walk only
+                cmove.exert(self, battle)
+                renpy.hide_screen("move_browse_b")
+                return
+
 
             if 'sq' in locals():
                 if sq == -1:
@@ -491,7 +497,7 @@ init -1 python:
             self.pose = "yve_pose"
             self.deployable = 1
 
-            self.equip_types = (3, 1, 1)
+            self.equip_types = [[3,2,1], [1], [1]]
             self.weapon = Folding_spear()
             self.armour = Folding_armour()
             self.acc = Plain_headband()
@@ -512,7 +518,7 @@ init -1 python:
             self.dodgemax = 15
             self.hit = 5
 
-            self.able = 1
+            self.able = self.get_ablemax_actual()
             self.hp = self.get_hpmax_actual()
             self.stamina = self.get_staminamax_actual()
             self.dodge = self.get_dodgemax_actual()
@@ -527,14 +533,14 @@ init -1 python:
             self.magd = 50
 
             self.foc = Focus_fighter()
-            self.pattern = 1
+            self.pattern = 1 #4/2/1
             self.move1 = Spear()
             self.move2 = Pierce()
             self.move3 = Defend()
             self.move4 = Walk()
             self.move5 = Adrenaline()
             self.move6 = None
-            self.move7 = None
+            self.move7 = Whirl()
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
@@ -550,7 +556,7 @@ init -1 python:
             self.pose = "boy_pose"
             self.deployable = 1
 
-            self.equip_types = (1, 2, 2)
+            self.equip_types = self.equip_types = [[1], [2], [2]]
             self.weapon = Screwbox()
             self.armour = Smock_armour()
             self.acc = Plain_belt()
@@ -571,7 +577,7 @@ init -1 python:
             self.dodgemax = 5
             self.hit = 0
 
-            self.able = 1
+            self.able = self.get_ablemax_actual()
             self.hp = self.get_hpmax_actual()
             self.stamina = self.get_staminamax_actual()
             self.dodge = self.get_dodgemax_actual()
@@ -586,7 +592,7 @@ init -1 python:
             self.magd = 60
 
             self.foc = Focus_assistant()
-            self.pattern = 2
+            self.pattern = 2 #2/4/1
             self.move1 = None
             self.move2 = None
             self.move3 = None
@@ -604,48 +610,50 @@ init -1 python:
         def __init__(self):
             self.iff = 0
             self.name = "Federal"
-            self.point = Point(-1, -1, (1,1)) #instance of point class. coordinates for unit's position.
+            self.point = Point(-1, -1, (1,1))
             self.face = "face_federal"
             self.face_h = "face_federal_hover"
-            self.icon = "icon_federal" #picture
-            self.pose = "pose_federal"
-            self.deployable = 1 #whether you can field them
-            self.ablemax = 1
-            self.able = 1 #lets the unit act each round
-            self.staminamax = 60
-            self.stamina = 60 #basically mana. some recovers each round.
-            self.energymax = 10 #mana. necessary for the best moves
-            self.energy = 10 #does not recover each round.
-            self.restam = 10
-            self.lvl = 0
-            self.exp = 0 #the unit's exp for leveling up
-            self.evo = 0 #whether the unit is in evo mode
-            self.turn_over = 0
+            self.icon = "icon_federal"
+            self.pose = "yve_federal"
+            self.deployable = 1
 
-            self.stance = Stances() #unit's status effects
-            self.hpmax = 110 #max hp
-            self.hp = 110 #current hp
-            self.dodgemax = 5 #max dodge
-            self.dodge = 5 #percent chance to dodge attacks.
-            self.hit = 5 #subtract from enemy's dodge
-            self.ooa = 0 #out of action. defeated.
-            self.dead = 0 #dead. not a battle stat.
-
-            self.aff = 0 #affinity. for super effective and stuff.
-            self.aff_name = "Normal"
-            self.physa = 65 #physical attack
-            self.physd = 65 #physical defense
-            self.maga = 50 #magical attack
-            self.magd = 50 #magical defense
-
-            self.equip_types = (3, 3, 0) #armour, weapon, acc
+            self.equip_types = [[3,2,1], [3], [0]]
             self.weapon = Regulation_sword()
             self.armour = Regulation_armour()
             self.acc = None_accessory()
 
-            #moves:
-            self.foc = Focus_fighter() #TODO.
-            self.pattern = 3 #3/3
+            self.energymax = 10
+            self.energy = 10
+            self.restam = 10
+            self.lvl = 0
+            self.exp = 0
+            self.evo = 0
+
+            self.turn_over = 0
+
+            self.stance = Stances()
+            self.hpmax = 110
+            self.ablemax = 1
+            self.staminamax = 50
+            self.dodgemax = 10
+            self.hit = 5
+
+            self.able = self.get_ablemax_actual()
+            self.hp = self.get_hpmax_actual()
+            self.stamina = self.get_staminamax_actual()
+            self.dodge = self.get_dodgemax_actual()
+
+            self.ooa = 0
+            self.dead = 0
+            self.aff = 0
+            self.aff_name = "Normal"
+            self.physa = 60
+            self.physd = 65
+            self.maga = 50
+            self.magd = 60
+
+            self.foc = Focus_fighter()
+            self.pattern = 3 #3/3/1
             self.move1 = Sword()
             self.move2 = Flourish()
             self.move3 = Form6()
@@ -653,63 +661,68 @@ init -1 python:
             self.move5 = Defend()
             self.move6 = Walk()
             self.move7 = None
-            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
-            self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
+
+            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
+            self.movelist = []
+
     class Unit_aide(Unit):
         def __init__(self):
             self.iff = 0
             self.name = "Aide"
-            self.point = Point(-1, -1, (1,1)) #instance of point class. coordinates for unit's position.
+            self.point = Point(-1, -1, (1,1))
             self.face = "face_federal"
             self.face_h = "face_federal_hover"
-            self.icon = "icon_federal_aide" #picture
-            self.pose = "pose_federal"
-            self.deployable = 1 #whether you can field them
-            self.ablemax = 1
-            self.able = 1 #lets the unit act each round
-            self.staminamax = 60
-            self.stamina = 60 #basically mana. some recovers each round.
-            self.energymax = 10 #mana. necessary for the best moves
-            self.energy = 10 #does not recover each round.
-            self.restam = 10
-            self.lvl = 0
-            self.exp = 0 #the unit's exp for leveling up
-            self.evo = 0 #whether the unit is in evo mode
-            self.turn_over = 0
+            self.icon = "icon_federal_aide"
+            self.pose = "yve_federal"
+            self.deployable = 1
 
-            self.stance = Stances() #unit's status effects
-            self.hpmax = 100 #max hp
-            self.hp = 100 #current hp
-            self.dodgemax = 5 #max dodge
-            self.dodge = 5 #percent chance to dodge attacks.
-            self.hit = 5 #subtract from enemy's dodge
-            self.ooa = 0 #out of action. defeated.
-            self.dead = 0 #dead. not a battle stat.
-
-            self.aff = 0 #affinity. for super effective and stuff.
-            self.aff_name = "Normal"
-            self.physa = 60 #physical attack
-            self.physd = 60 #physical defense
-            self.maga = 50 #magical attack
-            self.magd = 50 #magical defense
-
-            self.equip_types = (3, 4, 0) #armour, weapon, acc
-            self.weapon = Regulation_rifle()
+            self.equip_types = [[3,2,1], [3], [0]]
+            self.weapon = Regulation_sword()
             self.armour = Regulation_armour()
             self.acc = None_accessory()
 
-            #moves:
-            self.foc = Focus_fighter() #TODO.
-            self.pattern = 3 #3/3
+            self.energymax = 10
+            self.energy = 10
+            self.restam = 10
+            self.lvl = 0
+            self.exp = 0
+            self.evo = 0
+
+            self.turn_over = 0
+
+            self.stance = Stances()
+            self.hpmax = 100
+            self.ablemax = 1
+            self.staminamax = 50
+            self.dodgemax = 10
+            self.hit = 5
+
+            self.able = self.get_ablemax_actual()
+            self.hp = self.get_hpmax_actual()
+            self.stamina = self.get_staminamax_actual()
+            self.dodge = self.get_dodgemax_actual()
+
+            self.ooa = 0
+            self.dead = 0
+            self.aff = 0
+            self.aff_name = "Normal"
+            self.physa = 55
+            self.physd = 60
+            self.maga = 55
+            self.magd = 50
+
+            self.foc = Focus_fighter()
+            self.pattern = 3 #3/3/1
             self.move1 = Form6()
-            self.move2 = Shoot()
-            self.move3 = Suppress()
-            self.move4 = First_aid()
-            self.move5 = Defend()
-            self.move6 = Walk()
+            self.move2 = Walk()
+            self.move3 = Defend()
+            self.move4 = Shoot()
+            self.move5 = Suppress()
+            self.move6 = First_aid()
             self.move7 = None
-            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7] #equipped moves
-            self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
+
+            self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
+            self.movelist = []
 
 
 

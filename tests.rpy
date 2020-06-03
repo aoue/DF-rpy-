@@ -3,7 +3,7 @@
 
 
 #purely combat
-label map00:
+label map0:
 
     #battle test
     python:
@@ -27,7 +27,7 @@ label map00:
 
         pl = [yve, fed, aide]#, boy]
 
-        baddie0 = Unit_groskel(0, "groskel", (1, 1))
+        baddie0 = Unit_groskel(0, "groskel", (1, 1), 1)
         #baddie1 = unit_jowler(0, "jowler", (0, 3), 1)
         #baddie2 = unit_jowler(0, "jowler 2", (3, 4), 1)
         el = [baddie0]#, baddie1, baddie2]
@@ -38,7 +38,7 @@ label map00:
     return
 
 #overworld screen
-label map0:
+label map00:
     python:
         #overworld map test
         ow = Overworld()

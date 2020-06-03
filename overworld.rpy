@@ -116,8 +116,6 @@ init python:
                 viewlist = self.get_inventory().get_wea()
             elif i == 2:
                 viewlist = self.get_inventory().get_acc()
-            else:
-                viewlist = self.get_inventory().get_ite()
             renpy.show_screen("inventory_view", viewlist, self.get_party()[self.get_view()].get_equip_types()[i])
         def swap_gear(self, unit, flag):
             new_gear = renpy.invoke_in_new_context(self.gear_view, flag, unit)
@@ -126,31 +124,35 @@ init python:
                 return
             elif new_gear == -1: #unequip
                 if flag == 1:
-                    self.get_inventory().add_gear(unit.get_armour())
+                    if unit.get_armour().get_type() != 0:
+                        self.get_inventory().add_gear(unit.get_armour())
                     unit.set_armour(None_armour())
 
                 elif flag == 2:
-                    self.get_inventory().add_gear(unit.get_weapon())
+                    if unit.get_weapon().get_type() != 0:
+                        self.get_inventory().add_gear(unit.get_weapon())
                     unit.set_weapon(None_weapon())
 
                 elif flag == 3:
-                    self.get_inventory().add_gear(unit.get_acc())
+                    if unit.get_acc().get_type() != 0:
+                        self.get_inventory().add_gear(unit.get_acc())
                     unit.set_acc(None_accessory())
 
             else:
                 self.get_inventory().remove_gear(new_gear)
                 #put previously equipped gear into inventory and equip new gear
                 if flag == 1:
-                    self.get_inventory().add_gear(unit.get_armour())
+                    if unit.get_armour().get_type() != 0:
+                        self.get_inventory().add_gear(unit.get_armour())
                     unit.set_armour(new_gear)
                 elif flag == 2:
-                    self.get_inventory().add_gear(unit.get_weapon())
+                    if unit.get_weapon().get_type() != 0:
+                        self.get_inventory().add_gear(unit.get_weapon())
                     unit.set_weapon(new_gear)
                 elif flag == 3:
-                    self.get_inventory().add_gear(unit.get_acc())
+                    if unit.get_acc().get_type() != 0:
+                        self.get_inventory().add_gear(unit.get_acc())
                     unit.set_acc(new_gear)
-
-
         def gear_view(self, flag, unit):
             renpy.show(self.get_party_bg())
             renpy.show_screen("party_view", self.get_party(), self.get_view(), self)
@@ -174,18 +176,21 @@ init python:
         #move management
         def put_move(self, unit, spot, rank):
             new_move = renpy.invoke_in_new_context(self.move_view, unit, rank)
-            if new_move == 0:
+            if new_move == 0 or new_move == -1:
                 return
-            unit.get_movelist().remove(new_move)
             unit.get_moves()[spot] = new_move
+            unit.get_movelist().remove(new_move)
+            #renpy.hide_screen("move_browse")
         def swap_move(self, unit, spot, rank):
             new_move = renpy.invoke_in_new_context(self.move_view, unit, rank)
             if new_move == 0: #cancel button
                 return
-
             unit.get_movelist().append(unit.get_moves()[spot])
-            unit.get_movelist().remove(new_move)
-            unit.get_moves()[spot] = new_move
+            if new_move == -1:
+                unit.get_moves()[spot] = None
+            else:
+                unit.get_moves()[spot] = new_move
+                unit.get_movelist().remove(new_move)
         def move_view(self, unit, rank):
             renpy.show(self.get_party_bg())
             renpy.show_screen("party_view", self.get_party(), self.get_view(), self)

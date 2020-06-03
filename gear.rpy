@@ -30,7 +30,7 @@ init -2 python:
         def __init__(self):
             self.title = "" #weapon name
             self.flavour = "" #flavour text
-            self.flag = 0 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 0 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 0 #int. who can equip the gear within its flag.
             self.aff = 0 #affects damage affinity
             self.aff_name = ""
@@ -92,7 +92,7 @@ init -2 python:
         def __init__(self):
             self.title = "Folding Spear" #weapon name
             self.flavour = "A light, flexible spear that folds to a fraction of its size." #flavour text
-            self.flag = 1 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 2 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 1 #int. who can equip the gear within its flag.
             self.aff = 0 #affects damage affinity
             self.aff_name = "Normal"
@@ -113,7 +113,7 @@ init -2 python:
         def __init__(self):
             self.title = "Screwbox" #weapon name
             self.flavour = "Half-inch." #flavour text
-            self.flag = 1 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 2 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 2 #int. who can equip the gear within its flag.
             self.aff = 6 #affects damage affinity
             self.aff_name = "Metal"
@@ -134,7 +134,7 @@ init -2 python:
         def __init__(self):
             self.title = "Regulation Sword" #weapon name
             self.flavour = "A mass-produced sword favoured by government agencies." #flavour text
-            self.flag = 1 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 2 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 3 #int. who can equip the gear within its flag.
             self.aff = 0 #affects damage affinity
             self.aff_name = "Normal"
@@ -155,7 +155,7 @@ init -2 python:
         def __init__(self):
             self.title = "Regulation Rifle" #weapon name
             self.flavour = "A mass-produced rifle favoured by government agencies." #flavour text
-            self.flag = 1 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 2 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 4 #int. who can equip the gear within its flag.
             self.aff = 0 #affects damage affinity
             self.aff_name = "Normal"
@@ -176,7 +176,7 @@ init -2 python:
         def __init__(self):
             self.title = "Beast claw" #weapon name
             self.flavour = "Claws sharpened by the forces of nature." #flavour text
-            self.flag = 1 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 2 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 0 #int. who can equip the gear within its flag.
             self.aff = 1 #affects damage affinity
             self.aff_name = "Beast"
@@ -199,7 +199,7 @@ init -2 python:
         def __init__(self):
             self.title = "Folding Armour" #weapon name
             self.flavour = "A light, flexible armour that folds to a fraction of its size." #flavour text
-            self.flag = 2 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 1 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 1 #int. who can equip the gear within its flag.
             self.aff = 0 #affects damage affinity
             self.aff_name = "Normal"
@@ -220,7 +220,7 @@ init -2 python:
         def __init__(self):
             self.title = "Regulation Armour" #weapon name
             self.flavour = "Widespread armour." #flavour text
-            self.flag = 2 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 1 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 1 #int. who can equip the gear within its flag.
             self.aff = 0 #affects damage affinity
             self.aff_name = "Normal"
@@ -241,7 +241,7 @@ init -2 python:
         def __init__(self):
             self.title = "Bascule Armour" #weapon name
             self.flavour = "Strong armour, perfect for getting roughed about in." #flavour text
-            self.flag = 2 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 1 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 3 #int. who can equip the gear within its flag.
             self.aff = 6 #affects damage affinity
             self.aff_name = "Metal"
@@ -262,7 +262,7 @@ init -2 python:
         def __init__(self):
             self.title = "Smock Armour" #weapon name
             self.flavour = "A smock, best suited for off the battlefield." #flavour text
-            self.flag = 2 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 1 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 1 #int. who can equip the gear within its flag.
             self.passive = 0 #0: has no passive. 1: has a passive.
             self.aff_name = "Normal"
@@ -283,7 +283,7 @@ init -2 python:
         def __init__(self):
             self.title = "Beast Skin" #weapon name
             self.flavour = "Skin hardened by the forces of nature." #flavour text
-            self.flag = 2 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 1 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 0 #int. who can equip the gear within its flag.
             self.aff = 1 #affects damage affinity
             self.aff_name = "Beast"
@@ -307,7 +307,7 @@ init -2 python:
         def __init__(self):
             self.title = "Plain Headband" #weapon name
             self.flavour = "A plain headband Yve brought with her." #flavour text
-            self.flag = 3 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 3 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 1 #int. who can equip the gear within its flag.
             self.aff_name = "-"
             self.passive = 0 #0: has no passive. 1: has a passive.
@@ -327,7 +327,7 @@ init -2 python:
         def __init__(self):
             self.title = "Plain Belt" #weapon name
             self.flavour = "A plain belt." #flavour text
-            self.flag = 3 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 3 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 2 #int. who can equip the gear within its flag.
             self.aff_name = "-"
             self.passive = 0 #0: has no passive. 1: has a passive.
@@ -351,7 +351,7 @@ init -2 python:
         def __init__(self):
             self.title = "Nothing" #weapon names
             self.flavour = "Nothing." #flavour text
-            self.flag = 3 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 1 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 0 #int. who can equip the gear within its flag.
             self.passive = 0 #0: has no passive. 1: has a passive.
             self.aff_name = "-"
@@ -371,7 +371,7 @@ init -2 python:
         def __init__(self):
             self.title = "Nothing" #weapon names
             self.flavour = "Nothing." #flavour text
-            self.flag = 1 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 2 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 0 #int. who can equip the gear within its flag.
             self.aff_name = "-"
             self.passive = 0 #0: has no passive. 1: has a passive.
@@ -391,7 +391,7 @@ init -2 python:
         def __init__(self):
             self.title = "Nothing" #weapon names
             self.flavour = "Nothing." #flavour text
-            self.flag = 3 #1,2,3. corresponds to 1:weapon, 2:armour, 3:accessory
+            self.flag = 3 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 0 #int. who can equip the gear within its flag.
             self.aff_name = "-"
             self.passive = 0 #0: has no passive. 1: has a passive.

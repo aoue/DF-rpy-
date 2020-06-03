@@ -29,6 +29,8 @@ init python:
 
         #add to lists
         def add_gear(self, gear):
+            if gear.get_type == 0:
+                return
             if gear.get_flag() == 1:
                 self.get_arm().append(gear)
             elif gear.get_flag() == 2:
@@ -39,6 +41,8 @@ init python:
                 self.get_ite().append(gear)
 
         def remove_gear(self, gear):
+            if gear.get_type == 0:
+                return
             if gear.get_flag() == 1:
                 self.get_arm().remove(gear)
             elif gear.get_flag() == 2:

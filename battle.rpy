@@ -146,7 +146,8 @@ init -2 python:
             renpy.hide(self.get_bg())
         def game_over(self):
             pass
-            #return to title screen
+            #redo battle?
+            #return to title?
 
         #--combat round. uses everything
         def unit_dots(self):

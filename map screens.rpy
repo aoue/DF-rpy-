@@ -14,7 +14,7 @@ screen inventory_view(viewlist, equip_type):
         vbox:
             spacing 20
             for gear in viewlist:
-                if gear.get_type() <= equip_type:
+                if gear.get_type() in equip_type:
                     textbutton gear.get_title() action NullAction() hovered Function(ow.gear_browse, gear) unhovered Hide("gear_browse")
 screen move_view(viewlist):
     #move vp on the right.
@@ -28,7 +28,6 @@ screen move_view(viewlist):
         vbox:
             spacing 20
             for move in viewlist:
-                #if gear.get_type() == type:
                 textbutton move.get_title() action NullAction() hovered Function(ow.move_browse, move) unhovered Hide("move_browse")
 screen party_view(party, i, ow):
     zorder 100
@@ -154,7 +153,7 @@ screen party_view(party, i, ow):
         if party[i].get_moves()[6] == None:
             textbutton "Nothing" action Function(ow.put_move, party[i], 6, 0)
         else:
-            textbutton party[i].get_moves()[x].get_title() action Function(ow.swap_move, party[i], 6, 0) hovered Function(ow.move_browse, party[i].get_moves()[6]) unhovered Hide("move_browse")
+            textbutton party[i].get_moves()[6].get_title() action Function(ow.swap_move, party[i], 6, 0) hovered Function(ow.move_browse, party[i].get_moves()[6]) unhovered Hide("move_browse")
 screen gear_swap(viewlist, equip_type):
     #inventory: overworld inventory object
     modal True
@@ -172,9 +171,8 @@ screen gear_swap(viewlist, equip_type):
             textbutton "Unequip" action Return(-1)
 
             for gear in viewlist:
-                if gear.get_type() == equip_type:
+                if gear.get_type() in equip_type:
                     textbutton gear.get_title() action Return(gear) hovered Function(ow.gear_browse, gear) unhovered Hide("gear_browse")
-
 screen gear_browse(gear):
     zorder 101
     frame: #obviously all the positioning aspects will have to be perfected.
@@ -209,6 +207,9 @@ screen move_swap(movelist, rank):
 
         vbox:
             spacing 20
+
+            textbutton "Unequip" action Return(-1)
+
             for move in movelist:
                 if rank == 0:
                     textbutton move.get_title() action Return(move) hovered Function(ow.move_browse, move) unhovered Hide("move_browse")
@@ -225,15 +226,20 @@ screen move_browse(move):
         vbox:
             text move.get_title()
             text move.get_flavour()
-            text "drain(a/s) = " + str(move.get_able_drain()) + "/" + str(move.get_stamina_drain())
-            text "rank = " + str(move.get_rank())
-            if move.get_damage_type() == 0:
-                text "power = " + str(move.get_power()) + " (Physical)"
+            text "drain(a/s) = " + str(move.get_able_drain()) + "/" + str(move.get_stamina_drain()) size 20
+            if move.get_rank() == 1:
+                text "rank = Front" size 20
+            elif move.get_rank() == 2:
+                text "rank = Back" size 20
             else:
-                text "power = " + str(move.get_power()) + " (Magical)"
+                text "rank = Wild" size 20
+            if move.get_damage_type() == 0:
+                text "power = " + str(move.get_power()) + " (Physical)" size 20
+            else:
+                text "power = " + str(move.get_power()) + " (Magical)" size 20
             if move.get_status_only() == 0:
-                text "hit bonus = " + str(move.get_hit())
-                text "affinity = " + str(move.get_element_name()) #<-- replace text with image.
+                text "hit bonus = " + str(move.get_hit()) size 20
+                text "affinity = " + str(move.get_element_name()) size 20 #<-- replace text with image.
 
 ## -- HUB SCREENS -- ##
 #TODO

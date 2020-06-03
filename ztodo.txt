@@ -1,13 +1,6 @@
 ------the very next thing(s)------
 
-unequip moves. in move swap, add a new button that swaps the move with None.
--don't add the 'none equipment' to the inventory
-
-inventory mix up. it's probably something off with the flags. weapons -> armour, armour -> nothing.
-
-when initializing a unit, set hp, dodge, etc, to the actual value. need to do for: federal, aide, jowler, groskel
-
-only call a room's when entering if the room is not explored.
+only call room event when entering if the room is not explored.
 
 level up screen, focus, and level up.
 -level cap? it would be increased by clearing achievements or something. i.e. kill optional bosses, complete optional missions. of course,  it will increase as the story progresses too. it means the player can't just power level past any challenge in the mechanics.
