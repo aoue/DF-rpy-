@@ -1,30 +1,34 @@
+Things to keep in mind:
+-anywhere there is a 'renpy.call', it should be a 'renpy.call_in_new_context.' this allows us to use return in the label instead of return the whole damn world.
+-if saving breaks (pickling), there's some steps at the top of battle.rpy that might be useful
+
+
 ------the very next thing(s)------
 
-only call room event when entering if the room is not explored.
 
-level up screen, focus, and level up.
--level cap? it would be increased by clearing achievements or something. i.e. kill optional bosses, complete optional missions. of course,  it will increase as the story progresses too. it means the player can't just power level past any challenge in the mechanics.
--level up screen, dramatic pose.
--if it's a choose your focus level-up. then do a very dramatic picture (press a to grab destiny) with buttons, one for each focus. "unit name stands at a crossroads."
-    -when a focus is chosen, unlock a flashback for that character's backstory that can be viewed back at the hub. one flashback per focus per time chosen. the flashback has to do with the focus, obviously.
-    -it should be clear that a focus influences story, in the way that the character responds.
 
-overworld map:
-hub:
- -room selection on the bottom
- -crafting
- -talk to all the other characters
- -call meeting
+focus/level up stuff:
+-level up screen: shows xp gained towards next level.
+    -unit variable, focus list. a list of every focus the unit has available to them. at certain levels, add more focuses into the list.
+    -show exact exp unit needs for their level up.
+    -changing focus (flashback unlocked at hub, focus details when choosing focus)
+
+focus list. it's the list of every focus the unit has access to.
+for learning new moves. there needs to be a way to convert the unit's level into an index for the focus to assign the correct move.
+
+change adrenaline. it's too useful. each of yve's adrenaline-type moves should only do one thing.
 
 handler's textbox. on the side. shows up while the other textbox is still on screen. there can be two conversations ongoing at once.
-we can also use if for phone calls.
+we can also use for phone calls.
 
-move passives. Call:
+unit and gear passives. Call:
 -start of round.
--when a unit attacks
--when a unit is attacked
+-when the unit attacks
+-when the unit is attacked
+-end of round.
+the function unit.do_passives() will check the passives for the unit and all of the gear, and run the function if the time is right.
+Every passive has a type that corresponds to a time when the passive should occur.
 
-for some reason, sometimes damage is dealt in floats. don't know why. fix it by returning the integer function of the damage value. might be in the round function for spread in the calculate damage function. That's my best guess.
 
 combat view:
 what there is now will not work. ideas:
@@ -33,23 +37,21 @@ what there is now will not work. ideas:
  -fire emblem 7 size/style sprites
 
 ------what needs doing-------
-should weapons also affect defense/dodge and armor affects offense/hit? makes for more interesting gear. think on it.
 
-evo moves/special moves/whatever if we're doing them. like ebf's limit breaks. move 8. a unit may acquire multiple, you have to equip/manage it like everything else.
--once a unit has filled its special gauge or whatever, it MUST use it's limit break on its next turn. no holding on to it. resets at the start of each battle.
+overworld map:
+hub:
+ -room selection on the bottom
+ -crafting
+ -talk to all the other characters
+ -call meeting
+
+evo moves?
 
 hard cap on buffs? I don't see why. Rather than hard capping buffs, they should just be designed to be impractical.
 
 unit passive abilities. (can be stances, i.e. stance 0 and stance 1, which will never be decremented when the others are.)
 
-
-hover over a move: power, element, physical or magical, diagram of what it hits, clearance, flavor text, stamina/able drain,
-
-a battle log on the right or something?
-
-inventory system (acquire and change gear. should be easy. make an inventory list and just whatever.)
-
-make the glossary (cannibalize the letter viewport grid)
+battle log? [unit name] uses [move name] and hits [target name] for [damage] (list multiple targets too.) Would be a scrollable viewport kind of thing.
 
 figure out why my Unicode characters aren't working. ex: \u2603 should be a snowman
 
@@ -72,9 +74,7 @@ combo moves:
 defeated allies stay on the board. they can be revived.
 defeated enemies go off the board.
 
-enemy reinforcements during a battle
-
-switching out a unit midbattle for one in reserve?
+switching out a unit midbattle for one in reserve. No problem. pl is in the battle, so select a unit in dungeon party that's not in pl, and swap one into pl.
 
 
 

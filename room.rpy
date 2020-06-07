@@ -72,7 +72,7 @@ init python:
             pass
         def do_event(self, dungeon):
             #jump to a label.
-            #renpy.call("room", dungeon)
+            #renpy.call_in_new_context("room", dungeon)
             pass
         def room_action(self, dungeon):
             #repeatable events in the room. i.e. heal, exit.
@@ -107,7 +107,7 @@ init python:
             self.is_exit = 1
 
         def do_event(self, dungeon):
-            renpy.call(self.get_room_label(), dungeon)
+            renpy.call_in_new_context(self.get_room_label(), dungeon)
         def room_action(self, dungeon):
             #dungeon.exit_dungeon()
             pass
@@ -138,7 +138,7 @@ init python:
             self.action_title = "fullheal room"
 
         def do_event(self, dungeon):
-            renpy.call(self.get_room_label(), dungeon)
+            renpy.call_in_new_context(self.get_room_label(), dungeon)
         def room_action(self, dungeon):
             for unit in dungeon.get_party():
                 unit.set_hp(unit.get_hpmax())
@@ -168,8 +168,7 @@ init python:
             self.is_exit = 0
 
         def do_event(self, dungeon):
-            if self.get_explored() == 1:
-                renpy.call(self.get_room_label(), dungeon)
+            renpy.call_in_new_context(self.get_room_label(), dungeon)
 
     ## -- COMBAT ROOMS -- ##
     class Combat_room(Room):
@@ -188,11 +187,16 @@ init python:
             self.fight = 1
             self.loot = 0
 
-            self.room_label = "room"
+            self.room_label = "room_combat"
             self.poi = 0
             self.poi_label = ""
             self.has_action = 0
             self.is_exit = 0
+
+        def do_event(self, dungeon):
+            #dungeon.encounter(self)
+            #renpy.call_in_new_context(self.get_room_label(), dungeon, self)
+            renpy.invoke_in_new_context(dungeon.encounter, self)
 
 
         def get_baddies(self, dungeon):

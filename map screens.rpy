@@ -98,7 +98,7 @@ screen party_view(party, i, ow):
 
 
     #lvl and focus
-    text "Lvl " + str(party[i].get_lvl()) + " " + party[i].get_focus().get_title() pos (445, 20)
+    text "Lvl " + str(party[i].get_lvl()) + " " + party[i].get_foc().get_title() pos (445, 20)
 
     #next unit button on midtop right: (i += 1 OR if i+1 > len(party), i = 0). dissolve.
 

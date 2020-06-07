@@ -229,16 +229,18 @@ init -2 python:
             self.set_ad_loss(int(unit.get_hpmax_actual()*0.5) + (10*unit.get_lvl()))
 
             #-increase current hp by (1.5*max hp + 5*lvl)
-            unit.set_hp(unit.get_hp() + self.get_ad_loss())
-
-            #unit.take_heal(self.get_ad_loss())
+            #unit.set_hp(unit.get_hp() + self.get_ad_loss())
+            showlist = []
+            unit.take_heal(unit, self.get_ad_loss(), showlist, 1)
+            #shows properly
+            renpy.show_screen("show_heal", showlist, "", unit)
 
             #-increase physa mod by .5
             self.set_physa(self.get_physa() + 0.5)
 
             #show
             targetlist = [(unit.get_point().get_x(), unit.get_point().get_y(), self.get_ad_loss(), unit.get_iff())]
-            renpy.show_screen("show_heal", targetlist, "", unit) #shows properly
+
 
         def exit_adrenaline(self, unit):
             #if above max health thanks to adrenaline hp buff, remove hp buff.

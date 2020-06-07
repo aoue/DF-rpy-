@@ -14,11 +14,42 @@
 # 0: no dot
 # 1: poison
 #--------------------------------
+#---TO ADD ---
+#how do we feel about 'slayer' moves. i.e. bonus against a certain type of units: beast slayer, man slayer, etc. i don't like them.
+
+
+#tori:
+#time warp: makes buffs run their course. set time remaining on target's buffs to half their current duration, or to 0 if current duration == 1. ??. or expire all buffs/dots on selected units? cool.
+#energy transfer. transfers stamina, energy to target.
+
+#boy:
+#screw: power = 3 or something. stam cost = 5 or something. purpose is to use up enemies kindara/shatter point/defensive stances, yeah.
+
+#yve:
+#flourish.
+#fast hit. more damage the more able units there are on the field.
+#double hit. hits the same target twice.
+#thrust. a longer version of pierce.
+#flow. increases dodge, hit stances. enter the flow stance. (lose dodge slower, regain it faster)
+#shock. heal hp based on how much hp yve is down. enter exhaustion state.
+
+#nai:
+#misdirect. target self or ally. lower priority so the enemy doesn't target you as often.
+#enemy:
+#pull/push units. get the player units out of position.
 
 init -3 python:
     #--- GUIDELINES ---
-
     #any move that sets a stance first checks if the stance is already applied. If it is, the move only resets its duration.
+
+
+
+
+
+
+
+
+
 
     #--- MOVES ---
     class Move():
@@ -170,7 +201,7 @@ init -3 python:
                     showlist.append(target)
                 elif target != None:
                     if target.get_ooa() == 0:
-                        target.take_heal(unit, unit.calc_heal(target, self), showlist) #appends to showlist inside here
+                        target.take_heal(unit, unit.calc_heal(target, self), showlist, 0) #appends to showlist inside here
 
             if len(showlist) > 0:
                 renpy.show_screen("show_heal", showlist, self.get_title(), unit)
@@ -304,7 +335,7 @@ init -3 python:
             self.stamina_drain = 30
             self.energy_drain = 1
             self.able_drain = 2
-            self.power = 35
+            self.power = 1000#35
             self.hit = -5
             self.damage_type = 0
             self.element = -1
@@ -361,7 +392,7 @@ init -3 python:
             if unit.get_stance().get_adrenaline() <= 0:
                 unit.get_stance().enter_adrenaline(unit)
             else:
-                unit.get_stance().set_adrenaline(4)
+                unit.get_stance().set_adrenaline(5)
     class Whirl(Move):
         #3x3 cross minus the center square
         #med damage
@@ -657,30 +688,6 @@ init -3 python:
 
 
 
-
-
-
-
-
-#---TO ADD ---
-#tori:
-#time warp: makes buffs run their course. set time remaining on target's buffs to half their current duration, or to 0 if current duration == 1. ??. or expire all buffs/dots on selected units? cool.
-#energy transfer. transfers stamina, energy to target.
-
-#boy:
-#screw: power = 3 or something. stam cost = 5 or something. purpose is to use up enemies kindara/shatter point/defensive stances, yeah.
-
-#yve:
-#flourish. heavy stam drain, but no able.
-#fast hit. more damage the more able units there are on the field.
-#double hit. hits twice. (while)
-#trance. increase able and stamina regen at the start of each round.
-
-#nai:
-#misdirect. target self or ally. lower priority so the enemy doesn't target you as often.
-
-#enemy:
-#pull/push units. get the player units out of position.
 
 
 

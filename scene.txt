@@ -3,18 +3,38 @@ maintain a list of all backgrounds and all character expressions. thanks.
 
 --- SCENES ---
 
-flashback0: some trashy motel room. rose petals, wine, etc. are all over the floor, tables, and bed. We can see the bodies of dg's mother and some guy. there's blood that we can see on the ground and through the clothes.
+sasaches_lobby: the lobby of the motel 'sasaches'
+sasaches_lobby_2: the lobby of the motel 'sasaches'. we're closer to the stairs, now, and the aide there is saluting
+sasaches_lobby_3: the lobby of the motel 'sasaches'. we're closer to the stairs, now, and the aide there is at ease
+sasaches_stairs: staircase of sasache.
+sasaches_inside: some trashy motel room. rose petals, wine, etc. are all over the floor, tables, and bed. We can see the bodies of dg's mother and some guy. there's blood that we can see on the ground and through the clothes. In the foreground, there's the back of the federal. Further in, there's some aides looking through the items.
+sasaches_inside_close: closeup of the corpses. the woman should be smiling or something.
+
+title: the game's title screen.
+
+taxi: yve inside a taxi at the beginning.
+taxi_meter: zoomed in to the meter of the taxi. shows $187.79
+
+grandarms: in front of the hotel, the grand arms
+grandarms_inside: big chandeliers, very fancy hotel lobby.
+
+--- TRACKS ---
+
+track0: ambient city sounds.
+track1: episode1 overworld theme.
+track2: grandarms. play inside rich/nice building. violin.
 
 
---- PHONE ---
+--- CHARACTERSE ---
 
+fe: federal
+ai: federal aide
 
+ta: taxi driver
 
+y: Yvette
 
-
-
-
-
+h: Yvette's handler
 
 
 

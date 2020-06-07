@@ -195,7 +195,7 @@ init -1 python:
             return self.armour
         def get_acc(self):
             return self.acc
-        def get_focus(self):
+        def get_foc(self):
             return self.foc
         def get_pattern(self):
             return self.pattern
@@ -282,8 +282,11 @@ init -1 python:
         def set_flavour(self, i, flavour):
             self.flavour[i] = flavour
         #useful functions
-        def level_up(self):
-            self.get_foc().level_up(self)
+        def get_next_level_exp(self):
+            #returns the exp the unit needs to advance to the next level
+            nextlvl = 100 + (10*self.get_lvl()) + (5*self.get_lvl()*self.get_lvl())
+            return nextlvl
+
         def end_turn(self):
             self.set_turn_over(1)
             self.get_stance().end_turn(self)
@@ -312,6 +315,7 @@ init -1 python:
                 self.set_icon("dead_icon")
 
                 if self.get_iff() == 1:
+                    battle.set_totalexp(battle.get_totalexp() + self.get_exp())
                     battle.get_enemymap().remove_unit(self)
                     battle.get_el().remove(self)
 
@@ -363,15 +367,22 @@ init -1 python:
             heal = max((((astats + cmove.get_power()) / dstats) * cmove.get_power() * spread), 0)
 
             return int(heal)
-        def take_heal(self, dealer, heal, showlist):
+        def take_heal(self, dealer, heal, showlist, maxes):
+            #maxes: if 0, the heal cannot exceed unit's actual max health. if 1: it can.
             #check stances: i.e. reciprocal
 
-            if self.get_hp() >= self.get_hpmax_actual():
-                #showlist.append((self, "maxed"))
-                showlist.append((self.get_point().get_x(), self.get_point().get_y(), -1, self.get_iff()))
+            #any stances that do: take 2x heals, 0.5x heals, etc. need to be handled in here.
+
+            if maxes == 0:
+                if self.get_hp() >= self.get_hpmax_actual():
+                    showlist.append((self.get_point().get_x(), self.get_point().get_y(), -1, self.get_iff()))
+                    return
+            elif maxes == 1:
+                self.set_hp(self.get_hp()+heal)
             else:
                 self.set_hp(min(self.get_hp()+heal, self.get_hpmax_actual()))
-                showlist.append((self.get_point().get_x(), self.get_point().get_y(), heal, self.get_iff()))
+
+            showlist.append((self.get_point().get_x(), self.get_point().get_y(), heal, self.get_iff()))
 
         def take_heal_oob(self, dealer, heal):
             self.set_hp(min(self.get_hp()+heal, self.get_hpmax_actual()))
@@ -420,6 +431,8 @@ init -1 python:
             #damage: an int.
             #showlist: for showing damage
 
+            #any stances that do: take 2x damage, 0.5x damage, etc. need to be handled in here.
+
             if damage == -1: #dodge
                 showlist.append((self.get_point().get_x(), self.get_point().get_y(), "Dodge", self.get_iff()))
 
@@ -430,17 +443,17 @@ init -1 python:
 
                 #dodge go down
                 if self.get_dodgemax_actual() > 0:
-                    self.set_dodge(max(self.get_dodge()-5, 0))
+                    self.set_dodge(max(self.get_dodge()-10, 0))
 
                 return
 
             if self.get_dodgemax_actual() > 0:
-                self.set_dodge(min(self.get_dodge()+5, self.get_dodgemax_actual()))
+                self.set_dodge(min(self.get_dodge()+10, self.get_dodgemax_actual()))
 
 
             #look through stances: the order is important.
             if self.get_stance().get_exhausted() > 0: #if exhausted, take 1.2x damage
-                damage = damage * 1.5
+                damage = int(damage * 1.5)
 
             self.get_stance().move_dot(self, dot, duration)
 
@@ -448,6 +461,7 @@ init -1 python:
             showlist.append((self.get_point().get_x(), self.get_point().get_y(), damage, self.get_iff()))
             self.set_hp(max(self.get_hp()-damage, 0))
             self.check_dead(battle)
+
         def use_move(self, cmove, battle):
             #legend:
             # cmove = the chosen move. e.g. hit. it's an object.
@@ -540,7 +554,7 @@ init -1 python:
             self.move4 = Walk()
             self.move5 = Adrenaline()
             self.move6 = None
-            self.move7 = Whirl()
+            self.move7 = None
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []

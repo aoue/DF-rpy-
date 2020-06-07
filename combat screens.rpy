@@ -161,7 +161,7 @@ screen pick_move(unit, battle):
             textbutton "Cancel" action Return
 
 screen move_browse_b(move):
-    zorder 101
+    zorder 108
     frame: #obviously all the positioning aspects will have to be perfected.
         background Solid("#0000007F") # for transparency. colour = rrggbbaa where red green blue alpha
         area(910, 500, 300, 200)
@@ -317,7 +317,6 @@ screen enemy_highlight_extra(unit, cmove, row, column):
         for c in range(column, column+2):
             for r in range(row, row+1):
                 add "tile_e_hovered" at e_tile_hover(r, c)
-
 
     elif cmove.get_type() == 3: # 1x3
         $column = min(column, 2)

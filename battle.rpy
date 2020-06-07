@@ -4,7 +4,7 @@ init -2 python:
 
 
     ##save testing stuff##
-    config.use_cpickle = False
+    #config.use_cpickle = False # <-- if saving breaks again, uncomment this line.
 
     #--- BATTLE ---#
     class Map():
@@ -52,11 +52,12 @@ init -2 python:
 
 
     class Battle():
-        def __init__(self, rounds, pl, el, bg):
+        def __init__(self, rounds, party, pl, el, bg):
             self.rounds = rounds #number of rounds the battle will last. negative for infinite.
             self.bg = bg
             self.phase = ""
-            self.pl = pl
+            self.party = party #all the units in the player's party. necessary for exp and subs.
+            self.pl = pl #all the currently active units
             self.el = el
             self.pable = 0
             self.eable = 0
@@ -64,8 +65,11 @@ init -2 python:
             self.last_turn = 1
             self.allymap = Map(pl)
             self.enemymap = Map(el)
+            self.totalexp = 0
 
         #getters
+        def get_party(self):
+            return self.party
         def get_rounds(self):
             return self.rounds
         def get_bg(self):
@@ -88,6 +92,8 @@ init -2 python:
             return self.allymap
         def get_enemymap(self):
             return self.enemymap
+        def get_totalexp(self):
+            return self.totalexp
         #setters
         def set_rounds(self, rounds):
             self.rounds = rounds
@@ -103,6 +109,8 @@ init -2 python:
             self.ableleft = ableleft
         def set_last_turn(self, last):
             self.last_turn = last
+        def set_totalexp(self, exp):
+            self.totalexp = exp
         #--during battle
         def move_browse_b(self, move):
             renpy.show_screen("move_browse_b", move)
@@ -144,6 +152,19 @@ init -2 python:
             renpy.hide_screen("show_units")
             renpy.hide_screen("combatinfo")
             renpy.hide(self.get_bg())
+
+            #level up stuff
+            showlist = []
+            for unit in self.get_party():
+                unit.post_battle()
+                unit.get_foc().level_up(unit, self.get_totalexp(), showlist)
+
+                renpy.show_screen("level_up", showlist) #shows the level up screen, so the player knows what's going on behind the scenes.
+
+
+            renpy.pause()
+            renpy.hide_screen("level_up")
+
         def game_over(self):
             pass
             #redo battle?

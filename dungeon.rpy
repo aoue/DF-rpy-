@@ -20,8 +20,8 @@ init python:
 
             self.map = [
                 [None, self.entrance, Fullheal_room(2,0,(0,0,1,1))],
-                [Event_room(0,1,(0,1,1,0)), Event_room(1,1,(1,0,0,1)), Event_room(2,1,(1,0,1,0))],
-                [Event_room(0,2,(1,1,0,0)), Event_room(1,2,(0,1,1,1)), Event_room(2,2,(1,0,1,1))],
+                [Combat_room(0,1,(0,1,1,0)), Combat_room(1,1,(1,0,0,1)), Event_room(2,1,(1,0,1,0))],
+                [Combat_room(0,2,(1,1,0,0)), Combat_room(1,2,(0,1,1,1)), Event_room(2,2,(1,0,1,1))],
                 [None, Event_room(1,3,(1,0,1,0)), Event_room(2,3,(1,0,0,0))],
                 [None, Event_room(1,4,(1,0,1,0)), None],
                 [None, Event_room(1,5,(0,0,0,0)), None]
@@ -64,16 +64,23 @@ init python:
         def exit_dungeon(self):
             #leaves dungeon. returns control to the overworld.
             self.get_master().set_in_dungeon(2)
+            #renpy.hide_screen("dungeon_map")
+            #self.get_master().show_overworld()
+            renpy.call("test_dungeon_entrance")
 
         def move_spot(self, x, y):
             self.set_x(x)
             self.set_y(y)
-            self.find_room().set_explored(1)
 
-            if self.find_room().get_fight() == 1:
-                renpy.invoke_in_new_context(self.encounter, self.find_room())
-            else:
+            if self.find_room().get_explored() == 0:
+                self.find_room().set_explored(1)
                 self.find_room().do_event(self)
+
+                #self.find_room().do_event(self)
+                #if self.find_room().get_fight() == 1:
+                #    renpy.invoke_in_new_context(self.encounter, self.find_room())
+
+
         def find_room(self):
             #finds the room the party is in
             return self.get_map()[self.get_y()][self.get_x()]
@@ -84,7 +91,7 @@ init python:
                 self.hold[2].append(nl[x].get_point().get_y())
         def show_dungeon(self): #(self, floor)
             renpy.hide_screen("dungeon_map")
-            renpy.call_screen("dungeon_map", self, self.get_map(), self.get_spot())
+            renpy.call_screen("dungeon_map", self, self.get_map())
             #renpy.hide_screen("dungeon_map")
         def encounter(self, room):
             el = room.get_baddies(self)
@@ -100,16 +107,21 @@ init python:
                 deployer.remember_deployment(self.get_hold()[0], self.get_hold()[1], self.get_hold()[2])
                 self.remember_hold(deployer.get_player())
 
-            battle_ins = Battle(room.get_rounds(), deployer.get_player(), el, "battlefield0")
+            battle_ins = Battle(room.get_rounds(), self.get_party(), deployer.get_player(), el, "battlefield0")
             battle_ins.combat_round()
 
-            for unit in self.get_party():
-                unit.post_battle()
+            #post battle. every unit in the party gets exp.
+            #showlist = []
+            #for unit in self.get_party():
+            #    unit.post_battle()
+            #    unit.get_foc().level_up(unit, battle_ins.get_total_exp(), showlist)
+            #
+            #    renpy.show_screen("level_up", showlist) #shows the level up screen
+
 
             allow_save = True
             allow_load = True
 
-            renpy.call("room", self)
         def find_trouble(self):
             #generates an encounter based on the dungeon and the threat level.
             pass

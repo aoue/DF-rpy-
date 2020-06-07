@@ -17,6 +17,7 @@ init python:
             self.restam = 5
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
+            self.exp = 0 #how much exp the unit gives when defeated.
 
             self.stance = Stances() #unit's status effects
             self.hpmax = 80
@@ -56,6 +57,8 @@ init python:
             self.discipline = (0,0) #range that affects unit's priority. the smaller the range, the less random.
 
         #getters
+        def get_exp(self):
+            return self.exp
         def get_pridef(self):
             return self.pridef
         def get_pri(self):
@@ -261,6 +264,7 @@ init python:
             self.restam = 5
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
+            self.exp = 80 #10
 
             self.stance = Stances() #unit's status effects
 
@@ -312,6 +316,7 @@ init python:
             self.restam = 5
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
+            self.exp = 80
 
             self.stance = Stances() #unit's status effects
 

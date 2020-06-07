@@ -60,6 +60,11 @@ label before_main_menu:
 label start:
     stop music fadeout 1.0
 
+    #here we're going to be initializing a bunch of units.
+    python:
+        #some globals
+        LEVELCAP = 10 #a unit's level cannot exceed the level cap.
+
     #jump
     #(for testing a specific label)
 

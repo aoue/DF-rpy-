@@ -63,11 +63,11 @@ screen oob_target_select(dungeon, unit, move):
 
 
 ## -- DUNGEON SCREENS -- ##
-screen dungeon_map(dungeon, map, spot):
+screen dungeon_map(dungeon, map):
     #map: the connected net of rooms
     #spot: tuple of the party's position
 
-    #room menu/skills stuff
+    #room menu/skills menu
     vbox:
         yalign 0.05
         xalign 1.0
@@ -79,7 +79,7 @@ screen dungeon_map(dungeon, map, spot):
         # room specific stuff
         if dungeon.find_room().get_has_action() == 1:
             if dungeon.find_room().get_is_exit() == 1:
-                textbutton dungeon.find_room().get_action_title() action Function(dungeon.exit_dungeon), Return
+                textbutton dungeon.find_room().get_action_title() action Function(dungeon.exit_dungeon)
             else:
                 textbutton dungeon.find_room().get_action_title() action Function(dungeon.find_room().room_action, dungeon)
 
@@ -89,7 +89,7 @@ screen dungeon_map(dungeon, map, spot):
         if dungeon.find_room().get_poi() == 1:
             textbutton "Point of Interest" action Function(dungeon.find_room().poi_event(), dungeon)
 
-    #party stuff
+    #party menu
     vbox:
         yalign 0.05
         xalign 0.0
@@ -140,8 +140,8 @@ screen dungeon_map(dungeon, map, spot):
                         else:
                             idle "room_ex"
 
-                        if (abs(spot[0] - room.get_x()) == 1 and spot[1] - room.get_y() == 0) or (spot[0] - room.get_x() == 0 and abs(spot[1] - room.get_y()) == 1):
-                            if (spot[1] < room.get_y() and room.get_connect()[0] == 1) or (spot[0] > room.get_x() and room.get_connect()[1] == 1) or (spot[1] > room.get_y() and room.get_connect()[2] == 1) or (spot[0] < room.get_x() and room.get_connect()[3] == 1):
+                        if (abs(dungeon.get_spot()[0] - room.get_x()) == 1 and dungeon.get_spot()[1] - room.get_y() == 0) or (dungeon.get_spot()[0] - room.get_x() == 0 and abs(dungeon.get_spot()[1] - room.get_y()) == 1):
+                            if (dungeon.get_spot()[1] < room.get_y() and room.get_connect()[0] == 1) or (dungeon.get_spot()[0] > room.get_x() and room.get_connect()[1] == 1) or (dungeon.get_spot()[1] > room.get_y() and room.get_connect()[2] == 1) or (dungeon.get_spot()[0] < room.get_x() and room.get_connect()[3] == 1):
                                 hover "room_hover"
                                 action Function(dungeon.move_spot, room.get_x(), room.get_y())
 
@@ -168,8 +168,11 @@ screen dungeon_map(dungeon, map, spot):
 
 label room(dungeon):
     "room: [dungeon.spot_x], [dungeon.spot_y] event"
-    python:
-        dungeon.show_dungeon()
+    #python:
+    #    dungeon.show_dungeon()
+    return
+
+    #return
     #return
 
 label test_dungeon_entrance:
@@ -186,4 +189,5 @@ label test_dungeon_entrance:
             ow.show_overworld()
         else:
             ow.show_dungeon()
-    #return
+
+#eof
