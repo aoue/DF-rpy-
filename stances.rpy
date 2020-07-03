@@ -21,6 +21,7 @@ init -2 python:
             self.ex = 0 #exhausted
             self.ki = 0 #kindara
             self.sh = 0 #shatter point
+            self.mtn = 0 #of the mountain
 
             #dots/hots
             self.be = -1 #bleeding
@@ -45,6 +46,8 @@ init -2 python:
             self.md = 1.0 #mag d
 
         #getters
+        def get_mtn(self):
+            return self.mtn
         def get_dot(self):
             return self.dot
         def get_poison(self):
@@ -89,6 +92,8 @@ init -2 python:
             return self.howl
 
         #setters
+        def set_mtn(self, x):
+            self.mtn = x
         def set_dot(self, x):
             self.dot = x
         def set_poison(self, x):
@@ -143,6 +148,7 @@ init -2 python:
             self.set_exhausted(0)
             self.set_kindara(0)
             self.set_shatter(0)
+            self.set_mtn(0)
 
             self.set_bleeding(-1)
             self.set_poison(-1)

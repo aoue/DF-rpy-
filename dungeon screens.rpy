@@ -7,28 +7,30 @@ screen oob_unit_tab(dungeon):
 
     #adds the background
     #add dungeon.get_bg()
+    vbox:
+        xpos 800
+        ypos 0
 
-    textbutton "Close" action Hide("oob_unit_tab"), Hide("oob_move_select"), Hide("oob_target_select") pos (60, 0)
+        textbutton "Close" action Hide("oob_unit_tab"), Hide("oob_move_select"), Hide("oob_target_select")
 
-    #shows a column of all units in party. click a unit to see/select a move to use
-    viewport:
-        xpos 60
-        ypos 25
-        mousewheel True
-        vbox:
-            #xpos 500
-            #ypos 400
+        #shows a column of all units in party. click a unit to see/select a move to use
+        viewport:
 
-            for unit in dungeon.get_party():
-                textbutton unit.get_name() action Hide("oob_move_select"), Hide("oob_target_select"), Function(dungeon.out_of_battle_skills, unit)
+            mousewheel True
+            vbox:
+                #xpos 500
+                #ypos 400
+
+                for unit in dungeon.get_party():
+                    textbutton unit.get_name() action Hide("oob_move_select"), Hide("oob_target_select"), Function(dungeon.out_of_battle_skills, unit)
 screen oob_move_select(dungeon, unit):
     zorder 101
     #modal True
-    text "Moves:"
 
     #all the unit's known moves with oob = 1.
+
     viewport:
-        area (700, 100, 100, 300)
+        area (900, 100, 100, 300)
         vbox:
             spacing 10
             for move in unit.get_moves():
@@ -51,7 +53,7 @@ screen oob_target_select(dungeon, unit, move):
     #modal True
 
     viewport:
-        area (800, 100, 100, 300)
+        area (1000, 100, 100, 300)
         vbox:
             spacing 10
             for target in dungeon.get_party():
@@ -80,7 +82,7 @@ screen dungeon_map(dungeon, map):
         if dungeon.find_room().get_has_action() == 1:
             if dungeon.find_room().get_is_exit() == 1:
                 textbutton dungeon.find_room().get_action_title() action Function(dungeon.exit_dungeon)
-            else:
+            elif dungeon.find_room().get_charges() != 0:
                 textbutton dungeon.find_room().get_action_title() action Function(dungeon.find_room().room_action, dungeon)
 
         if dungeon.find_room().get_fight() == 1:
@@ -108,16 +110,17 @@ screen dungeon_map(dungeon, map):
             for x in range(0, min(len(dungeon.get_party()), 5)):
                 vbox:
                     text dungeon.get_party()[x].get_name() #change to portrait
-                    text "Hp: "+str(dungeon.get_party()[x].get_hp())+"/"+str(dungeon.get_party()[x].get_hpmax()) #change to bar. on hover, see actual numbers.
-                    text "En: "+str(dungeon.get_party()[x].get_energy())+"/"+str(dungeon.get_party()[x].get_energymax()) #change to bar. on hover, see actual numbers.
+                    text "Hp: "+str(dungeon.get_party()[x].get_hp())+"/"+str(dungeon.get_party()[x].get_hpmax_actual()) #change to bar. on hover, see actual numbers.
+                    text "En: "+str(dungeon.get_party()[x].get_energy())+"/"+str(dungeon.get_party()[x].get_energymax_actual()) #change to bar. on hover, see actual numbers.
         else:
             for unit in dungeon.get_hold()[0]:
                 vbox:
                     text unit.get_name() #change to portrait
-                    text "Hp: "+str(unit.get_hp())+"/"+str(unit.get_hpmax()) #change to bar. on hover, see actual numbers.
-                    text "En: "+str(unit.get_energy())+"/"+str(unit.get_energymax()) #change to bar. on hover, see actual numbers.
+                    text "Hp: "+str(unit.get_hp())+"/"+str(unit.get_hpmax_actual()) #change to bar. on hover, see actual numbers.
+                    text "En: "+str(unit.get_energy())+"/"+str(unit.get_energymax_actual()) #change to bar. on hover, see actual numbers.
 
-    #map stuff
+    #map
+    text "Threat = " + str(dungeon.get_threat()) pos (610, 0)
     viewport:
         xpos 150 ypos 75 xysize (1000,625)
         child_size (len(map)*128, 500) #xlength = len(dungeon.get_map()*(xroomspace+connector space)). ylength = len(longest list)*(yroomspace+connector space)
@@ -142,8 +145,14 @@ screen dungeon_map(dungeon, map):
 
                         if (abs(dungeon.get_spot()[0] - room.get_x()) == 1 and dungeon.get_spot()[1] - room.get_y() == 0) or (dungeon.get_spot()[0] - room.get_x() == 0 and abs(dungeon.get_spot()[1] - room.get_y()) == 1):
                             if (dungeon.get_spot()[1] < room.get_y() and room.get_connect()[0] == 1) or (dungeon.get_spot()[0] > room.get_x() and room.get_connect()[1] == 1) or (dungeon.get_spot()[1] > room.get_y() and room.get_connect()[2] == 1) or (dungeon.get_spot()[0] < room.get_x() and room.get_connect()[3] == 1):
-                                hover "room_hover"
-                                action Function(dungeon.move_spot, room.get_x(), room.get_y())
+
+                                if room.get_locked() == 0:
+                                    hover "room_hover"
+                                    action Function(dungeon.move_spot, room.get_x(), room.get_y()) #play footsteps sound as the group walks
+                                else:
+                                    hover "room_lock"
+                                    action Function(room.lock_event, dungeon)
+                                    #action NullAction() #play lock clunking sound as the door is locked
 
                     if room.get_explored() == 1:
                         #add room icon

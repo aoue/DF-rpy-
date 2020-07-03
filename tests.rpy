@@ -1,5 +1,4 @@
 
-#map0 is run as a test
 
 
 #purely combat test
@@ -9,16 +8,16 @@ label map00:
     #battle test
     python:
         yve = Unit_yve()
-        yve.get_point().set_x(1)
-        yve.get_point().set_y(2)
+        yve.get_point().set_x(0)
+        yve.get_point().set_y(3)
 
         fed = Unit_federal()
-        fed.get_point().set_x(3)
-        fed.get_point().set_y(1)
+        fed.get_point().set_x(4)
+        fed.get_point().set_y(2)
 
         aide = Unit_aide()
-        aide.get_point().set_x(2)
-        aide.get_point().set_y(2)
+        aide.get_point().set_x(4)
+        aide.get_point().set_y(3)
 
 
         boy = Unit_boy()
@@ -29,8 +28,8 @@ label map00:
         pl = [yve, fed, aide]#, boy]
 
         baddie0 = Unit_groskel(0, "groskel", (1, 1), 1)
-        #baddie1 = unit_jowler(0, "jowler", (0, 3), 1)
-        #baddie2 = unit_jowler(0, "jowler 2", (3, 4), 1)
+        #baddie1 = Unit_jowler(0, "jowler", (0, 3), 1)
+        #baddie2 = Unit_jowler(0, "jowler 2", (3, 4), 1)
         el = [baddie0]#, baddie1, baddie2]
 
 
@@ -42,6 +41,7 @@ label map00:
 
 #overworld screen
 label map0:
+
     #return
     python:
         #overworld map test

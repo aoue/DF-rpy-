@@ -34,9 +34,10 @@ init -2 python:
             self.type = 0 #int. who can equip the gear within its flag.
             self.aff = 0 #affects damage affinity
             self.aff_name = ""
-            self.passive = 0 #0: has no passive. 1: has a passive.
+            self.passive = 0 #0: has no passive. otherwise it will be a class.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -49,6 +50,8 @@ init -2 python:
             self.dodge = 0
 
         #getters
+        def get_energy(self):
+            return self.energy
         def get_title(self):
             return self.title
         def get_flavour(self):
@@ -99,6 +102,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 10
@@ -120,6 +124,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -141,6 +146,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -162,6 +168,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -183,12 +190,35 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
             self.restam = 0
             self.physa = 10
             self.maga = 0
+            self.physd = 0
+            self.magd = 0
+            self.hit = 0
+            self.dodge = 5
+    class Beast_claw(Gear):
+        def __init__(self):
+            self.title = "Beast Spit" #weapon name
+            self.flavour = "Vile spit. Don't get it in your hair." #flavour text
+            self.flag = 2 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
+            self.type = 0 #int. who can equip the gear within its flag.
+            self.aff = 1 #affects damage affinity
+            self.aff_name = "Beast"
+            self.passive = 0 #0: has no passive. 1: has a passive.
+
+            #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
+            self.hp = 0
+            self.able = 0
+            self.stamina = 0
+            self.restam = 0
+            self.physa = 5
+            self.maga = 15
             self.physd = 0
             self.magd = 0
             self.hit = 0
@@ -206,6 +236,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 10
@@ -227,6 +258,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -248,6 +280,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 10
             self.able = 0
             self.stamina = 0
@@ -269,6 +302,7 @@ init -2 python:
             self.aff = 0 #affects damage affinity
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -290,6 +324,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -313,6 +348,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 10
@@ -333,6 +369,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -357,6 +394,7 @@ init -2 python:
             self.aff_name = "-"
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -377,6 +415,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0
@@ -397,6 +436,7 @@ init -2 python:
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
             self.hp = 0
             self.able = 0
             self.stamina = 0

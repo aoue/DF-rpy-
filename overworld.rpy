@@ -19,6 +19,8 @@
 # [7] =
 # etc
 
+#location icon offset: 54, 72
+
 init python:
     #overworld map
     class Overworld():
@@ -31,13 +33,12 @@ init python:
             self.inventory = Inventory()
 
             #--- lists of lists. each list inside corresponds to a chapter. all preset images in here. ---#
-            self.unlocked = [[1, 1]] #whether the location can trigger an event.
-            self.jumps = [["fail", "test_dungeon_entrance"]] #str of the label we're jumping to.
-            self.descr = [["nice place", "test dungeon"]] #str description on hover.
-            self.images = [["face_boy", "dungeon_icon"]] #normal image for a location
-            self.hovers = [["face_boy_hover", "dungeon_icon_h"]] #hover image for a location
-            self.positions = [[(300, 400), (600, 500)]] #position for a location
-            self.bg = [["bg_chapter1"]] #the background image.
+            self.unlocked = [[1, 1, 1]] #whether the location can trigger an event.
+            self.jumps = [["fail", "test_dungeon_entrance", "fail"]] #str of the label we're jumping to.
+            self.descr = [["Hotel", "Circumvallation", "Backstreets"]] #str description on hover.
+            self.images = [["hotel_icon", "dungeon_icon", "nai_office_icon"]] #normal image for a location
+            self.positions = [[(130, 275), (332, 313), (1160, 458)]] #position for a location
+            self.bg = [["bg_prologue"],["bg_chapter1"]] #the background image.
 
             self.direction = Direction()
 
@@ -77,8 +78,6 @@ init python:
             return self.descr[self.get_chapter()]
         def get_images(self):
             return self.images[self.get_chapter()]
-        def get_hovers(self):
-            return self.hovers[self.get_chapter()]
         def get_positions(self):
             return self.positions[self.get_chapter()]
         def get_bg(self):
@@ -118,6 +117,15 @@ init python:
                 viewlist = self.get_inventory().get_acc()
             renpy.show_screen("inventory_view", viewlist, self.get_party()[self.get_view()].get_equip_types()[i])
         def swap_gear(self, unit, flag):
+
+            if flag == 1:
+                old_passive = unit.get_armour().get_passive()
+            elif flag == 2:
+                old_passive = unit.get_weapon().get_passive()
+            elif flag == 3:
+                old_passive = unit.get_acc().get_passive()
+
+
             new_gear = renpy.invoke_in_new_context(self.gear_view, flag, unit)
 
             if new_gear == 0: #cancel button
@@ -153,6 +161,12 @@ init python:
                     if unit.get_acc().get_type() != 0:
                         self.get_inventory().add_gear(unit.get_acc())
                     unit.set_acc(new_gear)
+            unit.post_battle()
+
+            #check if unit's passive should also be removed
+            if unit.get_passive() == old_passive:
+                unit.set_passive(Passive())
+
         def gear_view(self, flag, unit):
             renpy.show(self.get_party_bg())
             renpy.show_screen("party_view", self.get_party(), self.get_view(), self)
@@ -200,6 +214,33 @@ init python:
         def move_browse(self, move):
             renpy.show_screen("move_browse", move)
 
+        #passive management
+        def swap_passive(self, unit):
+            pl = unit.get_passivelist()
+            pl.append(unit.get_armour().get_passive())
+            pl.append(unit.get_weapon().get_passive())
+            pl.append(unit.get_acc().get_passive())
+
+            if unit.get_passive() in pl:
+                pl.remove(unit.get_passive())
+
+            new_passive = renpy.invoke_in_new_context(self.passive_view, pl)
+            if new_passive == 0: #cancel
+                return
+            elif new_passive == -1: #unequipped
+                unit.set_passive(Passive())
+                return
+            else:
+                unit.set_passive(new_passive)
+        def passive_browse(self, passive):
+            renpy.show_screen("passive_browse", passive)
+        def passive_view(self, pl):
+            renpy.show(self.get_party_bg())
+            renpy.show_screen("party_view", self.get_party(), self.get_view(), self)
+            new_passive = renpy.call_screen("passive_swap", pl)
+            renpy.hide(self.get_party_bg())
+            return new_passive
+
         #direction
         def change_direction_view(self, chapter):
             renpy.invoke_in_new_context(self.direction_view, chapter)
@@ -212,12 +253,15 @@ init python:
             renpy.show_screen("quest_view", quest)
 
         #big shows
+        def show_tooltip(self, descr, loc):
+            renpy.transition(dissolve)
+            renpy.show_screen("overworld_tooltip", descr, loc)
         def show_ow_helpers(self):
             renpy.transition(dissolve)
             renpy.show_screen("overworld_helpers", self)
         def show_overworld(self):
             self.set_in_dungeon(0)
-            renpy.call_screen("overworld_map", self.get_unlocked(), self.get_jumps(), self.get_descr(), self.get_images(), self.get_hovers(), self.get_positions(), self)
+            renpy.call_screen("overworld_map", self.get_unlocked(), self.get_jumps(), self.get_descr(), self.get_images(), self.get_positions(), self)
         def show_dungeon(self): #(self, floor)
             #for a dungeon 0. it will have to be preset.
             self.set_in_dungeon(1)

@@ -23,7 +23,7 @@ define gui.show_name = False #hides the title on the main menu
 
 ## The version of the game.
 
-define config.version = "0.13"
+define config.version = "0.1"
 
 
 

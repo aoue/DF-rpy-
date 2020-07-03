@@ -2,79 +2,103 @@ Things to keep in mind:
 -anywhere there is a 'renpy.call', it should be a 'renpy.call_in_new_context.' this allows us to use return in the label instead of return the whole damn world.
 -if saving breaks (pickling), there's some steps at the top of battle.rpy that might be useful
 
+------Dungeon things to add-------
+
+save room. in dungeons, can only save in this room?
+
+keys are kept track of:
+    -in the 'key item' list could then be searched for the correct key. the correct key would have to be known by the room.
+    -the room looks for an integer in the key item list, which is really just a list of integers. if the room finds a matching integer to its own lock number, then it will unlock.
+
+------Things needed for prologue release------
+
+-art-
+party portraits: federal, aide
+character portraits: yve, handler, federal, aide, nai
+backgrounds: taxi, hotel entrace, hotel desk, nai's office
+dungeon backgrounds: generic rooms, idk what else exactly
+music: at least one battle track and one vn track would be nice.
+
+-code-
+dungeon: rooms, room events. (they need writing too)
+enemies: lord historian's grunt, lord historian's squad leader.
+ai: healing. human squads usually have a healer in the group.
+gear: loot after battle, treasure chests, stuff like that.
+focus: yve's stat growth and learnset from level 1 through 10.
+write: all the story
+
+
 
 ------the very next thing(s)------
 
 
+inventory:
+    -all spots in inventory lists to be redone as tuples. (object, quantity)
 
-focus/level up stuff:
--level up screen: shows xp gained towards next level.
-    -unit variable, focus list. a list of every focus the unit has available to them. at certain levels, add more focuses into the list.
-    -show exact exp unit needs for their level up.
-    -changing focus (flashback unlocked at hub, focus details when choosing focus)
+escape from battle. it can only be used when all your units are at full able (i.e. at the start of a round.) it sets all units' able to zero and you have to wait out the enemy's attacks. next round, end the combat as normal. increase threat by like 3x normal amount or something.
+
+inventory:
+    -using items in battle
+    -using items in dungeon
+
+the preferences menu. change it or something.
+ all we need is:
+    -text speed
+    -history
+    -?
+
+clicking on the overworld 'backstreets' button should change the overworld background to the backstreets, which has some buttons and stuff, etc.
+quick travel menu? has all the locations and they can be zoomed to with just a click.
+
+key inventory and unlocking doors. do it.
 
 focus list. it's the list of every focus the unit has access to.
-for learning new moves. there needs to be a way to convert the unit's level into an index for the focus to assign the correct move.
 
-change adrenaline. it's too useful. each of yve's adrenaline-type moves should only do one thing.
+change adrenaline. it's too useful. each of yve's adrenaline-type moves should only have one thing:
+    -hp
+    -physa
+    -dodge and hit
+    they'll all have the same adrenaline marker in stance though, so you can't apply them all at the same time.
 
-handler's textbox. on the side. shows up while the other textbox is still on screen. there can be two conversations ongoing at once.
-we can also use for phone calls.
 
-unit and gear passives. Call:
--start of round.
--when the unit attacks
--when the unit is attacked
--end of round.
-the function unit.do_passives() will check the passives for the unit and all of the gear, and run the function if the time is right.
-Every passive has a type that corresponds to a time when the passive should occur.
 
+------what needs doing eventually-------
+
+crafting
+
+shops:
+ -gear
+ -information (moves)
+ -utility (chest keys, false alarms[lower threat in a dungeon], healing items, restore energy items.)
+
+use items in battle.
+
+overworld: hub. needed for chapter 1.
+
+evo moves
 
 combat view:
-what there is now will not work. ideas:
+what there is now will not work. don't worry about it for now.
+ideas:
  -how about a mostly overhead view, where we see the backs of our own units and the fronts of the enemy.
  -show all the backs of our units close to the screen and the fronts of the enemy too, all lined up against each other. Then, off to the side, or maybe overlaid but semi-transparent, have the current map view that we've got now so the player can actually tell what's going on. I kind of like the semi-transparent but right in the center middle idea.
  -fire emblem 7 size/style sprites
 
-------what needs doing-------
-
-overworld map:
-hub:
- -room selection on the bottom
- -crafting
- -talk to all the other characters
- -call meeting
-
-evo moves?
-
-hard cap on buffs? I don't see why. Rather than hard capping buffs, they should just be designed to be impractical.
-
-unit passive abilities. (can be stances, i.e. stance 0 and stance 1, which will never be decremented when the others are.)
-
-battle log? [unit name] uses [move name] and hits [target name] for [damage] (list multiple targets too.) Would be a scrollable viewport kind of thing.
+battle log? [unit name] uses [move name] and hits [target name] for [damage, effect] (list multiple targets too.) Would be a scrollable viewport kind of thing.
 
 figure out why my Unicode characters aren't working. ex: \u2603 should be a snowman
 
-blender grease pencil. can interpolate animations. try this with the scarf animation from before.
 ---------------------------------
 combat thingies:
 
-each unit can have some passives. 2? that is, equipped at once. they can have a larger pool available.
-e.g. bad connotations. Not good things to be.
- -sadist: regain some stamina on kill.
- -masochist: regain some stamina when damaged.
- -bloodhungry: regain some able on kill
- -egoist: enemies more likely to target you (weight the inevitable get target priority function)
-
 combo moves:
--each time the unit uses a 'combo move', increase combo counter.
--combo moves deal .x? extra damage per combo counter.
--reset combo counter to 0 at the end of a round.
+ -each time the unit uses a 'combo move', increase combo counter.
+ -combo moves deal .x? extra damage per combo counter.
+ -reset combo counter to 0 at the end of a round (or just decrease it?)
 
 defeated allies stay on the board. they can be revived.
 defeated enemies go off the board.
 
-switching out a unit midbattle for one in reserve. No problem. pl is in the battle, so select a unit in dungeon party that's not in pl, and swap one into pl.
 
 
 

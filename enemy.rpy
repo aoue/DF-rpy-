@@ -35,6 +35,7 @@ init python:
             self.magd = 80 #magical defense
 
             #gear
+            self.loot = None
             self.weapon = None
             self.armour = None
             self.acc = None
@@ -57,6 +58,8 @@ init python:
             self.discipline = (0,0) #range that affects unit's priority. the smaller the range, the less random.
 
         #getters
+        def get_loot(self):
+            return self.loot
         def get_exp(self):
             return self.exp
         def get_pridef(self):
@@ -264,26 +267,30 @@ init python:
             self.restam = 5
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
-            self.exp = 80 #10
+            self.exp = 10 #10
+            self.loot = 0 #gear object or something
 
             self.stance = Stances() #unit's status effects
 
             self.hpmax = 50
             self.dodgemax = 10
-            self.hit = 0 #subtract from enemy's dodge
+            self.hit = 5 #subtract from enemy's dodge
 
             self.aff = 1 # affinity. for super effective and stuff.
+            self.aff_name = "Beast"
             self.physa = 60 #physical attack
             self.physd = 55 #physical defense
             self.maga = 30 #magical attack
             self.magd = 30 #magical defense
 
             #gear
+            self.loot = (Mat_dog_teeth(), 50) #object, %chance
             self.weapon = Beast_claw()
             self.armour = Beast_skin()
             self.acc = None_accessory()
             #moves:
             self.moves = [E_claw(), E_jaws(), E_rush(), E_howl()]
+            self.passive = Passive()
 
             self.hp = self.get_hpmax_actual()
             self.stamina = self.get_staminamax_actual()
@@ -302,6 +309,113 @@ init python:
             self.is_buffed = 0 #0: in not buffed. 1: is buffed.
             self.discipline = (-5,5) #range that affects unit's priority. the smaller the range, the less random.
 
+    class Unit_spitter(Enemy_unit):
+        def __init__(self, lvl, name, postup, able):
+            self.iff = 1
+            self.name = name
+            self.point = Point(postup[0], postup[1], (1,1)) #instance of point class.
+            self.icon = "icon_spitter" #picture
+            self.ablemax = 1
+            self.able = able #lets the unit act each round
+            self.ooa = 0 #out of action. defeated.
+            self.staminamax = 50
+            self.restam = 5
+            self.lvl = lvl
+            self.evo = 0 #whether the unit is in evo mode
+            self.exp = 12 #10
+
+            self.stance = Stances() #unit's status effects
+
+            self.hpmax = 45
+            self.dodgemax = 10
+            self.hit = 5 #subtract from enemy's dodge
+
+            self.aff = 1 # affinity. for super effective and stuff.
+            self.aff_name = "Beast"
+            self.physa = 40 #physical attack
+            self.physd = 50 #physical defense
+            self.maga = 60 #magical attack
+            self.magd = 50 #magical defense
+
+            #gear
+            self.loot = (Mat_dog_teeth(), 70) #object, %chance
+            self.weapon = Beast_spit()
+            self.armour = Beast_skin()
+            self.acc = None_accessory()
+            #moves:
+            self.moves = [E_claw(), E_spit()]
+            self.passive = Passive()
+
+            self.hp = self.get_hpmax_actual()
+            self.stamina = self.get_staminamax_actual()
+            self.dodge = self.get_dodgemax_actual()
+
+            #thinking:
+            self.pridef = 5 #default of innate initiative value. normal is 2 or 3 or so.
+            self.pri = 5 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
+            self.pri_change = -2 #amount pri is inc/dec after acting
+            self.concern = 0.6 #when hp/hpmax < concern, unit priority is inc/dec
+            self.concern_change = 0 #when concern affects pri, this is by how much. + or -
+            self.healer = 0 #0: not healer, 1: is healer
+            self.healer_change = 0 #when there are hurt units, increase pri by this much
+            self.buffer = 0 #0: not buffer, 1: is buffer
+            self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
+            self.is_buffed = 0 #0: in not buffed. 1: is buffed.
+            self.discipline = (-4,4) #range that affects unit's priority. the smaller the range, the less random.
+
+    class Unit_frother(Enemy_unit):
+        def __init__(self, lvl, name, postup, able):
+            self.iff = 1
+            self.name = name
+            self.point = Point(postup[0], postup[1], (1,1)) #instance of point class.
+            self.icon = "icon_frother" #picture
+            self.ablemax = 1
+            self.able = able #lets the unit act each round
+            self.ooa = 0 #out of action. defeated.
+            self.staminamax = 50
+            self.restam = 2
+            self.lvl = lvl
+            self.evo = 0 #whether the unit is in evo mode
+            self.exp = 15 #10
+
+            self.stance = Stances() #unit's status effects
+
+            self.hpmax = 60
+            self.dodgemax = 20
+            self.hit = 5 #subtract from enemy's dodge
+
+            self.aff = 1 # affinity. for super effective and stuff.
+            self.aff_name = "Beast"
+            self.physa = 90 #physical attack
+            self.physd = 20 #physical defense
+            self.maga = 30 #magical attack
+            self.magd = 20 #magical defense
+
+            #gear
+            self.loot = (Mat_dog_teeth(), 10) #object, %chance
+            self.weapon = Beast_spit()
+            self.armour = Beast_skin()
+            self.acc = None_accessory()
+            #moves:
+            self.moves = [E_froth(), E_jaws()]
+            self.passive = Stamina_Drain_1()
+
+            self.hp = self.get_hpmax_actual()
+            self.stamina = self.get_staminamax_actual()
+            self.dodge = self.get_dodgemax_actual()
+
+            #thinking:
+            self.pridef = 5 #default of innate initiative value. normal is 2 or 3 or so.
+            self.pri = 5 #innate initiative value. normal is 2 or 3 or so. inc/dec each time the unit acts.
+            self.pri_change = 1 #amount pri is inc/dec after acting
+            self.concern = 0.2 #when hp/hpmax < concern, unit priority is inc/dec
+            self.concern_change = 10 #when concern affects pri, this is by how much. + or -
+            self.healer = 0 #0: not healer, 1: is healer
+            self.healer_change = 0 #when there are hurt units, increase pri by this much
+            self.buffer = 0 #0: not buffer, 1: is buffer
+            self.buffer_change = 0 #when there are unbuffed units, increase pri by this much
+            self.is_buffed = 0 #0: in not buffed. 1: is buffed.
+            self.discipline = (0,4) #range that affects unit's priority. the smaller the range, the less random.
 
     class Unit_groskel(Enemy_unit):
         def __init__(self, lvl, name, postup, able):
@@ -316,26 +430,29 @@ init python:
             self.restam = 5
             self.lvl = lvl
             self.evo = 0 #whether the unit is in evo mode
-            self.exp = 80
+            self.exp = 60
 
             self.stance = Stances() #unit's status effects
 
             self.hpmax = 500
-            self.dodgemax = -50
+            self.dodgemax = -30
             self.hit = 0 #subtract from enemy's dodge
 
             self.aff = 1 # affinity. for super effective and stuff.
+            self.aff_name = "Beast"
             self.physa = 80 #physical attack
             self.physd = 55 #physical defense
             self.maga = 40 #magical attack
             self.magd = 40 #magical defense
 
             #gear
+            self.loot = (Mat_dog_teeth(), 100) #object, %chance 
             self.weapon = Beast_claw()
             self.armour = Beast_skin()
             self.acc = None_accessory()
             #moves:
             self.moves = [E_gobble(), E_clobber(), E_spew()]
+            self.passive = Passive()
 
             self.hp = self.get_hpmax_actual()
             self.stamina = self.get_staminamax_actual()

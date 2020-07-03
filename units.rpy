@@ -96,8 +96,12 @@ init -1 python:
             self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
+            self.passive = 0 #it's a class
+            self.passivelist = [] #it's a list of all the passives the unit knows by leveling up
 
         #actual getters - returns final value of the stat to simplify display and calculations
+        def get_energymax_actual(self):
+            return self.get_energymax() + self.get_weapon().get_energy() + self.get_armour().get_energy() + self.get_acc().get_energy()
         def get_hpmax_actual(self):
             return self.get_hpmax() + self.get_weapon().get_hp() + self.get_armour().get_hp() + self.get_acc().get_hp()
         def get_ablemax_actual(self):
@@ -121,6 +125,10 @@ init -1 python:
 
 
         #getters
+        def get_passivelist(self):
+            return self.passivelist
+        def get_passive(self):
+            return self.passive
         def get_aff_name(self):
             return self.aff_name
         def get_turn_over(self):
@@ -208,6 +216,8 @@ init -1 python:
         def get_flavour(self, i):
             return self.flavour[i]
         #setters
+        def set_passive(self, passive):
+            self.passive = passive
         def set_turn_over(self, turn_over):
             self.turn_over = turn_over
         def set_name(self, name):
@@ -284,9 +294,8 @@ init -1 python:
         #useful functions
         def get_next_level_exp(self):
             #returns the exp the unit needs to advance to the next level
-            nextlvl = 100 + (10*self.get_lvl()) + (5*self.get_lvl()*self.get_lvl())
+            nextlvl = 100 + (20*self.get_lvl()) + (5*self.get_lvl()*self.get_lvl())
             return nextlvl
-
         def end_turn(self):
             self.set_turn_over(1)
             self.get_stance().end_turn(self)
@@ -299,7 +308,10 @@ init -1 python:
                 self.get_acc().use_passive()
         def post_battle(self):
             #after a battle in the dungeon crawler portion.
-            if self.get_hp() > self.get_hpmax_actual():
+            if self.get_ooa() == 1:
+                self.set_ooa(0)
+                self.set_hp(1)
+            elif self.get_hp() > self.get_hpmax_actual():
                 self.set_hp(self.get_hpmax_actual())
             self.set_stamina(self.get_staminamax_actual())
             self.set_able(self.get_ablemax_actual())
@@ -308,16 +320,22 @@ init -1 python:
             self.get_stance().post_battle()
         def check_dead(self, battle):
             if self.get_hp() == 0:
+
+                if self.get_passive().get_check() == 5:
+                    self.get_passive().exert()
+
                 self.set_able(0)
                 self.set_stamina(0)
                 self.set_ooa(1)
                 self.get_stance().post_battle()
-                self.set_icon("dead_icon")
 
                 if self.get_iff() == 1:
+                    battle.get_totalloot().append(self.get_loot())
                     battle.set_totalexp(battle.get_totalexp() + self.get_exp())
                     battle.get_enemymap().remove_unit(self)
                     battle.get_el().remove(self)
+                else:
+                    self.set_icon("dead_icon")
 
         def wait(self):
             self.set_stamina(int(min(self.get_stamina()+(0.25 * self.get_staminamax() * self.get_able()), self.get_staminamax())))
@@ -364,6 +382,9 @@ init -1 python:
             spread = renpy.random.randint(230, 255) /255.0
             #spread = 1 #for testing buffs
 
+            if self.get_passive().get_check() == 4:
+                self.get_passive().exert()
+
             heal = max((((astats + cmove.get_power()) / dstats) * cmove.get_power() * spread), 0)
 
             return int(heal)
@@ -373,10 +394,16 @@ init -1 python:
 
             #any stances that do: take 2x heals, 0.5x heals, etc. need to be handled in here.
 
+            if self.get_passive().get_check() == 4:
+                self.get_passive().exert()
+
             if maxes == 0:
                 if self.get_hp() >= self.get_hpmax_actual():
                     showlist.append((self.get_point().get_x(), self.get_point().get_y(), -1, self.get_iff()))
                     return
+                else:
+                    self.set_hp(min(self.get_hp()+heal, self.get_hpmax_actual()))
+
             elif maxes == 1:
                 self.set_hp(self.get_hp()+heal)
             else:
@@ -385,6 +412,8 @@ init -1 python:
             showlist.append((self.get_point().get_x(), self.get_point().get_y(), heal, self.get_iff()))
 
         def take_heal_oob(self, dealer, heal):
+            if self.get_passive().get_check() == 4:
+                self.get_passive().exert()
             self.set_hp(min(self.get_hp()+heal, self.get_hpmax_actual()))
 
         def calc_damage(self, target, cmove):
@@ -395,21 +424,29 @@ init -1 python:
             #power = move's power. int
 
             #see if we're dealing with physical or magical damage. returns tuples of (attack, hit) , (defense, dodge)
-            if cmove.get_damage_type() == 0: #physical damage
+            damage = 1.0
 
+            if self.get_passive().get_check() == 1:
+                self.get_passive().exert(self, target)
+
+            if cmove.get_damage_type() == 0: #physical damage
                 atk = self.get_physa_actual() * self.get_stance().get_physa()
                 dfs = target.get_physd_actual() * target.get_stance().get_physd()
-
+                if target.get_stance().get_mtn() == 1:
+                    damage = 0.5
             else: #magical damage
                 atk = self.get_maga_actual() * self.get_stance().get_maga()
                 dfs = target.get_magd_actual() * self.get_stance().get_magd()
+                if target.get_stance().get_mtn() == 1:
+                    target.get_stance().set_mtn(0)
 
             hit = self.get_hit() * self.get_stance().get_hit()
             dodge = target.get_dodge() * target.get_stance().get_dodge()
 
-
             #the unit tries to dodge
             if renpy.random.randint(1, 100) < max(dodge - hit, 0):
+                if target.get_dodgemax_actual() > 0:
+                    target.set_dodge(max(target.get_dodge()-abs(self.get_hit()+cmove.get_hit()), 0))
                 return -1 #dodge successful. returns -1 damage
 
             if cmove.get_element == -1:
@@ -417,12 +454,10 @@ init -1 python:
             else:
                 aff_mod = target.get_aff_mod(cmove.get_element())
 
-
             spread = round(renpy.random.uniform(0.9, 1.0), 2)
-            #spread = 1 #for testing
 
             #actual damage calculation
-            damage = ((atk) * (cmove.get_power() + self.get_lvl()) / (dfs)) * aff_mod * spread
+            damage = damage * ((atk) * (cmove.get_power() + self.get_lvl()) / (dfs)) * aff_mod * spread
 
             return int(damage)
         def take_damage(self, dealer, damage, showlist, battle, dot, duration):
@@ -431,29 +466,30 @@ init -1 python:
             #damage: an int.
             #showlist: for showing damage
 
+
+
             #any stances that do: take 2x damage, 0.5x damage, etc. need to be handled in here.
 
             if damage == -1: #dodge
                 showlist.append((self.get_point().get_x(), self.get_point().get_y(), "Dodge", self.get_iff()))
+                return
 
                 #when a unit dodges, its dodge goes down
                 #when a unit it hit, its dodge goes up
                 #dodge is changed by the dodge_change variable??
                 #^can never go less that 0, or above dodgemax
-
-                #dodge go down
-                if self.get_dodgemax_actual() > 0:
-                    self.set_dodge(max(self.get_dodge()-10, 0))
-
-                return
-
             if self.get_dodgemax_actual() > 0:
-                self.set_dodge(min(self.get_dodge()+10, self.get_dodgemax_actual()))
+                self.set_dodge(min(self.get_dodge()+int(self.get_dodgemax_actual()*1.1), self.get_dodgemax_actual()))
 
+            #call passive:
+            if self.get_passive().get_check() == 3:
+                workaround = [damage]
+                self.get_passive().exert(self, battle, workaround)
+                damage = workaround[0]
 
             #look through stances: the order is important.
             if self.get_stance().get_exhausted() > 0: #if exhausted, take 1.2x damage
-                damage = int(damage * 1.5)
+                damage = int(damage * 1.25)
 
             self.get_stance().move_dot(self, dot, duration)
 
@@ -517,7 +553,7 @@ init -1 python:
             self.acc = Plain_headband()
 
             self.energymax = 15
-            self.energy = 15
+            self.energy = self.get_energymax_actual()
             self.restam = 10
             self.lvl = 0
             self.exp = 0
@@ -558,6 +594,8 @@ init -1 python:
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
+            self.passive = Passive()
+            self.passivelist = []
 
     class Unit_boy(Unit):
         def __init__(self):
@@ -576,7 +614,7 @@ init -1 python:
             self.acc = Plain_belt()
 
             self.energymax = 10
-            self.energy = 10
+            self.energy = self.get_energymax_actual()
             self.restam = 10
             self.lvl = 0
             self.exp = 0
@@ -617,6 +655,8 @@ init -1 python:
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
+            self.passive = Passive()
+            self.passivelist = []
 
 
     #temp units
@@ -637,7 +677,7 @@ init -1 python:
             self.acc = None_accessory()
 
             self.energymax = 10
-            self.energy = 10
+            self.energy = self.get_energymax_actual()
             self.restam = 10
             self.lvl = 0
             self.exp = 0
@@ -678,6 +718,8 @@ init -1 python:
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
+            self.passive = Stick_Together_1()
+            self.passivelist = []
 
     class Unit_aide(Unit):
         def __init__(self):
@@ -696,7 +738,7 @@ init -1 python:
             self.acc = None_accessory()
 
             self.energymax = 10
-            self.energy = 10
+            self.energy = self.get_energymax_actual()
             self.restam = 10
             self.lvl = 0
             self.exp = 0
@@ -737,6 +779,8 @@ init -1 python:
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
+            self.passive = Stick_Together_1()
+            self.passivelist = []
 
 
 

@@ -6,6 +6,55 @@
 #------enemy side positions------#
 #px: 275 + 125*(point.get_x()), , 5 + 65*(point.get_y())
 
+init python:
+    def show_status_screen(unit):
+        renpy.show_screen("status_screen", unit)
+
+
+screen status_screen(unit):
+    #shows a screen with:
+    # -all the stances the unit is currently under and their remaining durations
+    # -unit's natural/armour affinity
+    # -unit's passive
+
+    zorder 100
+    frame: #obviously all the positioning aspects will have to be perfected.
+        background Solid("#0000007F") # for transparency. colour = rrggbbaa where red green blue alpha
+        area(910, 500, 300, 200)
+        ypadding 5
+        xpadding 10
+
+        vbox:
+            text unit.get_name()
+            text "Aff: " + unit.get_aff_name() + ","  + unit.get_armour().get_aff_name()
+            text "wpn aff: " + unit.get_weapon().get_aff_name()
+            text "Passive: " + unit.get_passive().get_title()
+
+            #dots
+            if unit.get_stance().get_poison() > 0:
+                text "Poison: " + str(unit.get_stance().get_poison())
+
+            #stances
+            if unit.get_stance().get_adrenaline() > 0:
+                text "Adrenaline: " + str(unit.get_stance().get_adrenaline())
+
+            if unit.get_stance().get_rally() > 0:
+                text "Rally: " + str(unit.get_stance().get_rally())
+
+            if unit.get_stance().get_howl() > 0:
+                text "Howl: " + str(unit.get_stance().get_howl())
+
+            if unit.get_stance().get_exhausted() > 0:
+                text "Exhausted"
+
+            if unit.get_stance().get_kindara() > 0:
+                text "Kindara: " + str(unit.get_stance().get_kindara())
+
+            if unit.get_stance().get_shatter() > 0:
+                text "Shatter: " + str(unit.get_stance().get_shatter())
+
+            if unit.get_stance().get_mtn() > 0:
+                text "MTN: " + str(unit.get_stance().get_mtn())
 
 
 screen combatinfo(pl, el, pt, et, rounds, ph):
@@ -28,23 +77,34 @@ screen combatinfo(pl, el, pt, et, rounds, ph):
 
         for unit in pl:
 
-            text "{}: hp={}/{}\n dodge=[[{}/{}]% s={}/{} e={}/{}".format(unit.get_name(), unit.get_hp(), unit.get_hpmax_actual(), unit.get_dodge(), unit.get_dodgemax_actual(), unit.get_stamina(), unit.get_staminamax_actual(), unit.get_energy(), unit.get_energymax()) size 20
+            text "{}: hp={}/{} a={}\n dodge=[[{}/{}]% s={}/{} e={}/{}".format(unit.get_name(), unit.get_hp(), unit.get_hpmax_actual(), unit.get_able(), unit.get_dodge(), unit.get_dodgemax_actual(), unit.get_stamina(), unit.get_staminamax_actual(), unit.get_energy(), unit.get_energymax()) size 20
 
     vbox: #enemy stats/info
         xalign 0.0
         yalign 0.0
         spacing 2
         for unit in el:
-            text "{}: {} ({}%) [[{}] s={}".format(unit.get_name(), unit.get_hp(), unit.get_dodgemax_actual(), unit.get_able(), unit.get_stamina()) size 20
+            text "{}: hp={}/{} a={}\n dodge=[[{}/{}]% s={}/{}".format(unit.get_name(), unit.get_hp(), unit.get_hpmax_actual(), unit.get_able(), unit.get_dodge(), unit.get_dodgemax_actual(), unit.get_stamina(), unit.get_staminamax_actual()) size 20
 
 screen show_units(pl, el):
     zorder 99
     for unit in pl:
-        add unit.get_icon() pos(265 + 124*unit.get_point().get_x(), 407 + 62*unit.get_point().get_y())
+        #add unit.get_icon() pos(265 + 124*unit.get_point().get_x(), 407 + 62*unit.get_point().get_y())
+        imagebutton:
+            pos(265 + 124*unit.get_point().get_x(), 407 + 62*unit.get_point().get_y())
+            idle unit.get_icon()
+            hover unit.get_icon()
+            action NullAction() hovered Function(show_status_screen, unit) unhovered Hide("status_screen")
 
     for unit in el:
-        add unit.get_icon() pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
+        #add unit.get_icon() pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
         text unit.get_name() pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
+
+        imagebutton:
+            pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
+            idle unit.get_icon()
+            hover unit.get_icon()
+            action NullAction() hovered Function(show_status_screen, unit) unhovered Hide("status_screen")
 
 screen show_damage(showlist, title, unit):
     #showlist: list of four-tuples: (grid x, grid y, damage, iff)
@@ -119,10 +179,11 @@ screen order_unit(pl):
     zorder 100
     for unit in pl:
         if unit.get_able() > 0:
-            button:
+            imagebutton:
                 pos(265 + 124*unit.get_point().get_x(), 415 + 62*unit.get_point().get_y())
-                text unit.get_name()
-                action Return(unit)
+                idle "ready_icon"
+                hover "ready_icon"
+                action Return(unit) hovered Function(show_status_screen, unit) unhovered Hide("status_screen")
 
 screen pick_move(unit, battle):
 
@@ -140,7 +201,6 @@ screen pick_move(unit, battle):
                     pass
                 #correct position
                 elif (move.get_rank() == 0) or (unit.get_point().get_y() in range (0, 3) and move.get_rank() == 1 ) or (unit.get_point().get_y() in range (3, 5) and move.get_rank() == 2):
-
                     #able to use move
                     if unit.get_stamina() >= move.get_stamina_drain() and move.check_clearance(unit, battle) == 1 and unit.get_energy() >= move.get_energy_drain():
                         textbutton move.get_title() action Function(unit.use_move, move, battle), Return hovered Function(battle.move_browse_b, move) unhovered Hide("move_browse_b")
@@ -155,6 +215,8 @@ screen pick_move(unit, battle):
 
                         elif unit.get_stamina() < move.get_stamina_drain():
                             text "{} (need stamina)".format(move.get_title())
+                else:
+                    text move.get_title() + " (rank)" #the list will get very long :( solution? is it fine?
 
             textbutton "Wait" action Function(unit.wait), Return
 

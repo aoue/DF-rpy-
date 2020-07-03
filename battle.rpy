@@ -52,7 +52,7 @@ init -2 python:
 
 
     class Battle():
-        def __init__(self, rounds, party, pl, el, bg):
+        def __init__(self, rounds, party, pl, el, bg, inventory):
             self.rounds = rounds #number of rounds the battle will last. negative for infinite.
             self.bg = bg
             self.phase = ""
@@ -66,8 +66,14 @@ init -2 python:
             self.allymap = Map(pl)
             self.enemymap = Map(el)
             self.totalexp = 0
+            self.inventory = inventory
+            self.totalloot = []
 
         #getters
+        def get_totalloot(self):
+            return self.totalloot
+        def get_inventory(self):
+            return self.inventory
         def get_party(self):
             return self.party
         def get_rounds(self):
@@ -146,6 +152,9 @@ init -2 python:
             config.rollback_enabled = False
             renpy.scene()
             renpy.show(self.get_bg())
+
+
+
         def postbattle_settings(self):
             renpy.block_rollback()
             config.rollback_enabled = True
@@ -159,14 +168,31 @@ init -2 python:
                 unit.post_battle()
                 unit.get_foc().level_up(unit, self.get_totalexp(), showlist)
 
-                renpy.show_screen("level_up", showlist) #shows the level up screen, so the player knows what's going on behind the scenes.
+                 #shows the level up screen, so the player knows what's going on behind the scenes.
 
+            #loot stuff
+            showlist2 = [0]
+            for loot in self.get_totalloot(): #loot is a tuple.
+                if loot == None:
+                    pass
+                elif renpy.random.randint(0,100) + loot[-1] > 100:
+                    if len(loot) == 3: #add money
+                        money = renpy.random.randint(loot[0], loot[1])
+                        self.get_inventory().add_money(money)
+                        showlist2[0] += money
+                    else: #add gear object
+                        self.get_inventory().add_gear(loot[0])
+                        showlist2.append(loot[0])
+
+
+            renpy.show_screen("level_up", showlist, showlist2)
 
             renpy.pause()
             renpy.hide_screen("level_up")
 
         def game_over(self):
             pass
+            #show options:
             #redo battle?
             #return to title?
 
@@ -193,20 +219,22 @@ init -2 python:
 
             for unit in self.get_pl():
                 if unit.get_ooa() == 0:
-                    unit.set_able(unit.get_ablemax_actual()) #refresh able
+                    unit.set_able(unit.get_ablemax_actual()) #regain able
                     unit.set_turn_over(0)
                     unit.get_stance().refresh_stamina(unit) #restam
                     unit.get_stance().round_start(unit, self)
-                    #unit.gear_passives()
+
+                    if unit.get_passive().get_check() == 0:
+                        unit.get_passive().exert()
 
             for unit in self.get_el():
                 if unit.get_ooa() == 0:
-                    unit.set_able(unit.get_ablemax_actual())
+                    unit.set_able(unit.get_ablemax_actual()) #regain able
                     unit.get_stance().refresh_stamina(unit) #restam
                     unit.get_stance().round_start(unit, self)
-                    #unit.gear_passives()
 
-
+                    if unit.get_passive().get_check() == 0:
+                        unit.get_passive().exert()
         def player_turn(self):
             #choose unit
             #choose move
@@ -220,8 +248,6 @@ init -2 python:
 
                 if chosen.get_turn_over() == 1:
                     return
-
-
         def enemy_turn(self):
             chosen = None
             nl = copy_list(self.get_el())

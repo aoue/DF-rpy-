@@ -60,10 +60,17 @@ label before_main_menu:
 label start:
     stop music fadeout 1.0
 
+
+
     #here we're going to be initializing a bunch of units.
     python:
+        #some game settings
+        config.rollback_enabled = False
+
         #some globals
         LEVELCAP = 10 #a unit's level cannot exceed the level cap.
+
+        #character dynamic names
 
     #jump
     #(for testing a specific label)

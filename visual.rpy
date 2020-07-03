@@ -121,25 +121,29 @@ init -555:
         "overworld/hub_button_hover.png"
 
     ##overworld screen
+    image bg_prologue:
+        "overworld/cityscape0.png"
     image bg_chapter1:
         "overworld/bg_chapter1.jpg"
     image party_icon:
         "dungeon/party_icon.png"
+    image location_icon:
+        "overworld/location_icon.png"
+    image location_icon_h:
+        "overworld/location_icon_h.png"
 
 
     ##dungeon screen
     image dungeon_bg:
         "dungeon/test_bg.jpg"
-    image dungeon_icon:
-        "overworld/dungeon_icon.png"
-    image dungeon_icon_h:
-        "overworld/dungeon_icon_h.png"
     image room:
         "dungeon/room_unexplored.png"
     image room_ex:
         "dungeon/room_explored.png"
     image room_hover:
         "dungeon/room_hover.png"
+    image room_lock:
+        "dungeon/room_lock.png"
     image hall_h:
         "dungeon/hallway_horizontal.png"
     image hall_v:
@@ -184,6 +188,8 @@ init -555:
 
 
     #battle fxs
+    image ready_icon:
+        "images/combat/fx/ready_icon.png"
     image tile_e_hovered:
         "images/combat/fx/tile e hover.png"
     image tile_f_hovered:
@@ -207,6 +213,10 @@ init -555:
         #"images/combat/units/jowler icon 2.png"
         #0.5
         #repeat
+    image icon_spitter:
+        "images/combat/units/spitter icon.png"
+    image icon_frother:
+        "images/combat/units/frother icon.png"
     image icon_groskel:
         "images/combat/units/groskel icon.png"
 

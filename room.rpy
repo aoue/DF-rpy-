@@ -22,10 +22,27 @@ init python:
             self.poi_label = "" #name of the label the poi button goes to.
             self.has_action = 1
             self.action_title = "room_action"
+            self.chargemax - 0 #maximum number of charges.
+            self.charges = 0 #how many times the room action can be called. decrements each time room action is called.
+            self.locked = 0 #is the room locked. 0: no. 1: yes
+            self.doorkey = 0 #index to search in inventory.get_keylist
+
+            #loot
+            self.chestloot = 0 #object. can be gear, money etc. is given if the room has a chest in it and the chest is opened
 
             self.is_exit = 0 #int. 0: is not an entrance, 1: is an entrance.
 
         #getters
+        def get_chestloot(self):
+            return self.chestloot
+        def get_doorkey(self):
+            return self.doorkey
+        def get_locked(self):
+            return self.locked
+        def get_chargemax(self):
+            return self.chargemax
+        def get_charges(self):
+            return self.charges
         def get_is_exit(self):
             return self.is_exit
         def get_room_label(self):
@@ -61,15 +78,55 @@ init python:
         def get_connect(self):
             return self.connect
         #setters
+        def set_locked(self, x):
+            self.locked = x
+        def set_charges(self, x):
+            self.charges = x
         def set_explored(self, x):
             self.explored = x
         def set_type(self, x):
             self.type = x
 
         #useful
+        def unlock_chest(self, dungeon):
+            if dungeon.get_master().get_inventory().get_chestkey() > 0:
+                dungeon.get_master().get_inventory().set_chestkey(dungeon.get_master().get_inventory().get_chestkey()-1)
+                dungeon.get_master().get_inventory().add_gear(self.get_chestloot())
+        def lock_event(self, dungeon):
+            # event that is called when the player unlocks the room.
+
+            #call a label to do some vn portion - if it hasn't been called before
+
+            #check dungeon for the matching key. if it matches, then set the room to unlocked
+            #else, tell the player they don't have the key.
+            if dungeon.get_master().get_inventory().get_keylist()[self.get_doorkey()] == 1:
+                self.locked = 0
         def get_baddies(self, dungeon):
-            #return list of enemy units
-            pass
+            #returns a list of enemy units to be fought.
+
+            #decide enemy force size based on threat:
+            nl = dungeon.get_monsterlist()
+            enemylist = [] #list to fill with bad guys
+            dummymap = Map(enemylist)
+
+            count = 0
+            maxcount = max(int((dungeon.get_threat()) / 3), 1) #TODO figure out something about how this should actually work
+            while count < maxcount: #max number of enemies that can be fielded.
+
+                i = renpy.random.randint(0, len(nl)-1) #randint is inclusive.
+
+                if nl[i][1] <= maxcount: #if the monster is within the current threat level
+                    count += 1
+                    baddie = dungeon.spawn_monster(nl[i][0], dummymap)
+                    enemylist.append(baddie)
+
+                else:
+                    nl.remove(nl[i])
+
+            #baddie1 = Unit_jowler(0, "jowler", (0, 3), 1)
+
+            return enemylist
+
         def do_event(self, dungeon):
             #jump to a label.
             #renpy.call_in_new_context("room", dungeon)
@@ -103,6 +160,8 @@ init python:
             self.poi_label = ""
             self.has_action = 1
             self.action_title = "exit room"
+            self.charges = -1
+            self.locked = 0
 
             self.is_exit = 1
 
@@ -129,6 +188,10 @@ init python:
             self.fight = 0
             self.loot = 0
             self.is_exit = 0
+            self.chargemax = 2
+            self.charges = 2
+            self.locked = 1
+            self.doorkey = 0 #index for keylist
 
 
             self.room_label = "room"
@@ -137,12 +200,16 @@ init python:
             self.has_action = 1
             self.action_title = "fullheal room"
 
+
         def do_event(self, dungeon):
             renpy.call_in_new_context(self.get_room_label(), dungeon)
         def room_action(self, dungeon):
+            if all(unit.get_hp() == unit.get_hpmax_actual() for unit in dungeon.get_party()) and all(unit.get_energy() == unit.get_energymax_actual() for unit in dungeon.get_party()):
+                return
             for unit in dungeon.get_party():
-                unit.set_hp(unit.get_hpmax())
-                unit.set_energy(unit.get_energymax())
+                unit.set_hp(unit.get_hpmax_actual())
+                unit.set_energy(unit.get_energymax_actual())
+            self.set_charges(self.get_charges()-1)
 
     class Event_room(Room):
         def __init__(self, x, y, (a,b,c,d)):
@@ -159,6 +226,8 @@ init python:
             self.dc = 0
             self.fight = 0
             self.loot = 0
+            self.charges = -1
+            self.locked = 0
 
             self.room_label = "room"
             self.poi = 0
@@ -186,6 +255,8 @@ init python:
             self.dc = 2
             self.fight = 1
             self.loot = 0
+            self.charges = -1
+            self.locked = 0
 
             self.room_label = "room_combat"
             self.poi = 0
@@ -199,12 +270,6 @@ init python:
             renpy.invoke_in_new_context(dungeon.encounter, self)
 
 
-        def get_baddies(self, dungeon):
-            #needs dungeon to get threat level
-            baddie1 = Unit_jowler(0, "jowler", (0, 3), 1)
-
-            enemylist = [baddie1]
-            return enemylist
 
 
 

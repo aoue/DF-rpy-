@@ -42,15 +42,6 @@ init -3 python:
     #--- GUIDELINES ---
     #any move that sets a stance first checks if the stance is already applied. If it is, the move only resets its duration.
 
-
-
-
-
-
-
-
-
-
     #--- MOVES ---
     class Move():
         def __init__(self):
@@ -335,7 +326,7 @@ init -3 python:
             self.stamina_drain = 30
             self.energy_drain = 1
             self.able_drain = 2
-            self.power = 1000#35
+            self.power = 35
             self.hit = -5
             self.damage_type = 0
             self.element = -1

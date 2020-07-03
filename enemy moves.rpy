@@ -128,7 +128,6 @@ init -2 python:
                 if isinstance(item, tuple) == False:
                     count += 1
             return count
-
         def pick_target(self, pl, battle):
 
             if pl[0].get_iff() == 0:
@@ -204,8 +203,8 @@ init -2 python:
                 targetmaxlist = [] #list of max
 
                 #for each square:
-                for column in range(0, 5 - self.get_aoe_area()[1]):
-                    for row in range(0, 5 - self.get_aoe_area()[0]):
+                for column in range(0, 6 - self.get_aoe_area()[1]):
+                    for row in range(0, 6 - self.get_aoe_area()[0]):
                         targetlist = [] #which units are targeted
 
                         #generate an aoe for each area
@@ -240,9 +239,65 @@ init -2 python:
             else: #aoe heal
                 pass
 
-
-
     ## -- Beast Moves -- ##
+    class E_froth(Enemy_move):
+        def __init__(self):
+            self.flavour = "{i}Uncontrolled Frothing.{/i}"
+            self.title = "Froth"
+            self.rank = 1
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 0
+            self.able_drain = 1
+            self.power = 0
+            self.hit = 0
+            self.damage_type = 0
+            self.element = 0
+            self.dot = 0
+            self.dot_duration = 0
+            self.weight = 100
+            self.effort = 1
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 1
+
+        def exert(self, unit, pl, el, battle):
+            self.e_drain(unit)
+            self.translate(unit, battle)
+
+            self.set_stamina(self.get_staminamax_actual())
+
+    class E_spit(Enemy_move):
+        def __init__(self):
+            self.flavour = "{i}Filthy spitting.{/i}"
+            self.title = "Spit"
+            self.rank = 1
+            self.type = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 15
+            self.able_drain = 1
+            self.power = 10
+            self.hit = -5
+            self.damage_type = 1
+            self.element = -1
+            self.dot = 1
+            self.dot_duration = 1
+            self.weight = 100
+            self.effort = 1
+            self.aoe = 0
+            self.heal = 0
+            self.targeting = 4
+
+        def exert(self, unit, pl, el, battle):
+            self.e_drain(unit)
+            self.translate(unit, battle)
+
+            target = self.pick_target(pl, battle)
+            targetlist = [target]
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
+
     class E_claw(Enemy_move):
         def __init__(self):
             self.flavour = "{i}Filthy clawing.{/i}"
@@ -465,7 +520,6 @@ init -2 python:
                 battle.get_enemymap().place_unit(newbaddie3)
 
                 return
-
 
     class E_gobble(Enemy_move):
         def __init__(self):

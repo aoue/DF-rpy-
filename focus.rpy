@@ -11,8 +11,11 @@ init -10 python:
         def __init__(self):
             self.title = "" #name of the focus
             self.flavour = "" #flavour of the focus shown to the player
-            self.physa_up = 0 #how the unit's physa will be increased after each level
-            self.physd_up = 0 #etc
+            self.hp_up = 0 #how the unit's physa will be increased after each level
+            self.energy_up = 0 #etc
+            self.stamina_up = 0
+            self.physa_up = 0
+            self.physd_up = 0
             self.maga_up = 0
             self.magd_up = 0
             self.hit_up = 0
@@ -25,10 +28,16 @@ init -10 python:
             return self.title
         def get_flavour(self):
             return self.flavour
+        def get_hp_up(self):
+            return self.hp_up
+        def get_energy_up(self):
+            return self.energy_up
+        def get_stamina_up(self):
+            return self.stamina_up
         def get_physa_up(self):
             return self.physa_up
         def get_physd_up(self):
-            return self.get_physd_up
+            return self.physd_up
         def get_maga_up(self):
             return self.maga_up
         def get_magd_up(self):
@@ -42,7 +51,18 @@ init -10 python:
         #useful functions
         def inc_stats(self, unit):
             #increases the unit's stats on level up.
-            pass
+            #you get the idea. each focus needs its own [inc_stats] function, where it can play with modulus to only increase certain stats on certain levels, etc. the building blocks are here.
+            unit.set_hpmax(unit.get_hpmax() + self.get_hp_up())
+            unit.set_energymax(unit.get_energymax() + self.get_energy_up())
+            unit.set_staminamax(unit.get_staminamax() + self.get_stamina_up())
+            unit.set_dodgemax(unit.get_dodgemax() + self.get_dodge_up())
+
+            unit.set_physa(unit.get_physa() + self.get_physa_up())
+            unit.set_physd(unit.get_physd() + self.get_physd_up())
+            unit.set_maga(unit.get_maga() + self.get_maga_up())
+            unit.set_magd(unit.get_magd() + self.get_magd_up())
+            unit.set_hit(unit.get_hit() + self.get_hit_up())
+
         def learn_move(self, unit):
             #checks if the unit learns a new move. if the unit does, then it appends the appropriate move to movelist. WIP. the numbers will definitely need changing later.
             if unit.get_lvl() == 0:
@@ -58,7 +78,6 @@ init -10 python:
                 return self.get_learnlist()[i]
             return -1
             #appends the move corresponding to the level up to the unit's movelist.
-
 
         def level_up(self, unit, exp, showlist):
             #method:
@@ -76,17 +95,15 @@ init -10 python:
             oldexp = unit.get_exp() #the exp the unit had before the battle
 
             if unit.get_exp() + exp >= unit.get_next_level_exp() and unit.get_lvl() < LEVELCAP:
+                unit.set_exp((unit.get_exp()+exp) - unit.get_next_level_exp())
                 unit.set_lvl(unit.get_lvl()+1)
                 lvlup = 1
                 #the unit levels up
                 self.inc_stats(unit) #the unit's stats are increased by the values defined by the focus.
-                newmove = self.learn_move(unit) #check if the unit gets a new move.
 
+                newmove = self.learn_move(unit) #check if the unit gets a new move.
                 if newmove != -1:
                     unit.get_movelist().append(newmove)
-
-                unit.set_exp((unit.get_exp()+exp) - unit.get_next_level_exp())
-
 
                 #check if the unit has enough exp to level up again:
                 if unit.get_exp() >= unit.get_next_level_exp():
@@ -109,27 +126,57 @@ init -10 python:
         def __init__(self):
             self.title = "Fighter"
             self.flavour = ""
+            self.hp_up = 5 #how the unit's physa will be increased after each level
+            self.energy_up = 0 #etc
+            self.stamina_up = 0
             self.physa_up = 2
             self.physd_up = 2
-            self.maga_up = 1
-            self.magd_up = 0
+            self.maga_up = 0
+            self.magd_up = 1
             self.hit_up = 0
-            self.dodge_up = 0
+            self.dodge_up = 1
 
             self.learnlist = [Whirl()]  #all moves the unit can learn under this focus
+        def inc_stats(self, unit):
+            #increases the unit's stats on level up.
+            unit.set_hpmax(unit.get_hpmax() + self.get_hp_up())
+            unit.set_energymax(unit.get_energymax() + self.get_energy_up())
+            unit.set_staminamax(unit.get_staminamax() + self.get_stamina_up())
+            unit.set_dodgemax(unit.get_dodgemax() + self.get_dodge_up())
+
+            unit.set_physa(unit.get_physa() + self.get_physa_up())
+            unit.set_physd(unit.get_physd() + self.get_physd_up())
+            unit.set_maga(unit.get_maga() + self.get_maga_up())
+            unit.set_magd(unit.get_magd() + self.get_magd_up())
+            unit.set_hit(unit.get_hit() + self.get_hit_up())
 
     class Focus_assistant(Focus):
         def __init__(self):
-            self.title = "Fighter"
+            self.title = "Assistant"
             self.flavour = ""
-            self.physa_up = 2
-            self.physd_up = 2
-            self.maga_up = 1
+            self.hp_up = 0 #how the unit's physa will be increased after each level
+            self.energy_up = 0 #etc
+            self.stamina_up = 0
+            self.physa_up = 1
+            self.physd_up = 1
+            self.maga_up = 0
             self.magd_up = 0
-            self.hit_up = 0
+            self.hit_up = 3
             self.dodge_up = 0
 
             self.learnlist = [-1]  #all moves the unit can learn under this focus
+        def inc_stats(self, unit):
+            #increases the unit's stats on level up.
+            unit.set_hpmax(unit.get_hpmax() + self.get_hp_up())
+            unit.set_energymax(unit.get_energymax() + self.get_energy_up())
+            unit.set_staminamax(unit.get_staminamax() + self.get_stamina_up())
+            unit.set_dodgemax(unit.get_dodgemax() + self.get_dodge_up())
+
+            unit.set_physa(unit.get_physa() + self.get_physa_up())
+            unit.set_physd(unit.get_physd() + self.get_physd_up())
+            unit.set_maga(unit.get_maga() + self.get_maga_up())
+            unit.set_magd(unit.get_magd() + self.get_magd_up())
+            unit.set_hit(unit.get_hit() + self.get_hit_up())
 
 
 
