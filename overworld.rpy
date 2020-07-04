@@ -9,9 +9,9 @@
 
 #-----ACT I index-----#
 #a certain item in the list always corresponds to the same physical location. It is as follows:
-# [0] = Chere Hotel (hotel)
-# [1] = Backstreet (becomes nai's office after first visit)
-# [2] = Saint Hope's (slums)
+# [0] = Chere Hope's (hotel)
+# [1] = Backstreets (becomes nai's office after first visit)
+# [2] = circumvallation
 # [4] =
 # [3] =
 # [5] =

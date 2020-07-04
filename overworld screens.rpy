@@ -14,8 +14,8 @@ screen inventory_view(viewlist, equip_type):
         vbox:
             spacing 20
             for gear in viewlist:
-                if gear.get_type() in equip_type:
-                    textbutton gear.get_title() action NullAction() hovered Function(ow.gear_browse, gear) unhovered Hide("gear_browse")
+                if gear[0].get_type() in equip_type:
+                    textbutton gear[0].get_title() + " Q:" + str(gear[1]) action NullAction() hovered Function(ow.gear_browse, gear[0]) unhovered Hide("gear_browse")
 screen move_view(viewlist):
     #move vp on the right.
     zorder 101
@@ -158,7 +158,6 @@ screen party_view(party, i, ow):
 
         text "Passive"
         textbutton party[i].get_passive().get_title() action Function(ow.swap_passive, party[i]) hovered Function(ow.passive_browse, party[i].get_passive()) unhovered Hide("passive_browse")
-
 screen passive_swap(pl):
     modal True
     zorder 105
@@ -179,7 +178,6 @@ screen passive_swap(pl):
                     pass
                 else:
                     textbutton passive.get_title() action Return(passive) hovered Function(ow.passive_browse, passive) unhovered Hide("passive_browse")
-
 screen passive_browse(passive):
     zorder 101
     frame: #obviously all the positioning aspects will have to be perfected.
@@ -192,8 +190,6 @@ screen passive_browse(passive):
             text passive.get_title()
             text passive.get_flavour()
             #add: when the passive activates
-
-
 screen gear_swap(viewlist, equip_type):
     #inventory: overworld inventory object
     modal True
@@ -211,8 +207,8 @@ screen gear_swap(viewlist, equip_type):
             textbutton "Unequip" action Return(-1)
 
             for gear in viewlist:
-                if gear.get_type() in equip_type:
-                    textbutton gear.get_title() action Return(gear) hovered Function(ow.gear_browse, gear) unhovered Hide("gear_browse")
+                if gear[0].get_type() in equip_type:
+                    textbutton gear[0].get_title() action Return(gear[0]) hovered Function(ow.gear_browse, gear[0]) unhovered Hide("gear_browse")
 screen gear_browse(gear):
     zorder 101
     frame: #obviously all the positioning aspects will have to be perfected.
@@ -378,6 +374,7 @@ screen overworld_helpers(overworld):
             hover "hub_h"
             action Return #TODO later. after prologue. (the first hub will be nai's place.)
             #tooltip "Hub"
+            
 screen overworld_tooltip(descr, posl):
     #add some kind of frame too? will probably need it.
     frame:

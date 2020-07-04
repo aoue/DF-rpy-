@@ -57,8 +57,22 @@ label map0:
         piece1 = Folding_armour()
         ow.get_inventory().add_gear(piece1)
 
-        piece2 = Bascule_armour()
+        piece2 = Folding_armour()
         ow.get_inventory().add_gear(piece2)
+
+        piece3 = Bascule_armour()
+        ow.get_inventory().add_gear(piece3)
+
+        nl = [(piece1, 1), (piece3, 1)]
+
+        for tup in nl:
+            if type(tup[0]) == type(piece2):
+                renpy.say(None, "y")
+            else:
+                renpy.say(None, "n")
+
+    python:
+
 
         wep1 = Folding_spear()
         ow.get_inventory().add_gear(wep1)
