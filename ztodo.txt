@@ -4,38 +4,36 @@ Things to keep in mind:
 
 ------Dungeon things to add-------
 
-save room. in dungeons, can only save in this room?
+save room? in dungeons, can only save in this room? we'll need to implement some kind of save control in at some point, in any case.
 
-keys are kept track of:
-    -in the 'key item' list could then be searched for the correct key. the correct key would have to be known by the room.
-    -the room looks for an integer in the key item list, which is really just a list of integers. if the room finds a matching integer to its own lock number, then it will unlock.
+Saving in the hub? that's good because it gets the player back to the hub often, and of their own will.
 
 ------Things needed for prologue release------
 
 -art-
-party portraits: federal, aide
-character portraits: yve, handler, federal, aide, nai
+party portraits: friday, federal, aide.
+character portraits: yve, friday, payton cutin, mueler, federal, aide
 backgrounds: taxi, hotel entrace, hotel desk, nai's office
 dungeon backgrounds: generic rooms, idk what else exactly
-music: at least one battle track and one vn track would be nice.
+music: at least one battle track and one event track would be nice.
 
 -code-
-dungeon: rooms, room events. (they need writing too)
-enemies: lord historian's grunt, lord historian's squad leader.
+overworld: switching overworld backgrounds when backstreets is clicked.
 ai: healing. human squads usually have a healer in the group.
-gear: loot after battle, treasure chests, stuff like that.
-focus: yve's stat growth and learnset from level 1 through 10.
-write: all the story
+units: yve and friday need leveling from 1 to 10. yve starts at a higher level than friday.
+write: all the story, the room events too.
+
+design the whole dungeon. create all the event labels. then fill them up.
 
 
 
 ------the very next thing(s)------
 
+each unit has two passives: gear passive and intrinsic passive.
+intrinsic passive can only come from learned passive list/pool. These can be to represent the handler. [0]
+gear passive can only come from gear. much more mundane passives. [1]
 
-inventory:
-    -all spots in inventory lists to be redone as tuples. (object, quantity)
-
-escape from battle. it can only be used when all your units are at full able (i.e. at the start of a round.) it sets all units' able to zero and you have to wait out the enemy's attacks. next round, end the combat as normal. increase threat by like 3x normal amount or something.
+combat lanes. a unit in row x can only target a hex in rows x-1, x, x+1. is this even a good change, though?
 
 inventory:
     -using items in battle
@@ -45,21 +43,10 @@ the preferences menu. change it or something.
  all we need is:
     -text speed
     -history
-    -?
+    -what else?
 
-clicking on the overworld 'backstreets' button should change the overworld background to the backstreets, which has some buttons and stuff, etc.
-quick travel menu? has all the locations and they can be zoomed to with just a click.
 
-key inventory and unlocking doors. do it.
-
-focus list. it's the list of every focus the unit has access to.
-
-change adrenaline. it's too useful. each of yve's adrenaline-type moves should only have one thing:
-    -hp
-    -physa
-    -dodge and hit
-    they'll all have the same adrenaline marker in stance though, so you can't apply them all at the same time.
-
+focus list. it's the list of every focus the unit has access to. it is useful for when a unit is on a focus level up. the unit chooses a focus from this list.
 
 
 ------what needs doing eventually-------
@@ -75,6 +62,8 @@ use items in battle.
 
 overworld: hub. needed for chapter 1.
 
+escape from battle. it can only be used when all your units are at full able (i.e. at the start of a round.) it sets all units' able to zero and you have to wait out the enemy's attacks. next round, end the combat as normal. increase threat by like 3x normal amount or something.
+
 evo moves
 
 combat view:
@@ -83,6 +72,7 @@ ideas:
  -how about a mostly overhead view, where we see the backs of our own units and the fronts of the enemy.
  -show all the backs of our units close to the screen and the fronts of the enemy too, all lined up against each other. Then, off to the side, or maybe overlaid but semi-transparent, have the current map view that we've got now so the player can actually tell what's going on. I kind of like the semi-transparent but right in the center middle idea.
  -fire emblem 7 size/style sprites
+ -acknowledge they are just boxes on the screen. make it look like a box with the character's cut in on it and name. like a token from a board game.
 
 battle log? [unit name] uses [move name] and hits [target name] for [damage, effect] (list multiple targets too.) Would be a scrollable viewport kind of thing.
 

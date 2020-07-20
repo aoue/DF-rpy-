@@ -26,3 +26,24 @@ init python:
             self.title = "Dog Teeth" #item name
             self.flavour = "Canines fallen from the mouth of a dog during the excitement." #flavour text
             self.flag = 5 #always 5. 5 corresponds to materials
+
+
+
+    #more materials to add:
+    #prologue:
+    # -intact dog claw
+    # -mangy fur
+
+
+
+
+
+
+
+
+
+
+
+
+
+##eof

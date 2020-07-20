@@ -242,7 +242,7 @@ init -2 python:
             renpy.show_screen("show_heal", showlist, "", unit)
 
             #-increase physa mod by .5
-            self.set_physa(self.get_physa() + 0.5)
+            self.set_physa(self.get_physa() + 0.2)
 
             #show
             targetlist = [(unit.get_point().get_x(), unit.get_point().get_y(), self.get_ad_loss(), unit.get_iff())]
@@ -252,7 +252,7 @@ init -2 python:
             #if above max health thanks to adrenaline hp buff, remove hp buff.
             if unit.get_hp() > unit.get_hpmax_actual():
                 unit.set_hp(max(unit.get_hpmax_actual(), unit.get_hp() - self.get_ad_loss()))
-            self.set_physa(self.get_physa() - 0.5)
+            self.set_physa(self.get_physa() - 0.2)
 
         def enter_rally(self):
             self.set_hit(self.get_hit() + 0.1)

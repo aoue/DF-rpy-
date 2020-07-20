@@ -6,7 +6,7 @@ init python:
     class Direction():
         def __init__(self):
             self.bg = "direction_bg"
-            self.current = [Slippers()] #list of ongoing missions. quest objects.
+            self.current = [Slippers(), Mq_prologue()] #list of ongoing missions. quest objects.
             self.completed = [] #list of succeeded or failed missions. quest objects.
 
             self.last_viewed = self.current[0] #last viewed quest on the direction screens. quest object
@@ -49,7 +49,7 @@ init python:
     class Quest():
         def __init__(self):
             self.chapter = 0 #int. determines what chapter quest expires at the start of
-            self.flag = 0 #int. unique quest identifier.
+            self.flag = -1 #int. unique quest identifier.
 
             self.teaser = "" #title that shows up in the quest selection tab.
             self.title = "" #quest title
@@ -81,10 +81,11 @@ init python:
         def set_progress(self, x):
             self.progress = x
 
+    #eg
     class Slippers(Quest):
         def __init__(self):
             self.chapter = 1 #int. determines what chapter quest expires at the start of
-            self.flag = 1 #int. unique quest identifier.
+            self.flag = 0 #int. unique quest identifier.
 
             self.teaser = "Slippers" #title that shows up in the quest selection tab.
             self.title = "The Case of the Missing Slippers" #quest title
@@ -92,6 +93,24 @@ init python:
             self.steps = 0 #int. max value of progress.
             self.flavour = ["please find my slippers", "find them again"] #list of quest description paragraphs. corresponds to a value of progress.
             self.requirement = ["find the slippers", "again buddy"] #list of requirement descriptions one line things. corresponds to progress.
+
+
+    #--- Prologue quests ---#
+
+    #main quest
+    class Mq_prologue(Quest):
+        def __init__(self):
+            self.chapter = 1 #int. determines what chapter quest expires at the start of
+            self.flag = 1 #int. unique quest identifier.
+
+            self.teaser = "Cherespoir" #title that shows up in the quest selection tab.
+            self.title = "Work in Cherespoir" #quest title
+            self.progress = 1 #int. allows next actions to be done for quest.
+            self.steps = 0 #int. max value of progress.
+
+            self.flavour = ["Find the rest of the team.", "Prepare for departure.", "Locate nest", "Determine optimal pesticidal location"] #list of quest description paragraphs. corresponds to a value of progress.
+            self.requirement = ["Team found", "Preparation complete", "Nest located", "Determined"] #list of requirement descriptions one line things. corresponds to progress.
+
 
 
 

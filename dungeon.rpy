@@ -2,15 +2,15 @@
 
 init python:
 
-#dungeons are for crawling
+#dungeons are for crawling.
+#each dungeon needs its own class. the map of the dungeon and the monsterlist, etc, are all in the dungeon's init.
 
     class Dungeon(): #really, a dungeon should accept a few arguments.
         def __init__(self, master):
-            #make the dungeon crawler interface (just images of interconnecting rooms, where each room is an image button and it shows up if you've explored it, and is clickable if you're adjacent. use a 2d array for this too.)
             self.master = master #overworld instance that called and presides over the dungeon.
             self.bg = "dungeon_bg" #image name
 
-            self.entrance = Exit_room(1,0,(0,1,1,0)) #where the entrance is. party starst here, exits here.
+            self.entrance = Exit_room(1,0,(0,1,1,0)) #where the entrance is. party starts here, exits here.
             self.entrance.set_explored(1)
             self.spot_x = self.entrance.get_x() #where the player's x is at
             self.spot_y = self.entrance.get_y() #where the player's y is at
@@ -68,6 +68,7 @@ init python:
         #useful functions
         def spawn_monster(self, type, dummymap):
             #type is the kind of monster that should be spawned. each dungeon will need its own.
+            #below is an example from dungeon_0
             if type == 0: #jowler
                 baddie = Unit_jowler(0, "jowler", dummymap.random_empty(), 1)
 
@@ -87,7 +88,7 @@ init python:
             #leaves dungeon. returns control to the overworld.
             self.get_master().set_in_dungeon(2)
 
-            dungeon.set_threat(0) #or something like this
+            self.set_threat(1) #or something like this. reduce the threat in some way.
 
             #for every room,
             for i in range (0, len(self.get_map())):
@@ -174,7 +175,47 @@ init python:
             renpy.hide_screen("oob_target_select")
             renpy.show_screen("oob_target_select", self, unit, move)
 
+    class Dungeon_0(Dungeon):
+        #this is the dungeon from the prologue.
+        def __init__(self, master):
+            self.master = master #overworld instance that called and presides over the dungeon.
+            self.bg = "dungeon_bg" #image name
 
+            self.entrance = Exit_room(1,0,(0,1,1,0)) #where the entrance is. party starts here, exits here.
+            self.entrance.set_explored(1)
+            self.spot_x = self.entrance.get_x() #where the player's x is at
+            self.spot_y = self.entrance.get_y() #where the player's y is at
+
+            self.monsterlist = [(0,0), (1,10), (2,3), (3,5)] #the threat necessary for the enemy to be faced in a random encounter
+            self.threat = 1 #the longer you're in a dungeon, the higher the threat. the higher the threat, the stronger the monsters generated from random encounters.
+
+            self.map = [
+                [None, self.entrance, Fullheal_room(2,0,(0,0,1,1))],
+                [Combat_room(0,1,(0,1,1,0)), Combat_room(1,1,(1,0,0,1)), Event_room(2,1,(1,0,1,0))],
+                [Combat_room(0,2,(1,1,0,0)), Combat_room(1,2,(0,1,1,1)), Event_room(2,2,(1,0,1,1))],
+                [None, Event_room(1,3,(1,0,1,0)), Event_room(2,3,(1,0,0,0))],
+                [None, Event_room(1,4,(1,0,1,0)), None],
+                [None, Event_room(1,5,(0,0,0,0)), None]
+            ]
+
+            self.party = [] #all the units player brought
+            self.hold = [[],[],[]] #unit,x,y of ppl that were deployed last. x and y at the time they were deployed.
+
+        def spawn_monster(self, type, dummymap):
+            #type is the kind of monster that should be spawned. each dungeon will need its own.
+            if type == 0: #jowler
+                baddie = Unit_jowler(0, "jowler", dummymap.random_empty(), 1)
+
+            elif type == 1: #groskel
+                baddie = Unit_groskel(0, "groskel", dummymap.random_empty(), 0)
+
+            elif type == 2: #spitter
+                baddie = Unit_spitter(0, "spitter", dummymap.random_empty(), 1)
+
+            elif type == 3: #frother
+                baddie = Unit_frother(0, "frother", dummymap.random_empty(), 1)
+
+            return baddie
 
 
 

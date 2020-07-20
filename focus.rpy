@@ -136,7 +136,7 @@ init -10 python:
             self.hit_up = 0
             self.dodge_up = 1
 
-            self.learnlist = [Whirl()]  #all moves the unit can learn under this focus
+            self.learnlist = [Whirl(), ]  #all moves the unit can learn under this focus
         def inc_stats(self, unit):
             #increases the unit's stats on level up.
             unit.set_hpmax(unit.get_hpmax() + self.get_hp_up())

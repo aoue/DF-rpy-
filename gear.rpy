@@ -22,7 +22,7 @@ init -2 python:
     #Accessory types: can only equip unit's type.
     #0: reserved for enemies.
     #1: headbands (yve)
-    #2: belts (boy)
+    #2: belts? something else? (friday)
 
 
     ## -- Gear -- ##
@@ -113,14 +113,14 @@ init -2 python:
             self.magd = 0
             self.hit = 5
             self.dodge = 5
-    class Screwbox(Gear):
+    class N1_carmina(Gear):
         def __init__(self):
-            self.title = "Screwbox" #weapon name
-            self.flavour = "Half-inch." #flavour text
+            self.title = "N1-Carmina" #weapon name
+            self.flavour = "A heavy pistol which stopping power exceeds expectations." #flavour text
             self.flag = 2 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
-            self.type = 2 #int. who can equip the gear within its flag.
-            self.aff = 6 #affects damage affinity
-            self.aff_name = "Metal"
+            self.type = 4 #int. who can equip the gear within its flag.
+            self.aff = 0 #affects damage affinity
+            self.aff_name = "Normal"
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
@@ -129,12 +129,12 @@ init -2 python:
             self.able = 0
             self.stamina = 0
             self.restam = 0
-            self.physa = 1
+            self.physa = 20
             self.maga = 0
             self.physd = 0
             self.magd = 0
-            self.hit = 0
-            self.dodge = 0
+            self.hit = 10
+            self.dodge = 5
     class Regulation_sword(Gear):
         def __init__(self):
             self.title = "Regulation Sword" #weapon name
@@ -341,10 +341,10 @@ init -2 python:
     class Plain_headband(Gear):
         def __init__(self):
             self.title = "Plain Headband" #weapon name
-            self.flavour = "A plain headband Yve brought with her." #flavour text
+            self.flavour = "A plain and unremarkable headband." #flavour text
             self.flag = 3 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 1 #int. who can equip the gear within its flag.
-            self.aff_name = "-"
+            self.aff_name = "N/a"
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
@@ -359,13 +359,35 @@ init -2 python:
             self.magd = 0
             self.hit = 0
             self.dodge = 5
+    class Yve_headband(Gear):
+        def __init__(self):
+            self.title = "Yve's Headband" #weapon name
+            self.flavour = "A red headband Yve likes to wear." #flavour text
+            self.flag = 3 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
+            self.type = 1 #int. who can equip the gear within its flag.
+            self.aff_name = "N/a"
+            self.passive = Revival_1() #0: has no passive. else: has a passive
+            #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.
+            self.energy = 0
+            self.hp = 0
+            self.able = 0
+            self.stamina = 5
+            self.restam = 0
+            self.physa = 0
+            self.maga = 0
+            self.physd = 0
+            self.magd = 0
+            self.hit = 0
+            self.dodge = 0
+
+
     class Plain_belt(Gear):
         def __init__(self):
             self.title = "Plain Belt" #weapon name
             self.flavour = "A plain belt." #flavour text
             self.flag = 3 #1,2,3. corresponds to 1:armour, 2:weapon, 3:accessory
             self.type = 2 #int. who can equip the gear within its flag.
-            self.aff_name = "-"
+            self.aff_name = "N/a"
             self.passive = 0 #0: has no passive. 1: has a passive.
 
             #how the gear affects stats. adds the integer to the stat value. every piece of gear can affect every stat.

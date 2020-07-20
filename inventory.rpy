@@ -34,6 +34,7 @@ init python:
             return self.questlist
         def get_view(self):
             return self.view
+            
         def get_arm(self):
             return self.armourlist
         def get_wea(self):

@@ -22,9 +22,6 @@
 #time warp: makes buffs run their course. set time remaining on target's buffs to half their current duration, or to 0 if current duration == 1. ??. or expire all buffs/dots on selected units? cool.
 #energy transfer. transfers stamina, energy to target.
 
-#boy:
-#screw: power = 3 or something. stam cost = 5 or something. purpose is to use up enemies kindara/shatter point/defensive stances, yeah.
-
 #yve:
 #flourish.
 #fast hit. more damage the more able units there are on the field.
@@ -279,7 +276,7 @@ init -3 python:
         #low stam, low able
         def __init__(self):
             self.status_only = 0
-            self.flavour = "{i}The noblest weapon.{/i}"
+            self.flavour = "{i}The oldest weapon.{/i}"
             self.title = "Spear"
             self.rank = 1
             self.type = 1
@@ -289,7 +286,7 @@ init -3 python:
             self.stamina_drain = 15
             self.energy_drain = 0
             self.able_drain = 1
-            self.power = 20
+            self.power = 25
             self.hit = 0
             self.damage_type = 0
             self.element = -1
@@ -354,7 +351,7 @@ init -3 python:
         #low stam, med able
         def __init__(self):
             self.status_only = 1
-            self.flavour = "{i}Quicken the senses.{p}The unit's hit, physical attack, and health all increase.{/i}"
+            self.flavour = "{i}Adrenaline washes away the pain{/i}"
             self.title = "Adrenaline"
             self.rank = 2
             self.type = 0
@@ -421,6 +418,198 @@ init -3 python:
 
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
+    #--- Friday ---
+    class Gun(Move):
+        #shoot. single target. back rank. light damage. light cost.
+        def __init__(self):
+            self.status_only = 0
+            self.flavour = "{i}Shoot.{/i}"
+            self.title = "Gun"
+            self.rank = 2
+            self.type = 1
+            self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 10
+            self.energy_drain = 0
+            self.able_drain = 1
+            self.power = 20
+            self.hit = 0
+            self.damage_type = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
+            self.oob = 0
+
+        def exert(self, unit, sq, battle):
+            #moves cost stamina and able
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            #this move hits only the selected square.
+            target = battle.get_enemymap().search_map(sq)
+            targetlist = [target]
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
+    class Beat_up(Move):
+        #hits 2-4 times
+        def __init__(self):
+            self.status_only = 0
+            self.flavour = "{i}hit someone a lot of times.{/i}"
+            self.title = "Beat up"
+            self.rank = 1
+            self.type = 1
+            self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 30
+            self.energy_drain = 0
+            self.able_drain = 1
+            self.power = 5
+            self.hit = 10
+            self.damage_type = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
+            self.oob = 0
+
+        def set_power(self, x):
+            self.power = x
+        def exert(self, unit, sq, battle):
+            #moves cost stamina and able
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            #this move hits only the selected square.
+            target = battle.get_enemymap().search_map(sq)
+            targetlist = [target]
+
+            i = renpy.random.randint(1, 10)
+            self.set_power(self.get_power() * i)
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
+            self.set_power(20)
+    class First_aid(Move):
+        #first aid. very light heal, stops bleeding. light cost.
+        def __init__(self):
+            self.status_only = 1
+            self.flavour = "{i}Basic care, even by the talentless, is better than nothing.{/i}"
+            self.title = "First Aid"
+            self.rank = 2
+            self.type = 1
+            self.iff = 1
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 20
+            self.energy_drain = 1
+            self.able_drain = 1
+            self.power = 20 #heals
+            self.hit = 0
+            self.damage_type = 1
+            self.element = 0
+            self.element_name = "-"
+            self.dot = 0
+            self.dot_duration = 0
+            self.oob = 1
+
+        def exert(self, unit, sq, battle):
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            target = battle.get_allymap().search_map(sq)
+            targetlist = [target]
+
+            if target != None:
+                #heal a little. based on ma.
+                if target.get_stance().get_bleeding() == 1:
+                    target.set_stance().set_bleeding(0)
+
+            self.do_heal(unit, targetlist)
+
+        def exert_oob(self, unit, target):
+            if target.get_hp() != target.get_hpmax():
+                self.drain_oob(unit)
+
+                targetlist = [target]
+
+                self.do_heal_oob(unit, targetlist)
+    class Suppress(Move):
+        #suppress. 2x2. terrible hit. back rank.
+        def __init__(self):
+            self.status_only = 0
+            self.flavour = "{i}Spread and inaccurate firing.{/i}"
+            self.title = "Suppress"
+            self.rank = 2
+            self.type = 7
+            self.iff = 0
+            self.clearance = (0,0)
+            self.clearance_type = 2
+            self.stamina_drain = 30
+            self.energy_drain = 0
+            self.able_drain = 1
+            self.power = 20
+            self.hit = -40
+            self.damage_type = 0
+            self.element = -1
+            self.element_name = "Weapon"
+            self.dot = 0
+            self.dot_duration = 0
+            self.oob = 0
+
+        def exert(self, unit, sq, battle):
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            r = min(sq[0], 3)
+            c = min(sq[1], 3)
+
+            target0 = battle.get_enemymap().search_map((r,c))
+            target1 = battle.get_enemymap().search_map((r+1,c))
+            target2 = battle.get_enemymap().search_map((r,c+1))
+            target3 = battle.get_enemymap().search_map((r+1,c+1))
+            targetlist = [target0, target1, target2, target3]
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
+    class Form6(Move):
+        #Twelve Forms - VI. 1x1. front rank. retreats 1.
+        def __init__(self):
+            self.status_only = 0
+            self.flavour = "{i}Twelve Forms - Form VI.{/i}"
+            self.title = "Form VI"
+            self.rank = 1
+            self.type = 1
+            self.iff = 0
+            self.clearance = (0,1)
+            self.clearance_type = 1
+            self.stamina_drain = 10
+            self.energy_drain = 0
+            self.able_drain = 1
+            self.power = 15
+            self.hit = 0
+            self.damage_type = 0
+            self.element = -1
+            self.element_name = "Weapon"
+
+            self.dot = 0
+            self.dot_duration = 0
+            self.oob = 0
+
+        def exert(self, unit, sq, battle):
+            #moves cost stamina and able
+            self.drain(unit)
+            self.translate(unit, battle)
+
+            #this move hits only the selected square.
+            targetlist = []
+            targetlist.append(battle.get_enemymap().search_map(sq))
+
+            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
+    #class Iron_arm(Move):
+        #single target, med dmg, metal attr.
+        #increases friday's defense.
+    #class Mark(Move):
+        #single target. no damage.
+        #lowers enemy's def, magic def. gives enemy back half their stamina.
+
     #--- Federal ---
     class Sword(Move):
         #sword. single target. front rank. light damage. light cost.
@@ -484,40 +673,6 @@ init -3 python:
             targetlist.append(battle.get_enemymap().search_map(sq))
 
             self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-    class Form6(Move):
-        #Twelve Forms - VI. 1x1. front rank. retreats 1.
-        def __init__(self):
-            self.status_only = 0
-            self.flavour = "{i}Twelve Forms - Form VI.{/i}"
-            self.title = "Form VI"
-            self.rank = 1
-            self.type = 1
-            self.iff = 0
-            self.clearance = (0,1)
-            self.clearance_type = 1
-            self.stamina_drain = 10
-            self.energy_drain = 0
-            self.able_drain = 1
-            self.power = 15
-            self.hit = 0
-            self.damage_type = 0
-            self.element = -1
-            self.element_name = "Weapon"
-
-            self.dot = 0
-            self.dot_duration = 0
-            self.oob = 0
-
-        def exert(self, unit, sq, battle):
-            #moves cost stamina and able
-            self.drain(unit)
-            self.translate(unit, battle)
-
-            #this move hits only the selected square.
-            targetlist = []
-            targetlist.append(battle.get_enemymap().search_map(sq))
-
-            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
     class Rally(Move):
         #rally. 3x3 (allies). hit up, physa up. back rank. light cost.
         def __init__(self):
@@ -559,120 +714,9 @@ init -3 python:
                         target.get_stance().enter_rally()
                     elif target.get_ooa() == 0:
                         target.get_stance().set_rally(5) #set/refresh duration
-    class Shoot(Move):
-        #shoot. single target. back rank. light damage. light cost.
-        def __init__(self):
-            self.status_only = 0
-            self.flavour = "{i}Shoot carefully.{/i}"
-            self.title = "Shoot"
-            self.rank = 2
-            self.type = 1
-            self.iff = 0
-            self.clearance = (0,0)
-            self.clearance_type = 2
-            self.stamina_drain = 15
-            self.energy_drain = 0
-            self.able_drain = 1
-            self.power = 20
-            self.hit = 0
-            self.damage_type = 0
-            self.element = -1
-            self.element_name = "Weapon"
-            self.dot = 0
-            self.dot_duration = 0
-            self.oob = 0
-
-        def exert(self, unit, sq, battle):
-            #moves cost stamina and able
-            self.drain(unit)
-            self.translate(unit, battle)
-
-            #this move hits only the selected square.
-            target = battle.get_enemymap().search_map(sq)
-            targetlist = [target]
-            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
 
     #--- Federal Aide ---
-    class Suppress(Move):
-        #suppress. 2x2. terrible hit. back rank.
-        def __init__(self):
-            self.status_only = 0
-            self.flavour = "{i}Spread and inaccurate firing.{/i}"
-            self.title = "Suppress"
-            self.rank = 2
-            self.type = 7
-            self.iff = 0
-            self.clearance = (0,0)
-            self.clearance_type = 2
-            self.stamina_drain = 30
-            self.energy_drain = 0
-            self.able_drain = 1
-            self.power = 20
-            self.hit = -40
-            self.damage_type = 0
-            self.element = -1
-            self.element_name = "Weapon"
-            self.dot = 0
-            self.dot_duration = 0
-            self.oob = 0
 
-        def exert(self, unit, sq, battle):
-            self.drain(unit)
-            self.translate(unit, battle)
-
-            r = min(sq[0], 3)
-            c = min(sq[1], 3)
-
-            target0 = battle.get_enemymap().search_map((r,c))
-            target1 = battle.get_enemymap().search_map((r+1,c))
-            target2 = battle.get_enemymap().search_map((r,c+1))
-            target3 = battle.get_enemymap().search_map((r+1,c+1))
-            targetlist = [target0, target1, target2, target3]
-            self.do_damage(unit, targetlist, battle, self.get_dot(), self.get_dot_duration())
-    class First_aid(Move):
-        #first aid. very light heal, stops bleeding. light cost.
-        def __init__(self):
-            self.status_only = 1
-            self.flavour = "{i}Basic care, even by the talentless, is better than nothing.{/i}"
-            self.title = "First Aid"
-            self.rank = 2
-            self.type = 1
-            self.iff = 1
-            self.clearance = (0,0)
-            self.clearance_type = 2
-            self.stamina_drain = 20
-            self.energy_drain = 1
-            self.able_drain = 1
-            self.power = 20 #heals
-            self.hit = 0
-            self.damage_type = 1
-            self.element = 0
-            self.element_name = "-"
-            self.dot = 0
-            self.dot_duration = 0
-            self.oob = 1
-
-        def exert(self, unit, sq, battle):
-            self.drain(unit)
-            self.translate(unit, battle)
-
-            target = battle.get_allymap().search_map(sq)
-            targetlist = [target]
-
-            if target != None:
-                #heal a little. based on ma.
-                if target.get_stance().get_bleeding() == 1:
-                    target.set_stance().set_bleeding(0)
-
-            self.do_heal(unit, targetlist)
-
-        def exert_oob(self, unit, target):
-            if target.get_hp() != target.get_hpmax():
-                self.drain_oob(unit)
-
-                targetlist = [target]
-
-                self.do_heal_oob(unit, targetlist)
 
 
 

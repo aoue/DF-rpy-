@@ -79,6 +79,8 @@ init -555:
         "overworld/party_button.png"
     image party_h:
         "overworld/party_button_hover.png"
+    image party_step_bg:
+        "party/party_step_bg.jpg"
     image party_bg:
         "party/party_bg.jpg"
     image party_prev:
@@ -89,11 +91,15 @@ init -555:
         "party/prev_h.png"
     image party_next_h:
         "party/next_h.png"
+    image open_inventory:
+        "party/open_inventory.png"
+    image open_inventory_h:
+        "party/open_inventory_h.png"
 
     #poses
     image pose_yve:
         "party/poses/yve_pose.png"
-    image pose_boy:
+    image pose_friday:
         "party/poses/boy_pose.png"
     image pose_aide:
         "party/poses/boy_pose.png"
@@ -121,10 +127,6 @@ init -555:
         "overworld/hub_button_hover.png"
 
     ##overworld screen
-    image bg_prologue:
-        "overworld/cityscape0.png"
-    image bg_chapter1:
-        "overworld/bg_chapter1.jpg"
     image party_icon:
         "dungeon/party_icon.png"
     image location_icon:
@@ -162,9 +164,9 @@ init -555:
         "dungeon/room icons/fight_icon.png"
 
     #face imgs. for deployment screen.
-    image face_boy:
+    image face_friday:
         "combat/face/deploy mc.png"
-    image face_boy_hover:
+    image face_friday_hover:
         "combat/face/deploy mc hover.png"
     image face_yve:
         "combat/face/deploy yve.png"
@@ -220,7 +222,7 @@ init -555:
     image icon_groskel:
         "images/combat/units/groskel icon.png"
 
-    image icon_boy:
+    image icon_friday:
         "images/combat/units/mc icon.png"
         #0.5
         #"images/combat/units/mc icon 2.png"

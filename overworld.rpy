@@ -1,31 +1,37 @@
-#method:
 
-#map nav for act I.
-#here's how it works:
-#-- when the screen is called, it is given arguments. These are:
-#-first arg: list of booleans that determine whether a location is unlocked.
-#-second arg: list of str label names that should be jumped to. paired one-to-one with first list.
-#update the lists with each call.
-
-#-----ACT I index-----#
-#a certain item in the list always corresponds to the same physical location. It is as follows:
-# [0] = Chere Hope's (hotel)
-# [1] = Backstreets (becomes nai's office after first visit)
-# [2] = circumvallation
-# [4] =
-# [3] =
-# [5] =
-# [6] =
-# [7] =
-# etc
 
 #location icon offset: 54, 72
 
-init python:
+#overworld map bgs:
+#-bg prologue
+#-bg office
+#-bg chp0
+#-bg chp1
+#-etc
+
+
+#the overworld maps we see a lot of:
+#city: shows when 0 is passed into show_overworld
+# -apartment
+# -dpt store
+# -ice rink
+# -etc
+
+#hq: shows when 1 is passed into show_overworld
+# -mueler's station
+# -tori's office
+# -crafting person. one of the workers at the crafting area
+
+#cherespoir: shows when 2 is passed into show_overworld
+
+
+
+init 2 python:
     #overworld map
     class Overworld():
         def __init__(self):
-            self.chapter = 0 #str. from 0 (prologue) to 8 (chapter 8). master key to control everything else.
+            self.chapter = 0 #int. from 0 (prologue) to 8 (chapter 8). master key to control everything else.
+            self.timeofday = 0 #int. 0: morning, 1:noon, etc
 
             self.party = [] #all units in the party.
             self.party_bg = "party_bg"
@@ -33,24 +39,35 @@ init python:
             self.inventory = Inventory()
 
             #--- lists of lists. each list inside corresponds to a chapter. all preset images in here. ---#
-            self.unlocked = [[1, 1, 1]] #whether the location can trigger an event.
-            self.jumps = [["fail", "test_dungeon_entrance", "fail"]] #str of the label we're jumping to.
-            self.descr = [["Hotel", "Circumvallation", "Backstreets"]] #str description on hover.
-            self.images = [["hotel_icon", "dungeon_icon", "nai_office_icon"]] #normal image for a location
-            self.positions = [[(130, 275), (332, 313), (1160, 458)]] #position for a location
-            self.bg = [["bg_prologue"],["bg_chapter1"]] #the background image.
+
+
+            ## -- Add only once it's actually implemented -- ##
+            self.ow_routes = [Route_ms_0()]
+            self.hq_routes = [Route_ms_0()] #mueler, tori, control, crafting, hospital.
+            self.cherespoir_routes = [Route_ms_0(), Route_hill(), Route_store(), Route_square(), Route_lab(), Route_radio()] #friday, payton
+            self.routes = [self.ow_routes, self.hq_routes, self.cherespoir_routes]
+
+            self.bg = [["city_map"],["hq_map"], ["cherespoir_map_day", "cherespoir_map_night"]] #the background image.
 
             self.direction = Direction()
 
             self.in_dungeon = 0 #int. 0: in dungeon, 1: not in dungeon.
-            self.dungeon_prologue = Dungeon(self) #prologue dungeon
-            self.dungeons = [[self.dungeon_prologue]] #dungeons for each chapter
+            self.dungeon_prologue = Dungeon_0(self) #prologue dungeon
+            self.dungeons = [[self.dungeon_prologue]] #dungeons by each chapter. Lose access to old dungeons in new chapters.
 
         #setters
-        def set_view(self, view):
-            self.view = view
+        def set_view(self, x):
+            self.view = x
+        def set_chapter(self, x):
+            self.chapter = x
+        def set_timeofday(self, x):
+            self.timeofday = x
 
-        #getters.
+        #getters
+        def get_timeofday(self):
+            return self.timeofday
+        def get_routes(self):
+            return self.routes
         def get_in_dungeon(self):
             return self.in_dungeon
         def get_chapter(self):
@@ -65,38 +82,27 @@ init python:
             return self.view
         def get_inventory(self):
             return self.inventory
-        #getters automatically return the chapter's list inside the larger list
-        def set_in_dungeon(self, x):
-            self.in_dungeon = x
-        def set_view(self, view):
-            self.view = view
-        def get_unlocked(self):
-            return self.unlocked[self.get_chapter()]
-        def get_jumps(self):
-            return self.jumps[self.get_chapter()]
-        def get_descr(self):
-            return self.descr[self.get_chapter()]
-        def get_images(self):
-            return self.images[self.get_chapter()]
-        def get_positions(self):
-            return self.positions[self.get_chapter()]
-        def get_bg(self):
-            return self.bg[self.get_chapter()]
+        def get_bg(self, x):
+            return self.bg[x][self.get_timeofday()]
         def get_dungeons(self, x):
             return self.dungeons[self.get_chapter()][x]
+
+        #setters
+        def set_in_dungeon(self, x):
+            self.in_dungeon = x
 
         ## -- useful functions -- ##
         #party management
         def join_party(self, unit):
             self.get_party().append(unit)
-            #centered text? unit.get_name() joins the party!
+            #centered text? unit.get_name() joins the party.
         def leave_party(self, unit):
             self.get_party().remove(unit)
-            #centered text? unit.get_name() leaves the party!
-        def party_view(self):
-            renpy.show_screen("inventory_view", self.get_inventory().get_arm(), self.get_party()[self.get_view()].get_equip_types()[0])
-            renpy.show_screen("move_view", self.get_party()[self.get_view()].get_movelist())
-            renpy.call_screen("party_view", self.get_party(), self.get_view(), self)
+            #centered text? unit.get_name() has left the party.
+        def party_view(self, i):
+            renpy.show_screen("inventory_view", self.get_inventory().get_arm(), self.get_party()[i].get_equip_types()[0])
+            renpy.show_screen("move_view", self.get_party()[i].get_movelist())
+            renpy.call_screen("party_view", self.get_party(), i, self)
         def next_party_unit(self, i):
             self.set_view(self.get_view() + i)
 
@@ -105,7 +111,7 @@ init python:
             elif self.get_view() < 0:
                 self.set_view(len(self.get_party())-1)
 
-            self.party_view()
+            self.party_view(self.get_view())
 
         #inventory management
         def change_inventory_view(self, i):
@@ -164,9 +170,8 @@ init python:
             unit.post_battle()
 
             #check if unit's passive should also be removed
-            if unit.get_passive() == old_passive:
-                unit.set_passive(Passive())
-
+            if unit.get_passive()[1] == old_passive:
+                unit.set_passive(1, Passive())
         def gear_view(self, flag, unit):
             renpy.show(self.get_party_bg())
             renpy.show_screen("party_view", self.get_party(), self.get_view(), self)
@@ -215,23 +220,30 @@ init python:
             renpy.show_screen("move_browse", move)
 
         #passive management
-        def swap_passive(self, unit):
-            pl = unit.get_passivelist()
-            pl.append(unit.get_armour().get_passive())
-            pl.append(unit.get_weapon().get_passive())
-            pl.append(unit.get_acc().get_passive())
+        def swap_passive(self, unit, x):
 
-            if unit.get_passive() in pl:
-                pl.remove(unit.get_passive())
+            if x == 0: #intrinsic passive swap
+                pl = copy_list(unit.get_passivelist())
+            else:
+                pl = []
+                if unit.get_armour().get_passive() != 0:
+                    pl.append(unit.get_armour().get_passive())
+                if unit.get_weapon().get_passive() != 0:
+                    pl.append(unit.get_weapon().get_passive())
+                if unit.get_acc().get_passive() != 0:
+                    pl.append(unit.get_acc().get_passive())
+
+            if unit.get_passive()[x] in pl:
+                pl.remove(unit.get_passive()) #swap this to remove all occurences of the equipped passive in pl
 
             new_passive = renpy.invoke_in_new_context(self.passive_view, pl)
+
             if new_passive == 0: #cancel
                 return
             elif new_passive == -1: #unequipped
-                unit.set_passive(Passive())
+                unit.set_passive(x, Passive())
                 return
-            else:
-                unit.set_passive(new_passive)
+            unit.set_passive(x, new_passive)
         def passive_browse(self, passive):
             renpy.show_screen("passive_browse", passive)
         def passive_view(self, pl):
@@ -253,22 +265,29 @@ init python:
             renpy.show_screen("quest_view", quest)
 
         #big shows
-        def show_tooltip(self, descr, loc):
+        def show_tooltip(self, descr, loc, images):
             renpy.transition(dissolve)
-            renpy.show_screen("overworld_tooltip", descr, loc)
+            renpy.show_screen("overworld_tooltip", descr, loc, images)
         def show_ow_helpers(self):
             renpy.transition(dissolve)
             renpy.show_screen("overworld_helpers", self)
-        def show_overworld(self):
+        def show_overworld(self, chapter):
+            renpy.retain_after_load()
             self.set_in_dungeon(0)
-            renpy.call_screen("overworld_map", self.get_unlocked(), self.get_jumps(), self.get_descr(), self.get_images(), self.get_positions(), self)
+            renpy.call_screen("overworld_map", self, chapter)
         def show_dungeon(self): #(self, floor)
             #for a dungeon 0. it will have to be preset.
             self.set_in_dungeon(1)
             self.get_dungeons(0).set_party(self.get_party())
             self.get_dungeons(0).show_dungeon()
-        def show_party(self):
-            renpy.invoke_in_new_context(self.party_view)
+        def show_party(self, i):
+            renpy.invoke_in_new_context(self.party_view, i)
+        def show_party_step(self):
+            renpy.transition(dissolve)
+            renpy.show_screen("party_step", self)
+        def show_inventory_step(self):
+            renpy.transition(dissolve)
+            renpy.show_screen("inventory_view_proper", self)
         def show_direction(self):
             renpy.transition(dissolve)
             self.quest_view(self.get_direction().get_last_viewed())

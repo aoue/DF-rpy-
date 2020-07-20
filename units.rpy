@@ -96,7 +96,7 @@ init -1 python:
             self.move7 = None
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = [] #all moves the unit has learned. used for equipping unequipping moves.
-            self.passive = 0 #it's a class
+            self.passive = (0,0) #tuple of 2 class objects. [0] is the one of the unit's natural passive, [1] is a gear passive.
             self.passivelist = [] #it's a list of all the passives the unit knows by leveling up
 
         #actual getters - returns final value of the stat to simplify display and calculations
@@ -216,8 +216,11 @@ init -1 python:
         def get_flavour(self, i):
             return self.flavour[i]
         #setters
-        def set_passive(self, passive):
-            self.passive = passive
+        def set_passive(self, x, passive):
+            if x == 1: #intrinsic is being changed
+                self.passive = (self.get_passive()[0], passive)
+            else:
+                self.passive = (passive, self.get_passive()[1])
         def set_turn_over(self, turn_over):
             self.turn_over = turn_over
         def set_name(self, name):
@@ -321,8 +324,10 @@ init -1 python:
         def check_dead(self, battle):
             if self.get_hp() == 0:
 
-                if self.get_passive().get_check() == 5:
-                    self.get_passive().exert()
+                for p in self.get_passive():
+                    if p.get_check() == 5:
+                        p.exert(self)
+                        return
 
                 self.set_able(0)
                 self.set_stamina(0)
@@ -382,8 +387,10 @@ init -1 python:
             spread = renpy.random.randint(230, 255) /255.0
             #spread = 1 #for testing buffs
 
-            if self.get_passive().get_check() == 4:
-                self.get_passive().exert()
+            for p in self.get_passive():
+                if p.get_check() == 2:
+                    p.exert(self)
+
 
             heal = max((((astats + cmove.get_power()) / dstats) * cmove.get_power() * spread), 0)
 
@@ -394,8 +401,9 @@ init -1 python:
 
             #any stances that do: take 2x heals, 0.5x heals, etc. need to be handled in here.
 
-            if self.get_passive().get_check() == 4:
-                self.get_passive().exert()
+            for p in self.get_passive():
+                if p.get_check() == 4:
+                    p.exert(self)
 
             if maxes == 0:
                 if self.get_hp() >= self.get_hpmax_actual():
@@ -412,8 +420,9 @@ init -1 python:
             showlist.append((self.get_point().get_x(), self.get_point().get_y(), heal, self.get_iff()))
 
         def take_heal_oob(self, dealer, heal):
-            if self.get_passive().get_check() == 4:
-                self.get_passive().exert()
+            for p in self.get_passive():
+                if p.get_check() == 4:
+                    p.exert(self)
             self.set_hp(min(self.get_hp()+heal, self.get_hpmax_actual()))
 
         def calc_damage(self, target, cmove):
@@ -426,8 +435,9 @@ init -1 python:
             #see if we're dealing with physical or magical damage. returns tuples of (attack, hit) , (defense, dodge)
             damage = 1.0
 
-            if self.get_passive().get_check() == 1:
-                self.get_passive().exert(self, target)
+            for p in self.get_passive():
+                if p.get_check() == 1:
+                    p.exert(self, target)
 
             if cmove.get_damage_type() == 0: #physical damage
                 atk = self.get_physa_actual() * self.get_stance().get_physa()
@@ -482,10 +492,11 @@ init -1 python:
                 self.set_dodge(min(self.get_dodge()+int(self.get_dodgemax_actual()*1.1), self.get_dodgemax_actual()))
 
             #call passive:
-            if self.get_passive().get_check() == 3:
-                workaround = [damage]
-                self.get_passive().exert(self, battle, workaround)
-                damage = workaround[0]
+            for p in self.get_passive():
+                if p.get_check() == 3:
+                    wordaround = [damage]
+                    p.exert(self, battle, workaround)
+                    damage = workaround[0]
 
             #look through stances: the order is important.
             if self.get_stance().get_exhausted() > 0: #if exhausted, take 1.2x damage
@@ -550,7 +561,7 @@ init -1 python:
             self.equip_types = [[3,2,1], [1], [1]]
             self.weapon = Folding_spear()
             self.armour = Folding_armour()
-            self.acc = Plain_headband()
+            self.acc = Yve_headband()
 
             self.energymax = 15
             self.energy = self.get_energymax_actual()
@@ -594,24 +605,24 @@ init -1 python:
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
-            self.passive = Passive()
+            self.passive = (Passive(), Passive())
             self.passivelist = []
 
-    class Unit_boy(Unit):
+    class Unit_friday(Unit):
         def __init__(self):
             self.iff = 0
-            self.name = "Boy"
+            self.name = "Friday"
             self.point = Point(-1, -1, (1,1))
-            self.face = "face_boy"
-            self.face_h = "face_boy_hover"
-            self.icon = "icon_boy"
-            self.pose = "boy_pose"
+            self.face = "face_friday"
+            self.face_h = "face_friday_hover"
+            self.icon = "icon_friday"
+            self.pose = "pose_friday"
             self.deployable = 1
 
-            self.equip_types = self.equip_types = [[1], [2], [2]]
-            self.weapon = Screwbox()
-            self.armour = Smock_armour()
-            self.acc = Plain_belt()
+            self.equip_types = self.equip_types = [[2,1], [4], [3]]
+            self.weapon = N1_carmina()
+            self.armour = Folding_armour()
+            self.acc = Plain_headband()
 
             self.energymax = 10
             self.energy = self.get_energymax_actual()
@@ -645,21 +656,21 @@ init -1 python:
 
             self.foc = Focus_assistant()
             self.pattern = 2 #2/4/1
-            self.move1 = None
-            self.move2 = None
-            self.move3 = None
+            self.move1 = Gun()
+            self.move2 = Beat_up()
+            self.move3 = Defend()
             self.move4 = First_aid()
-            self.move5 = None
+            self.move5 = Walk()
             self.move6 = None
             self.move7 = None
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
-            self.passive = Passive()
+            self.passive = (Passive(), Passive())
             self.passivelist = []
 
 
-    #temp units
+    #guest units
     class Unit_federal(Unit):
         def __init__(self):
             self.iff = 0
@@ -718,9 +729,8 @@ init -1 python:
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
-            self.passive = Stick_Together_1()
+            self.passive = (Stick_Together_1(), Passive())
             self.passivelist = []
-
     class Unit_aide(Unit):
         def __init__(self):
             self.iff = 0
@@ -772,14 +782,14 @@ init -1 python:
             self.move1 = Form6()
             self.move2 = Walk()
             self.move3 = Defend()
-            self.move4 = Shoot()
+            self.move4 = Gun()
             self.move5 = Suppress()
             self.move6 = First_aid()
             self.move7 = None
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
-            self.passive = Stick_Together_1()
+            self.passive = (Stick_Together_1(), Passive())
             self.passivelist = []
 
 

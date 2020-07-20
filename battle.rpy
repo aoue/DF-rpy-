@@ -224,8 +224,9 @@ init -2 python:
                     unit.get_stance().refresh_stamina(unit) #restam
                     unit.get_stance().round_start(unit, self)
 
-                    if unit.get_passive().get_check() == 0:
-                        unit.get_passive().exert()
+                    for p in unit.get_passive():
+                        if p.get_check() == 0:
+                            p.exert()
 
             for unit in self.get_el():
                 if unit.get_ooa() == 0:
@@ -233,8 +234,9 @@ init -2 python:
                     unit.get_stance().refresh_stamina(unit) #restam
                     unit.get_stance().round_start(unit, self)
 
-                    if unit.get_passive().get_check() == 0:
-                        unit.get_passive().exert()
+                    for p in unit.get_passive():
+                        if p.get_check() == 0:
+                            p.exert()
         def player_turn(self):
             #choose unit
             #choose move

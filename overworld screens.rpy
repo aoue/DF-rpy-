@@ -1,6 +1,5 @@
 
-#all the screens for the overworld/dungeon map and some assisting images.
-#to be reorganized later. grouper together for now for ease of development
+#all the screens for the overworld map
 
 ## -- PARTY SCREENS -- ##
 screen inventory_view(viewlist, equip_type):
@@ -106,7 +105,7 @@ screen party_view(party, i, ow):
     vbox:
         yalign 0.25
         xalign 0.75
-        spacing 15
+        spacing 8
 
         #patterns
         if party[i].get_pattern() == 1: #4/2
@@ -156,12 +155,18 @@ screen party_view(party, i, ow):
         else:
             textbutton party[i].get_moves()[6].get_title() action Function(ow.swap_move, party[i], 6, 0) hovered Function(ow.move_browse, party[i].get_moves()[6]) unhovered Hide("move_browse")
 
-        text "Passive"
-        textbutton party[i].get_passive().get_title() action Function(ow.swap_passive, party[i]) hovered Function(ow.passive_browse, party[i].get_passive()) unhovered Hide("passive_browse")
+        text "Intrinsic Passive"
+        textbutton party[i].get_passive()[0].get_title() action Function(ow.swap_passive, party[i], 0) hovered Function(ow.passive_browse, party[i].get_passive()[0]) unhovered Hide("passive_browse")
+
+        text "Gear Passive"
+        textbutton party[i].get_passive()[1].get_title() action Function(ow.swap_passive, party[i], 1) hovered Function(ow.passive_browse, party[i].get_passive()[1]) unhovered Hide("passive_browse")
+
+
+
 screen passive_swap(pl):
     modal True
     zorder 105
-    textbutton "Cancel" action Hide("passive_browse"), Return(0) pos (1220, 30)
+    textbutton "Cancel" action Return(0) pos (1220, 30)
 
     viewport:
         xpos 1080 ypos 60 xysize (160,625)
@@ -174,10 +179,7 @@ screen passive_swap(pl):
             textbutton "Unequip" action Return(-1)
 
             for passive in pl:
-                if passive == 0:
-                    pass
-                else:
-                    textbutton passive.get_title() action Return(passive) hovered Function(ow.passive_browse, passive) unhovered Hide("passive_browse")
+                textbutton passive.get_title() action Return(passive) hovered Function(ow.passive_browse, passive) unhovered Hide("passive_browse")
 screen passive_browse(passive):
     zorder 101
     frame: #obviously all the positioning aspects will have to be perfected.
@@ -228,8 +230,8 @@ screen gear_browse(gear):
             text "Hit = " + str(gear.get_hit()) size 20
             text "Dodge = " + str(gear.get_dodge()) size 20
             text "affinity = " + str(gear.get_aff_name()) size 20
-            if gear.get_passive() == 1:
-                text "I have a passive" size 20
+            if gear.get_passive() != 0:
+                text gear.get_passive().get_title() size 20
 screen move_swap(movelist, rank):
     modal True
     zorder 105
@@ -275,6 +277,85 @@ screen move_browse(move):
             if move.get_status_only() == 0:
                 text "hit bonus = " + str(move.get_hit()) size 20
                 text "affinity = " + str(move.get_element_name()) size 20 #<-- replace text with image.
+screen party_step(overworld):
+    #intermediary between clicking the party button and selecting a party unit.
+    #allows player to click any party unit or to click the inventory.
+    modal True
+
+    frame:
+        background "party_step_bg"
+        xpos 305
+        ypos 105
+
+        textbutton "Close" action Hide("party_step"), Hide("overworld_helpers")
+
+        hbox:
+            ypos 40
+            spacing 30
+
+            imagebutton:
+                idle "open_inventory"
+                hover "open_inventory_h"
+                action Function(overworld.show_inventory_step), Hide("overworld_helpers")
+
+            for i in range(0, len(overworld.get_party())):
+                #textbutton overworld.get_party()[i].get_name() action Function(overworld.show_party, i), Hide("overworld_helpers")#, Hide("party_step")
+                imagebutton:
+                    idle overworld.get_party()[i].get_face()
+                    hover overworld.get_party()[i].get_face_h()
+                    action Function(overworld.show_party, i), Hide("overworld_helpers")#, Hide("party_step")
+screen inventory_view_proper(overworld):
+    #this is the inventory view screen that gets brought up by the party_step screen
+    modal True
+    zorder 101
+
+    #5 viewports for our 5 inventory subsections
+    frame:
+        xpos 10
+        xmaximum 1150
+        ypos 25
+        ymaximum 700
+        textbutton "close" pos (25, 25) action Hide("inventory_view_proper")
+        viewport:
+            xpos 10 ypos 60 xysize (210,625)
+            draggable True
+            mousewheel True
+            scrollbars "vertical"
+            vbox:
+                for gear in overworld.get_inventory().get_arm():
+                    textbutton gear[0].get_title() + " Q:" + str(gear[1]) action NullAction() hovered Function(ow.gear_browse, gear[0]) unhovered Hide("gear_browse")
+        viewport:
+            xpos 230 ypos 60 xysize (210,625)
+            draggable True
+            mousewheel True
+            scrollbars "vertical"
+            vbox:
+                for gear in overworld.get_inventory().get_wea():
+                    textbutton gear[0].get_title() + " Q:" + str(gear[1]) action NullAction() hovered Function(ow.gear_browse, gear[0]) unhovered Hide("gear_browse")
+        viewport:
+            xpos 450 ypos 60 xysize (210,625)
+            draggable True
+            mousewheel True
+            scrollbars "vertical"
+            vbox:
+                for gear in overworld.get_inventory().get_acc():
+                    textbutton gear[0].get_title() + " Q:" + str(gear[1]) action NullAction() hovered Function(ow.gear_browse, gear[0]) unhovered Hide("gear_browse")
+        viewport:
+            xpos 670 ypos 60 xysize (210,625)
+            draggable True
+            mousewheel True
+            scrollbars "vertical"
+            vbox:
+                for ite in overworld.get_inventory().get_ite():
+                    textbutton ite[0].get_title() + " Q:" + str(ite[1]) action NullAction()
+        viewport:
+            xpos 890 ypos 60 xysize (210,625)
+            draggable True
+            mousewheel True
+            scrollbars "vertical"
+            vbox:
+                for mat in overworld.get_inventory().get_mat():
+                    textbutton mat[0].get_title() + " Q:" + str(mat[1]) action NullAction()
 
 ## -- HUB SCREENS -- ##
 #TODO
@@ -284,7 +365,7 @@ screen chapter_view(chapter, overworld):
     zorder 100
 
     #add a background frame. the journal can just overlay over wherever you are.
-    add overworld.get_bg()
+    add overworld.get_bg(chapter)
     add overworld.get_direction().get_bg() pos(302, 97) #background
 
     vbox: #shows a column of clickable chapter icons on the left of the questbook. click to change chapter.
@@ -325,7 +406,7 @@ screen quest_view(quest):
         text quest.get_title() pos (550, 130)
 
     #expiry
-    text "Expiry: Chapter " + str(quest.get_chapter()) pos (850, 165)
+    text "Expires: Chapter " + str(quest.get_chapter()) pos (850, 165)
 
     viewport:
         area (550, 200, 400, 600)
@@ -360,7 +441,8 @@ screen overworld_helpers(overworld):
         imagebutton: #party button
             idle "party_b"
             hover "party_h"
-            action Function(overworld.show_party) #invoke in new context
+            #action Function(overworld.show_party) #invoke in new context
+            action Function(overworld.show_party_step)
             #tooltip "Manage Party"
 
         imagebutton: #direction button
@@ -374,37 +456,42 @@ screen overworld_helpers(overworld):
             hover "hub_h"
             action Return #TODO later. after prologue. (the first hub will be nai's place.)
             #tooltip "Hub"
-            
-screen overworld_tooltip(descr, posl):
-    #add some kind of frame too? will probably need it.
+screen overworld_tooltip(descr, posl, images):
+    #show spawn the frame window off to the right of the location icon in a little frame.
+    #frame components:
+    # -text title along the top of the frame
+
     frame:
-        xpos posl[0]
-        ypos posl[1]-40
-        text descr color "#ffffff"
+        xpos posl[0]-20
+        ypos posl[1]-112
+        vbox:
+            text descr color "#ffffff"
+            hbox:
+                for portrait in images:
+                    add portrait
     timer 3.0 action Hide("overworld_tooltip", transition = dissolve)
-screen overworld_map(ul, jl, dl, il, posl, overworld):
-    #bg: background image
-    #ul: list of unlocked locations. 1: unlocked, 0: not
-    #jl: jumps corresponding to unlocked locations.
-    #dl: descriptions corresponding to unlocked locations
-    #il: images corresponding to unlocked location. on hover, will show the character's portrait if the character is there. NOT YET IMPLEMENTED. will be shown as part of the 'overworld tooltip' screen and function
-    #posl: position corresponding to unlocked location. tuples.
+
+screen overworld_map(overworld, chapter):
 
     #background bg
-    add overworld.get_bg()[overworld.get_chapter()]
+    add overworld.get_bg(chapter)
 
+    #overworld helpers, party, quests, etc
     mousearea:
-        area(0, 0.2, 0.1, 0.5)#dimensions
+        area(0, 0.2, 0.1, 0.5) #dimensions
         hovered Function(overworld.show_ow_helpers)
         unhovered Hide("overworld_helpers", transition = dissolve)
 
-    for loc in range(0, len(ul)): #it's really ul[chapter]
-        imagebutton:
-            pos (posl[loc][0], posl[loc][1])
-            idle "location_icon"
-            hover "location_icon_h"
-            if ul[loc] == 1: #call in new context maybe?
-                action Call(jl[loc]) hovered Function(overworld.show_tooltip, dl[loc], posl[loc]) #unhovered Hide("overworld_tooltip")
+    #events
+    for route in overworld.get_routes()[chapter]:
+        if route.get_lock() == 0:
+            imagebutton:
+                #pos (route.get_position()[0], route.get_position()[1])
+                pos (route.get_position()[0]-54, route.get_position()[1]-72)
+                idle "location_icon"
+                hover "location_icon_h"
+                action Function(renpy.invoke_in_new_context, route.call_event) hovered Function(overworld.show_tooltip, route.get_descr(), route.get_position(), route.get_images())
+
 
 
 

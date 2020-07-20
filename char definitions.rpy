@@ -22,15 +22,38 @@ define temp = '#eddff7'
 
 
 ####### CHARACTERS ########
-#main cast
-define b = Character("Me", color = blue, what_color=iceblue, what_prefix='"', what_suffix='"') #boy
-define y = Character("Yvette", color = purple, what_color= lightpurple, what_prefix='"', what_suffix='"') #yve
-define n = Character("Nai", color = yellow, what_color=paleyellow, what_prefix='"', what_suffix='"') #nai
-define m = Character("Mechanical Girl", color = temp, what_color=temp, what_prefix='"', what_suffix='"') #mechanical girl
-define d = Character("Dg.", color = temp, what_color=temp, what_prefix='"', what_suffix='"', slow_cps_multiplier = 1.2,) #dg/dominique
-define t = Character("Tori", color = temp, what_color=temp, what_prefix='"', what_suffix='"') #tori/victoria
-define o = Character("Osgood", color = temp, what_color=temp, what_prefix='"', what_suffix='"')
-define a = Character("Artificer", color = purple, what_color= lightpurple, what_prefix='"', what_suffix='"') #the artificer
+## -- main cast -- ##
+define mc = Character("Me", color=purple, what_color= lightpurple, what_font= tv_font, what_prefix='"', what_suffix='"') #mc. handler
+define f = Character("Friday", color = temp, what_color=temp, what_prefix='"', what_suffix='"', slow_cps_multiplier = 1.2,) #friday. op.
 
-#secondary characters
-define h = Character("Anima", color=purple, what_color= lightpurple, what_font= tv_font, what_prefix='<', what_suffix='>') #yve's handler.
+define y = Character("Yvette", color = purple, what_color= lightpurple, what_prefix='"', what_suffix='"') #yve. op.
+define p = Character("Payton", color = temp, what_color=temp, what_prefix='"', what_suffix='"') #payton. yve's handler.
+
+
+define m = Character("Mueler", color = temp, what_color=temp, what_prefix='"', what_suffix='"') #mueler. handler.
+define t = Character("Tori", color = temp, what_color=temp, what_prefix='"', what_suffix='"') #tori. floor direction/handler.
+
+## -- other cast -- ##
+define n = Character("Nai", color = temp, what_color=paleyellow, what_prefix='"', what_suffix='"') #nai. geologist.
+define i = Character("Iris", color = purple, what_color= lightpurple, what_prefix='"', what_suffix='"') #iris. technician/crafting.
+
+## -- interface voices -- ##
+define c = Character("Control", color = temp, what_color=temp, what_prefix='--')#, what_suffix='--') #osgood. mission control.
+
+
+#names?
+#metz
+#forest/barrett
+#iri/iris
+#kina/kinna
+
+
+
+
+
+
+
+
+
+
+#eof

@@ -100,7 +100,7 @@ screen dungeon_map(dungeon, map):
         imagebutton:
             idle "party_b"
             hover "party_h"
-            action Function(dungeon.get_master().show_party) #invoke in new context.
+            action Function(dungeon.get_master().show_party_step) #invoke in new context.
 
         #change deployment and change hold list. useful if ambush/we skip deployment. do we still want this??
         #imagebutton: #TODO
@@ -135,41 +135,42 @@ screen dungeon_map(dungeon, map):
                 if room != None:
 
                     #if room connected to the right, add horizontal hallway image. if top, add vertical, if left, if bottom, etc.
-                    imagebutton:
-                        pos (room.get_dis_x(), room.get_dis_y())
+                    if (abs(dungeon.get_spot()[0] - room.get_x()) == 1 and dungeon.get_spot()[1] - room.get_y() == 0) or (dungeon.get_spot()[0] - room.get_x() == 0 and abs(dungeon.get_spot()[1] - room.get_y()) == 1) or (room.get_explored() == 1):
+                        imagebutton:
+                            pos (room.get_dis_x(), room.get_dis_y())
 
-                        if room.get_explored() == 0:
-                            idle "room"
-                        else:
-                            idle "room_ex"
+                            if room.get_explored() == 0:
+                                idle "room"
+                            else:
+                                idle "room_ex"
 
-                        if (abs(dungeon.get_spot()[0] - room.get_x()) == 1 and dungeon.get_spot()[1] - room.get_y() == 0) or (dungeon.get_spot()[0] - room.get_x() == 0 and abs(dungeon.get_spot()[1] - room.get_y()) == 1):
-                            if (dungeon.get_spot()[1] < room.get_y() and room.get_connect()[0] == 1) or (dungeon.get_spot()[0] > room.get_x() and room.get_connect()[1] == 1) or (dungeon.get_spot()[1] > room.get_y() and room.get_connect()[2] == 1) or (dungeon.get_spot()[0] < room.get_x() and room.get_connect()[3] == 1):
+                            if (abs(dungeon.get_spot()[0] - room.get_x()) == 1 and dungeon.get_spot()[1] - room.get_y() == 0) or (dungeon.get_spot()[0] - room.get_x() == 0 and abs(dungeon.get_spot()[1] - room.get_y()) == 1):
+                                if (dungeon.get_spot()[1] < room.get_y() and room.get_connect()[0] == 1) or (dungeon.get_spot()[0] > room.get_x() and room.get_connect()[1] == 1) or (dungeon.get_spot()[1] > room.get_y() and room.get_connect()[2] == 1) or (dungeon.get_spot()[0] < room.get_x() and room.get_connect()[3] == 1):
 
-                                if room.get_locked() == 0:
-                                    hover "room_hover"
-                                    action Function(dungeon.move_spot, room.get_x(), room.get_y()) #play footsteps sound as the group walks
-                                else:
-                                    hover "room_lock"
-                                    action Function(room.lock_event, dungeon)
-                                    #action NullAction() #play lock clunking sound as the door is locked
+                                    if room.get_locked() == 0:
+                                        hover "room_hover"
+                                        action Function(dungeon.move_spot, room.get_x(), room.get_y()) #play footsteps sound as the group walks
+                                    else:
+                                        hover "room_lock"
+                                        action Function(room.lock_event, dungeon)
+                                        #action NullAction() #play lock clunking sound as the door is locked
 
-                    if room.get_explored() == 1:
-                        #add room icon
-                        add room.get_icon() pos(room.get_dis_x() + 100, room.get_dis_y())
+                        if room.get_explored() == 1:
+                            #add room icon
+                            add room.get_icon() pos(room.get_dis_x() + 100, room.get_dis_y())
 
-                        #draw the connector hallways
-                        if room.get_connect()[0] == 1:
-                            add "hall_v" pos (room.get_dis_x() + 64, room.get_dis_y() - 18) #top
+                            #draw the connector hallways
+                            if room.get_connect()[0] == 1:
+                                add "hall_v" pos (room.get_dis_x() + 64, room.get_dis_y() - 18) #top
 
-                        if room.get_connect()[1] == 1:
-                            add "hall_h" pos (room.get_dis_x() + 128, room.get_dis_y() + 36) #right
+                            if room.get_connect()[1] == 1:
+                                add "hall_h" pos (room.get_dis_x() + 128, room.get_dis_y() + 36) #right
 
-                        if room.get_connect()[2] == 1:
-                            add "hall_v" pos (room.get_dis_x() + 64, room.get_dis_y() + 72) #bottom
+                            if room.get_connect()[2] == 1:
+                                add "hall_v" pos (room.get_dis_x() + 64, room.get_dis_y() + 72) #bottom
 
-                        if room.get_connect()[3] == 1:
-                            add "hall_h" pos (room.get_dis_x() - 22, room.get_dis_y() + 36) #left
+                            if room.get_connect()[3] == 1:
+                                add "hall_h" pos (room.get_dis_x() - 22, room.get_dis_y() + 36) #left
 
         add "party_icon" pos (36 + dungeon.find_room().get_dis_x(), 3 + dungeon.find_room().get_dis_y())
 

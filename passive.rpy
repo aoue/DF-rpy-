@@ -28,14 +28,20 @@ init python:
             self.check = -1 # 0 through 7. determines when the passive should be called.
             self.flavour = "No passive equipped" #so the player knows what the passive does when equipping it.
             self.title = "None" #so the player can identify the passive by its name.
+            self.charges = 0 #how many times the passive can trigger. only relevant for some.
 
         #getters
+        def get_charges(self):
+            return self.charges
         def get_check(self):
             return self.check
         def get_flavour(self):
             return self.flavour
         def get_title(self):
             return self.title
+        #setters
+        def set_charges(self, x):
+            self.charges = x
 
     #--- Stick Together ---#
     #type = 3
@@ -75,6 +81,26 @@ init python:
             elif isinstance(map.search_map((unit.get_point().get_x(), min(unit.get_point().get_y()+1, 4))), Unit):
                 if map.search_map((unit.get_point().get_x(), min(unit.get_point().get_y()+1, 4))).get_ooa() == 0:
                     damage[0] = int(damage[0] * 0.9)
+
+
+    #--- Revival ---#
+    #type 5
+    #I: revive with 1 hp
+    #II: revive with 10% hp
+    #III: revive with 25% hp
+    #IV: revive with 50% hp
+    #V: revive with 100% hp
+    class Revival_1(Passive):
+        def __init__(self):
+            self.check = 5
+            self.flavour = "The first time the unit is put out of action, the unit returns immediately with 1 HP."
+            self.title = "Revival I"
+            self.charges = 1
+
+        def exert(self, unit):
+            self.set_charges(0)
+            unit.set_hp(1)
+
 
 
 

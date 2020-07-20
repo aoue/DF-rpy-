@@ -290,7 +290,7 @@ init python:
             self.acc = None_accessory()
             #moves:
             self.moves = [E_claw(), E_jaws(), E_rush(), E_howl()]
-            self.passive = Passive()
+            self.passive = (Passive(), Passive())
 
             self.hp = self.get_hpmax_actual()
             self.stamina = self.get_staminamax_actual()
@@ -344,7 +344,7 @@ init python:
             self.acc = None_accessory()
             #moves:
             self.moves = [E_claw(), E_spit()]
-            self.passive = Passive()
+            self.passive = (Passive(), Passive())
 
             self.hp = self.get_hpmax_actual()
             self.stamina = self.get_staminamax_actual()
@@ -398,7 +398,7 @@ init python:
             self.acc = None_accessory()
             #moves:
             self.moves = [E_froth(), E_jaws()]
-            self.passive = Stamina_Drain_1()
+            self.passive = (Stamina_Drain_1(), Passive())
 
             self.hp = self.get_hpmax_actual()
             self.stamina = self.get_staminamax_actual()
@@ -446,13 +446,13 @@ init python:
             self.magd = 40 #magical defense
 
             #gear
-            self.loot = (Mat_dog_teeth(), 100) #object, %chance 
+            self.loot = (Mat_dog_teeth(), 100) #object, %chance
             self.weapon = Beast_claw()
             self.armour = Beast_skin()
             self.acc = None_accessory()
             #moves:
             self.moves = [E_gobble(), E_clobber(), E_spew()]
-            self.passive = Passive()
+            self.passive = (Passive(), Passive())
 
             self.hp = self.get_hpmax_actual()
             self.stamina = self.get_staminamax_actual()
