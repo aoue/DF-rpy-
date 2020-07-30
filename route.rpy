@@ -3,6 +3,21 @@
 
 init python:
 
+
+    #for the main route:
+    # - add a confirm prompt when clicking. it says you will not be able to return.
+
+
+    def reset_loop(): #used to reset all the loopticks and stuff
+        loop = 0
+        looptick0 = 0
+        looptick1 = 0
+        looptick2 = 0
+        looptick3 = 0
+        looptick4 = 0
+
+
+
     #a route is a chain of events
     class Route():
         def __init__(self):
@@ -37,9 +52,9 @@ init python:
             self.lock = x
         #useful functions
         def call_event(self):
+            self.set_lock(1)
             renpy.call_in_new_context(self.get_jumps()[self.get_inc()])
             self.inc_up()
-            self.set_lock(1)
 
     #main story routes.
     #one per chapter, just to avoid getting cluttered. delete when chapter is done.

@@ -238,7 +238,7 @@ label p_ms_3:
     with brightfade
 
     "{w=1.0}.{w=1.0}.{w=1.0}."
-    "There must be a instinctual response at seeing someone else's reflection where you expect to see your own. Without an identity, a human is matter floating around together. Without a face, there is no identity."
+    "There must be a instinctual response at seeing someone else's reflection instead of your own. Without an identity, a human is matter floating around together. Without a face, there is no identity."
     "So I don't scream, but I would have. A second later I taste blood and let up."
     "Strange, I think, that there's no pain."
     mc "Please put the mirror down."
@@ -393,7 +393,7 @@ label p_ms_3:
 
     show list_0_2
 
-    extend " Since it's your first day, we'll take more. Just finish everything on that list, 'Kay?"
+    extend " Since it's your first day, we'll take extra. Just do everything else on that list, 'Kay? Should be no trouble."
 
     scene cherespoir_hill_2
 
@@ -401,31 +401,168 @@ label p_ms_3:
 
     show payton cutin
 
-    p "If you have any questions, ask each other. And remember- don't let the futility of your actions {i}ever{/i} impede your progress."
+    p "If you have any questions, just ask each other. And remember- don't let the futility of your actions {i}ever{/i} impede your progress."
 
     show mute
 
-    p "OK, but seriously, if you have any questions try asking Friday. She's been here for a few days already, and she's a fast learner. Aaaand I think she's been feeling a little shy. She hardly said a word the whole time we were walking."
-    p "Payton out. I would say don't call me, but you can't."
+    p "OK but seriously, if you have any questions try asking Friday. She's been here for a few days already, and she's a fast learner. Aaaand I think she's been feeling a little shy. She hardly said a word the whole time we were walking."
+    p "Payton out. I would say don't call me, but I don't think you know how. Ah, what a vile one-sided affair."
 
     hide mute
 
     python:
         ow.show_overworld(2)
 
-    #opens up the town.
+    #shows the map of cherespoir and unlocks the following events:
+    #-town square
+    #-lab
+    #-hill (optional)
 
-## --------------------- Done --------------------- ##
+    #once the mandatory events have been done, unlock one more event:
+    #-radio.
 
-
-
+    #once the radio event has been done, unlock one more event:
+    #-main story, which leads us to p_ms_4
 label p_ms_4:
-    #Scene 4: once that's done, call event from payton that says, sorry, they won't be able to make one of the stops on their list and need mc/friday to cover. just go check on the radar station. friday knows the way.
-    #call overworld again, this time with radar station unlocked. (hill can still be unlocked too.)
 
-    python:
-        ow.get_routes[2][5].set_lock(0) #unlocks the radio.
-        ow.get_routes[2][0].set_lock(1) #locks main story.
+    scene cherespoir_square
+    show yvette
+    with shortfade
+
+    show payton cutin
+
+    p "Look who's back."
+
+    $reset_loop()
+    while loop < 4:
+        menu:
+            "I have some questions." if looptick0 == 0:
+                python:
+                    looptick0 = 1
+                    looptick1 = 1
+                    looptick2 = 1
+                    looptick3 = 1
+                    looptick4 = 1
+                mc "I have some questions."
+                p "Sure, sure."
+
+            "Was that poison in the lab?" if looptick1 == 1:
+                python:
+                    loop += 1
+                    looptick1 = 2
+                    looptick2 = 0
+                mc "Was that poison in the lab?"
+                p "Uhm, yeah, kind of. Yvette, tell him."
+
+                show yve smile
+
+                y "It's pesticide."
+
+                show yve
+
+                mc "Is there a pest problem here? In the middle of the tundra?"
+                y "You saw the body in the street, didn't you? So yes, there's a bit of a pest problem."
+                mc "Is the... pesticide dangerous?"
+
+                show yve smile
+
+                y "Very. That's the entire point."
+
+                show yve
+
+                p "Yve likes poison."
+                y "I do not."
+
+            "The carcass in the street?" if looptick2 == 1:
+                python:
+                    loop += 1
+                    looptick2 = 0
+
+                mc "The carcass in the street?"
+                p "Oh, you saw that? Friday, you should know better. You'll scare him."
+                "Friday bows her head."
+                f "I'm sorry, I was being thoughtless."
+                p "Anyway, yeah there's a dead dog in the street. Never seen that before?"
+                mc "No, I haven't."
+                p "Well, I guess we live in different neighbourhoods. Don't worry about it, the dead ones are harmless."
+
+            "The radio?" if looptick3 == 1:
+                python:
+                    loop += 1
+                    looptick3 = 0
+                mc "The radio?"
+                p "Oh right! What did they say this time?"
+                "Friday repeats the message."
+                p "Alright, good job Friday."
+                mc "What does it mean?"
+                p "Just about what it says, really."
+                mc "Oh... "
+                p "I mean, sometimes we receive encoded messages and the like, but there's nobody out here and we don't really care if people do here what we're talking about. It's not important enough to be kept secret."
+                p "I'll tell you more about it later, I promise."
+
+            "Is this a ghost town?" if looptick4 == 1:
+                python:
+                    loop += 1
+                    looptick3 = 0
+                mc "Is this a ghost town?"
+                p "Kind of? People thought it'd be better to make themselves scarce while we get things sorted here."
+                p "Not that I mind. There's something nice about an empty town, you know?"
+
+            "[[End]":
+                $loop = 4
+
+
+    mc "So, what's next?"
+    "Yvette claps her hands together."
+    p "Right, follow me."
+    "Yvette leads the way to the outskirts of the town."
+
+    scene cherespoir_shed
+    with brightfade
+    show payton cutin
+
+    p "Welcome to Cherespoir base. I'd give you a tour, but you've gotten it just by walking in."
+    "There whole space is one wide open room. In the center, a cheerful-looking snowmobile is tied securely to struts in the floor. The walls of the building are packed with workbenches or racks from end to end while confused among them is an extensive collection of deadly weaponry."
+    "Most of them are alien to me, but most of the weapons I've seen or heard about are represented here."
+
+    if looptick1 == 2:
+        p "Yve likes weapons too."
+        y "Everyone likes weapons. They're a universal language."
+    "Yvette circles the snowmobile, giving it an inspection."
+    if looptick0 == 1:
+        p "I promised you an explanation, didn't I? Let's get going and I'll give it on the way."
+    else:
+        p "Let's get going. I should probably explain something about why we're even here on the way."
+    p "But first, Yve get them ready."
+
+    hide payton cutin
+    show yve
+
+    y "Here."
+    "She tosses a helmet towards Friday, but the throw is wide. Friday catches it in a burst of movement."
+
+    hide yve
+    show friday helmet
+    with dissolve
+
+    y "Make sure you're ready to fight. There's a chance we'll run into something that doesn't like us very much."
+    p "Rather, We're counting on it."
+    f "May I prepare?"
+    "She asks me quietly."
+    mc "Um, yes, please. I'm not really sure about this kind of thing. I'll be relying on you, Friday."
+    f "Yes."
+
+    hide friday helmet
+
+    "Friday puts the helmet on in a practiced movement. From my perspective, not much has changed besides a slight darkening of my vision through the glass. Next, she steps to one of the workbenches along the edge of the room where a nest of equipment lies half stacked, half sprawled among itself."
+    "Friday puts on it all on, finishing with strapping a holster for a gun to one leg, and a row of knives to the other. Finally there is nothing left to the pile."
+    mc "That's a lot of equipment. I'm sorry you have to carry all that."
+    f "It is comparatively light."
+
+    show yve armoured
+
+    "Yve appears from the other side of the room again."
+    y "You're all dressed up, good. We haven;t got any time to lose today."
 
 
 
@@ -433,18 +570,35 @@ label p_ms_4:
 
 
 
-label p_ms_5:
-    #scene 5: mc tells payton they were attacked. payton says no kidding, this is why we're here. mc asks if this is related to the pesticide. payton says yeah, it is, good job. let's get on the snowmobile and get moving. there's still lots to do today.
+
+
+
+
+
+
+
+    #about fighting: mc is very nervous. he doesn't want to say anything. he's hoping that it's not going to happen. he's been trying not to think about it.
+
+
+    #payton gives a complete explanation of the objective of the mission and the role each person has to play. she says what's happened so far, what they still have to do, and how they plan to do it.
+
+    #payton tells mc more about the interface and its different levels of connectivity. explains how mc can always pull the kill switch. mc says shouldnt they say this privately. payton says no, friday knows. show her some respect.
 
     #yvette starts slowing the snowmobile down. She kills the engine. Listen, she says. She hears monsters and so does friday. Mc can’t hear it though. He wants to know what’s going on though, so he glances up at the rest of the interface. He considers connecting. CHOICE. Either way, the monsters are coming this way, they must have smelled the two operatives. They might be able to escape, but the monsters would start chasing instead of stalking if the snowmobile was turned back on. We can take these guys, Yve says. Also, mc’s has to connect to the interface at this point if he hasn’t already.
 
-    #Combat tutorial.
+    #Combat tutorial: (no deployment) one enemy shows up, yvette says it's fine, just leave it to me. tutorial, command yvette versus 1 monster. then, the other two that were circling appear. yvette says it's still fine, but mc can friday's eagerness and it affects him too. he enters the full contact connection. yve gives some advice before the 2v2:
+    #yve tries to give some advice bero
 
     #After fighting, mc is kind of shook. Friday is more or less acting herself and just waiting for confirmation from mc to act. Mc stammers out to follow yve’s lead. Yve starts tracking the beasts. They follow to the crest of a hill and see the tracks go quite a ways. Mc wonders if they should go back for the snowmobile. It’ll be more dangerous, but faster. They’re just doing reconnaissance today, so Yve says there’s no rush. Better to go in nice and quiet. They walk quickly through the snow all through the morning and most of the afternoon before they finally find the nest, what they were looking for. They wait awhile before heading in.
 
     #Dungeon tutorial. the player has to scout a way to the center of the dungeon. Bonus marks for finding other exits
 
-label p_ms_6:
+    jump p_ms_5
+
+
+
+
+label p_ms_5:
     #Scene 6: Once finding the center, yve says this would be the best place for them to apply pesticide. They really need to be getting back, though. There’s a long walk back to the snowmobile. payton suggests she can take care of Friday from here. Mc says no, it's still dangerous. they need to get back. yve says its probably fine, mc says he doesnt want to take that chance. (this part is direct.)
     # they drive back and yve/payton congratulate the two of them. they're working well together, real faster, you've never met before, etc. the recipients clumsily accept.
     # a while of silence and friday falls asleep. payton contacts mc again, tells him that's enough, she'll take it from here and no arguing. he did fine for his first day. see you tomorrow, you'll need to be rested for that. mc exits the interface.
@@ -455,7 +609,7 @@ label p_ms_6:
 
     #end of prologue day 1.
 
-label p_ms_7:
+label p_ms_6:
     #day 2.
 
 

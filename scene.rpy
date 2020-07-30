@@ -47,6 +47,14 @@ init:
     #image cherespoir_hill = "" #the hill at one end of town where the hotel is. overlooks the whole town and the snowy wasteland all around it. it's not a normal bg shot. instead, the shot has yve and friday standing in it.
     #image cherespoir_hill_1 = "" #same as cherespoir_hill, but friday is pulling her coat around herself. cold. add some wind.
     #image cherespoir_hill_2 = "" #same as cherespoir_hill_1, but now yve is gone. also, remove the wind.
+    #image cherespoir_square = "" #in the town square. ground is a bunch of grey slush and crisscrossing footprints.
+    #image cherespoir_lab = "" #it's an old lab place. very dirty, spills, weird colours. dark, cobwebs. there's a container on the desk. got poison symbol, do not touch, fragile, written on it.
+    #image cherespoir_radio = "" #show friday at the radio station, wearing an old strange looking headset. there's weird dials and whatnot too. there's a lamp on somewhere, but it doesn't do much.
+    #image cherespoir_shed = "" #the shed where the snowmobile is stored. new building, bright lights, shiny. contrasts with the rest of the buildings we've been to so far.
+
+    #cherespoir props (a prop is an image that doesn't take up the whole screen.)
+    #image jowler_corpse = "" #grey background, image is in its own special frame. corpse of a monster. dead, not too large. clear stab wound in its torso. it's a jowler.
+    #image armory = "" #a closet opened. it has weapons hanging on every surface
 
 
 
@@ -58,11 +66,15 @@ init:
 
     #--- CHARACTERS ---#
     #image friday = ""
+    #image friday helmet = "" #friday holding a combat helmet. it's shiny and part of her face is reflected in it.
 
 
     #image yve = ""
     #image yve ear = "" #yve pointing at her ear. she means the handler.
     #image yve smile = "" #she's smiling. eyebrows up. looks curious too. like oh? a nice surprise.
+    #image yve stern = "" #she's stern.
+    #image yve mad = "" #she's upset. she feels betrayed. disbelief.
+    #image yve armoured = "" #she's in heavy armour. full combat suit with helmet. intimidating. bandana tied to arm or shoulder or something.
 
     #image mueler
     #image mueler stretch
@@ -97,6 +109,9 @@ init:
     #interface1 = #sound of more straps, different sound
     #interface2 = #sound of metal operating along a lever. folding.
     #interface_start = #sound of the interface starting. a short little melody, followed by 'welcome, animus.'
+
+    #--- MUSIC ---#
+    #radio_static = "" #sound of radio static. for cherespoir radio station calibration
 
 
 

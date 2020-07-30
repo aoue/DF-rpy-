@@ -1,5 +1,6 @@
 #--------------------------------
 #self.pattern #move slots
+# i: front/back/wild
 # 1: 4/2/1
 # 2: 3/3/1
 # 3: 2/4/1
@@ -321,13 +322,17 @@ init -1 python:
             self.set_dodge(self.get_dodgemax_actual())
             self.set_deployable(1)
             self.get_stance().post_battle()
-        def check_dead(self, battle):
+        def check_dead(self, battle, dealer):
             if self.get_hp() == 0:
 
-                for p in self.get_passive():
+                for p in self.get_passive(): #unit has been put ooa
                     if p.get_check() == 5:
                         p.exert(self)
                         return
+
+                for p in dealer.get_passive(): #dealer has put unit ooa
+                    if p.get_check() == 6:
+                        p.exert(dealer)
 
                 self.set_able(0)
                 self.set_stamina(0)
@@ -450,14 +455,19 @@ init -1 python:
                 if target.get_stance().get_mtn() == 1:
                     target.get_stance().set_mtn(0)
 
-            hit = self.get_hit() * self.get_stance().get_hit()
+            hit = max((self.get_hit() * self.get_stance().get_hit()) + cmove.get_hit() + 5, 5) #max(5, 5 + attacker's hit + move hit.)
             dodge = target.get_dodge() * target.get_stance().get_dodge()
 
-            #the unit tries to dodge
+            #the unit tries to dodge. success: decrease unit's dodge.
             if renpy.random.randint(1, 100) < max(dodge - hit, 0):
+
                 if target.get_dodgemax_actual() > 0:
-                    target.set_dodge(max(target.get_dodge()-abs(self.get_hit()+cmove.get_hit()), 0))
+                    #target.set_dodge(max(target.get_dodge()-abs(self.get_hit()+cmove.get_hit()), 0))
+                    target.set_dodge(int(max(target.get_dodge() - hit, 0))) #can only go down to 0
+
+
                 return -1 #dodge successful. returns -1 damage
+
 
             if cmove.get_element == -1:
                 aff_mod = target.get_aff_mod(self.get_weapon().get_aff())
@@ -470,6 +480,7 @@ init -1 python:
             damage = damage * ((atk) * (cmove.get_power() + self.get_lvl()) / (dfs)) * aff_mod * spread
 
             return int(damage)
+
         def take_damage(self, dealer, damage, showlist, battle, dot, duration):
             #self: unit taking the damage
             #dealer: unit dealing the damage
@@ -480,21 +491,16 @@ init -1 python:
 
             #any stances that do: take 2x damage, 0.5x damage, etc. need to be handled in here.
 
+            #dodge does not regenerate when the unit is hit. (passives notwithstanding.)
             if damage == -1: #dodge
                 showlist.append((self.get_point().get_x(), self.get_point().get_y(), "Dodge", self.get_iff()))
                 return
 
-                #when a unit dodges, its dodge goes down
-                #when a unit it hit, its dodge goes up
-                #dodge is changed by the dodge_change variable??
-                #^can never go less that 0, or above dodgemax
-            if self.get_dodgemax_actual() > 0:
-                self.set_dodge(min(self.get_dodge()+int(self.get_dodgemax_actual()*1.1), self.get_dodgemax_actual()))
 
             #call passive:
             for p in self.get_passive():
                 if p.get_check() == 3:
-                    wordaround = [damage]
+                    workaround = [damage]
                     p.exert(self, battle, workaround)
                     damage = workaround[0]
 
@@ -507,7 +513,7 @@ init -1 python:
             #unit takes damage
             showlist.append((self.get_point().get_x(), self.get_point().get_y(), damage, self.get_iff()))
             self.set_hp(max(self.get_hp()-damage, 0))
-            self.check_dead(battle)
+            self.check_dead(battle, dealer)
 
         def use_move(self, cmove, battle):
             #legend:
@@ -605,8 +611,8 @@ init -1 python:
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
-            self.passive = (Passive(), Passive())
-            self.passivelist = []
+            self.passive = (Adrenaline_Rush_1(), Passive())
+            self.passivelist = [Adrenaline_Rush_1()]
 
     class Unit_friday(Unit):
         def __init__(self):
@@ -666,8 +672,8 @@ init -1 python:
 
             self.moves = [self.move1,self.move2,self.move3,self.move4,self.move5,self.move6,self.move7]
             self.movelist = []
-            self.passive = (Passive(), Passive())
-            self.passivelist = []
+            self.passive = (Flexibility_1(), Passive())
+            self.passivelist = [Flexibility_1()]
 
 
     #guest units

@@ -35,7 +35,7 @@ screen level_up(showlist, showlist2):
             if showlist[i][2] == 1: #if the unit leveled up
                 text "Level: " + str(showlist[i][0].get_lvl()-1) + " --> " + str(showlist[i][0].get_lvl()) + "(level up)"
             else:
-                text str(showlist[i][0].get_lvl()) + " --> " + str(showlist[i][0].get_lvl())
+                text "Level: " + str(showlist[i][0].get_lvl()) + " --> " + str(showlist[i][0].get_lvl())
 
             text "Exp: " + str(showlist[i][4]) + " --> " + str(showlist[i][0].get_exp()) + " / " + str(showlist[i][0].get_next_level_exp())
 

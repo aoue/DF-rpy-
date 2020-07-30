@@ -334,11 +334,11 @@ init -2 python:
         renpy.hide_screen("ally_highlight_extra")
     def call_highlight_e(unit, cmove, battle):
         battle.refresh_visuals()
-        sq = renpy.call_screen("enemy_highlight", unit, cmove)
+        sq = renpy.call_screen("enemy_highlight", unit, cmove, battle)
         return sq
     def call_highlight_a(unit, cmove, battle):
         battle.refresh_visuals()
-        sq = renpy.call_screen("ally_highlight", unit, cmove)
+        sq = renpy.call_screen("ally_highlight", unit, cmove, battle)
         return sq
     def call_highlight_walk(unit, battle):
         battle.refresh_visuals()

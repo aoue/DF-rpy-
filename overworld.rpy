@@ -44,7 +44,7 @@ init 2 python:
             ## -- Add only once it's actually implemented -- ##
             self.ow_routes = [Route_ms_0()]
             self.hq_routes = [Route_ms_0()] #mueler, tori, control, crafting, hospital.
-            self.cherespoir_routes = [Route_ms_0(), Route_hill(), Route_store(), Route_square(), Route_lab(), Route_radio()] #friday, payton
+            self.cherespoir_routes = [Route_ms_0(), Route_hill(), Route_square(), Route_lab(), Route_radio()] #friday, payton
             self.routes = [self.ow_routes, self.hq_routes, self.cherespoir_routes]
 
             self.bg = [["city_map"],["hq_map"], ["cherespoir_map_day", "cherespoir_map_night"]] #the background image.
@@ -234,7 +234,7 @@ init 2 python:
                     pl.append(unit.get_acc().get_passive())
 
             if unit.get_passive()[x] in pl:
-                pl.remove(unit.get_passive()) #swap this to remove all occurences of the equipped passive in pl
+                pl.remove(unit.get_passive()[x]) #swap this to remove all occurences of the equipped passive in pl
 
             new_passive = renpy.invoke_in_new_context(self.passive_view, pl)
 

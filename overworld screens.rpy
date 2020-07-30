@@ -38,7 +38,7 @@ screen party_view(party, i, ow):
     add party[i].get_pose() pos (380, 40)
 
     #close button
-    textbutton "close" action Return pos (245, 10)
+    textbutton "close" action Function(ow.close_party), Return pos (245, 10)
 
     #character's affinity inforrmation
     vbox:

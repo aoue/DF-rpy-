@@ -264,7 +264,7 @@ init -2 python:
             self.set_maga(self.get_maga() - 0.1)
 
         def enter_defend(self):
-            self.set_defend(1)
+            self.set_defend(2)
             self.set_physd(self.get_physd() + 0.5)
         def exit_defend(self):
             self.set_physd(self.get_physd() - 0.5)

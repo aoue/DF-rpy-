@@ -168,7 +168,7 @@ init -3 python:
         def do_damage(self, unit, targetlist, battle, dot, duration):
             showlist = []
 
-            targetlist = list(set(targetlist))
+            targetlist = list(set(targetlist)) #uncommment this line to turn off multihit.
 
             for target in targetlist:
                 if isinstance(target, tuple):
@@ -351,7 +351,7 @@ init -3 python:
         #low stam, med able
         def __init__(self):
             self.status_only = 1
-            self.flavour = "{i}Adrenaline washes away the pain{/i}"
+            self.flavour = "{i}Adrenaline is the best painkiller.{/i}"
             self.title = "Adrenaline"
             self.rank = 2
             self.type = 0
@@ -387,7 +387,7 @@ init -3 python:
         #med stam, low able
         def __init__(self):
             self.status_only = 0
-            self.flavour = "{i}I am a storm.{/i}"
+            self.flavour = "{i}spin spin{/i}"
             self.title = "Ice Whirl"
             self.rank = 1
             self.type = 27

@@ -40,7 +40,7 @@ label start:
     stop music fadeout 1.0
 
 
-    call map0
+    #call map0 #calls a combat test. 
 
     default ow = Overworld()
 

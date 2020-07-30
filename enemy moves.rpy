@@ -481,8 +481,8 @@ init -2 python:
 
     class E_call_jowlers(Enemy_move):
         def __init__(self):
-            self.flavour = "{i}Calls 3 jowlers to join the fight.{/i}"
-            self.title = "Call Jowlers"
+            self.flavour = "{i}Calls a jowler to join the fight.{/i}"
+            self.title = "Call Jowler"
             self.rank = 1
             self.type = 1
             self.clearance = (0,0)
@@ -507,17 +507,9 @@ init -2 python:
             self.translate(unit, battle)
 
             if len(el) == 1:
-                newbaddie = Unit_jowler(0, "jowler", battle.get_enemymap().random_empty(), 0)
+                newbaddie = Unit_jowler(0, "Jowler", battle.get_enemymap().random_empty(), 1)
                 el.append(newbaddie)
                 battle.get_enemymap().place_unit(newbaddie)
-
-                newbaddie2 = Unit_jowler(0, "jowler 2", battle.get_enemymap().random_empty(), 0)
-                el.append(newbaddie2)
-                battle.get_enemymap().place_unit(newbaddie2)
-
-                newbaddie3 = Unit_jowler(0, "jowler 3", battle.get_enemymap().random_empty(), 0)
-                el.append(newbaddie3)
-                battle.get_enemymap().place_unit(newbaddie3)
 
                 return
 
@@ -547,7 +539,7 @@ init -2 python:
             self.e_drain(unit)
             self.translate(unit, battle)
 
-            if len(el) == 1:
+            if len(el) < 3:
                 move_alt = E_call_jowlers()
                 move_alt.exert(unit, pl, el, battle)
                 unit.set_stamina(min(unit.get_stamina()+20, unit.get_staminamax()))

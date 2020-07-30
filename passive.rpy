@@ -18,7 +18,7 @@
 # unit is attacked (3)      --> unit.take_damage
 # unit is healed (4)        --> unit.take_heal/unit.take_heal_oob
 # unit is put ooa (5)       --> unit.check_dead
-
+# unit kills (6)            --> unit.check_dead (dealer)
 
 #example
 init python:
@@ -42,6 +42,43 @@ init python:
         #setters
         def set_charges(self, x):
             self.charges = x
+
+    #--- Adrenaline Rush ---#
+    #type = 6
+    #I: extend by 1 turn
+    #II: extend by 2 turns
+    #III: reset to full duration
+    class Adrenaline_Rush_1(Passive):
+        #when the unit attacks and kills, extend the length of the adrenaline status by 1 turn.
+        def __init__(self):
+            self.check = 6
+            self.flavour = "When putting an enemy out of action, if {i}adrenaline{/i} status is active, extend its duration by 1 round."
+            self.title = "Adrenaline Rush I"
+
+        def exert(self, unit):
+            #called in check dead
+            if unit.get_stance().get_adrenaline() > 0:
+                unit.get_stance().set_adrenaline(unit.get_stance().get_adrenaline()+1)
+
+
+    #bloodhungry or something. on kill, regain some able. some stam? it's another passive for Payton.
+
+    #--- Flexibility ---#
+    #type = 3
+    #I: regain 1/10 of max dodge
+    #II: regain 1/5 of max dodge
+    #III: regain 1/2 of lost dodge
+    class Flexibility_1(Passive):
+        #when hit, regain 10% of max dodge.
+        def __init__(self):
+            self.check = 3
+            self.flavour = "When hit, regain 1/10 of max dodge."
+            self.title = "Flexibility I"
+
+        def exert(self, unit, battle, damage):
+            #called in take_damage. when unit is hit.
+            unit.set_dodge(int(min(unit.get_dodge() + unit.get_dodgemax_actual() / 10, unit.get_dodgemax_actual())))
+
 
     #--- Stick Together ---#
     #type = 3
@@ -82,7 +119,6 @@ init python:
                 if map.search_map((unit.get_point().get_x(), min(unit.get_point().get_y()+1, 4))).get_ooa() == 0:
                     damage[0] = int(damage[0] * 0.9)
 
-
     #--- Revival ---#
     #type 5
     #I: revive with 1 hp
@@ -100,9 +136,6 @@ init python:
         def exert(self, unit):
             self.set_charges(0)
             unit.set_hp(1)
-
-
-
 
     #--- Stamina Drain ---#
     #type = 1

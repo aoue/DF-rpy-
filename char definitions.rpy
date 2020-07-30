@@ -39,7 +39,7 @@ define i = Character("Iris", color = purple, what_color= lightpurple, what_prefi
 
 ## -- interface voices -- ##
 define c = Character("Control", color = temp, what_color=temp, what_prefix='--')#, what_suffix='--') #osgood. mission control.
-
+define v = Character("Voice", color = temp, what_color=temp, what_prefix='--')#, random interface or radio voice or whatever.
 
 #names?
 #metz

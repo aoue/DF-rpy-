@@ -12,6 +12,7 @@
 #put all labels for friday;s events in here.
 #friday's events are not just limited to when friday is back at the hq.
 
+#you won't die... because i'll protect you. (rei -> shinji)
 
 
 label r_friday0:

@@ -8,7 +8,8 @@
 
 init python:
     def show_status_screen(unit):
-        renpy.show_screen("status_screen", unit)
+        if unit != None:
+            renpy.show_screen("status_screen", unit)
 
 
 screen status_screen(unit):
@@ -17,15 +18,16 @@ screen status_screen(unit):
     # -unit's natural/armour affinity
     # -unit's passive
 
-    zorder 100
+    zorder 110
     frame: #obviously all the positioning aspects will have to be perfected.
         background Solid("#0000007F") # for transparency. colour = rrggbbaa where red green blue alpha
-        area(910, 500, 300, 200)
+        area(910, 300, 300, 350)
         ypadding 5
         xpadding 10
 
         vbox:
             text unit.get_name()
+            text "HP: " + str(unit.get_hp()) + "/" + str(unit.get_hpmax_actual())
             text "Aff: " + unit.get_aff_name() + ","  + unit.get_armour().get_aff_name()
             text "wpn aff: " + unit.get_weapon().get_aff_name()
             text "I-Passive: " + unit.get_passive()[0].get_title() #i for intrinsic
@@ -36,6 +38,9 @@ screen status_screen(unit):
                 text "Poison: " + str(unit.get_stance().get_poison())
 
             #stances
+            if unit.get_stance().get_defend() > 0:
+                text "Defend: " + str(unit.get_stance().get_defend())
+
             if unit.get_stance().get_adrenaline() > 0:
                 text "Adrenaline: " + str(unit.get_stance().get_adrenaline())
 
@@ -56,7 +61,6 @@ screen status_screen(unit):
 
             if unit.get_stance().get_mtn() > 0:
                 text "MTN: " + str(unit.get_stance().get_mtn())
-
 
 screen combatinfo(pl, el, pt, et, rounds, ph):
     #display battle information: turns left for each, rounds, hp, positions, etc
@@ -96,6 +100,13 @@ screen show_units(pl, el):
             idle unit.get_icon()
             hover unit.get_icon()
             action NullAction() hovered Function(show_status_screen, unit) unhovered Hide("status_screen")
+        bar:
+            xsize 120
+            ysize 15
+            pos(265 + 124*unit.get_point().get_x(), 455 + 62*unit.get_point().get_y())
+            value AnimatedValue(value = unit.get_hp(), range = unit.get_hpmax_actual(), delay = 1.0)
+
+
 
     for unit in el:
         #add unit.get_icon() pos(265 + 124*unit.get_point().get_x(), -2 + 62*unit.get_point().get_y())
@@ -106,6 +117,11 @@ screen show_units(pl, el):
             idle unit.get_icon()
             hover unit.get_icon()
             action NullAction() hovered Function(show_status_screen, unit) unhovered Hide("status_screen")
+        bar:
+            xsize 120
+            ysize 15
+            pos(265 + 124*unit.get_point().get_x(), 46 + 62*unit.get_point().get_y())
+            value AnimatedValue(value = unit.get_hp(), range = unit.get_hpmax_actual(), delay = 1.0)
 
 screen show_damage(showlist, title, unit):
     #showlist: list of four-tuples: (grid x, grid y, damage, iff)
@@ -125,6 +141,7 @@ screen show_damage(showlist, title, unit):
             if tup[2] > 0:
                 text "-{}".format(tup[2]) color "ff0000" pos(265 + 124*tup[0], 415 + 62*tup[1])
             add "tile_e_hovered" at a_tile_hover(tup[0], tup[1])
+
 
     timer 1.0 action Hide("show_damage", transition = dissolve)
 
@@ -243,8 +260,7 @@ screen move_browse_b(move):
                 text "hit bonus = " + str(move.get_hit())
                 text "affinity = " + str(move.get_element_name()) #<-- replace text with image.
 
-#no-lane version of target selecting. keeping it around in case i want to go back.
-screen enemy_highlight_old(unit, cmove):
+screen enemy_highlight(unit, cmove, battle):
     zorder 101
 
     if cmove.get_type() == 26 or cmove.get_type() == 27:
@@ -257,7 +273,7 @@ screen enemy_highlight_old(unit, cmove):
                     else:
                         hover "images/combat/fx/tile e hover.png"
                     pos(265 + (124*row), -2 + (62*column))
-                    action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
+                    action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column), Function(show_status_screen, battle.get_enemymap().search_map((row, column))) unhovered Function(hide_highlighter) #return tuple
 
     else:
         for column in range(0, 5): #column
@@ -265,42 +281,14 @@ screen enemy_highlight_old(unit, cmove):
                 imagebutton:
                     idle "images/combat/fx/tile.png"
                     hover "images/combat/fx/tile e hover.png"
-                    pos(265 + 124*row, -2 + 62*column)
-                    action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
-
-    frame:
-        area (530, 340, 100, 40)
-        textbutton "Cancel" action Return(-1)
-
-screen enemy_highlight(unit, cmove):
-    zorder 101
-
-    if cmove.get_type() == 26 or cmove.get_type() == 27:
-        for column in range(1, 4): #column
-            for row in range(1, 4): #row
-                imagebutton:
-                    idle "images/combat/fx/tile.png"
-                    if cmove.get_type() == 27:
-                        idle "images/combat/fx/tile.png"
-                    else:
-                        hover "images/combat/fx/tile e hover.png"
                     pos(265 + (124*row), -2 + (62*column))
-                    action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
-
-    else:
-        for column in range(0, 5): #column
-            for row in range(max(0, unit.get_point().get_x()-1), min(5, unit.get_point().get_x()+2)): #row
-                imagebutton:
-                    idle "images/combat/fx/tile.png"
-                    hover "images/combat/fx/tile e hover.png"
-                    pos(265 + 124*row, -2 + 62*column)
-                    action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
+                    action Return((row, column)) hovered Function(enemy_highlighter, unit, cmove, row, column), Function(show_status_screen, battle.get_enemymap().search_map((row, column))) unhovered Function(hide_highlighter) #return tuple
 
     frame:
         area (530, 340, 100, 40)
         textbutton "Cancel" action Return(-1)
 
-screen ally_highlight(unit, cmove):
+screen ally_highlight(unit, cmove, battle):
     zorder 101
 
     if cmove.get_type() == 0: #for targeting self
@@ -317,7 +305,7 @@ screen ally_highlight(unit, cmove):
                     idle "images/combat/fx/tile.png"
                     hover "images/combat/fx/tile f hover.png"
                     pos(265 + (124*row), 407 + (62*column))
-                    action Return((row, column)) hovered Function(ally_highlighter, unit, cmove, row, column) unhovered Function(hide_highlighter) #return tuple
+                    action Return((row, column)) hovered Function(ally_highlighter, unit, cmove, row, column), Function(show_status_screen, battle.get_allymap().search_map((row, column))) unhovered Function(hide_highlighter) #return tuple
 
     frame:
         area (530, 340, 100, 40)

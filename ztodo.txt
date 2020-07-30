@@ -17,23 +17,48 @@ backgrounds: taxi, hotel entrace, hotel desk, nai's office
 dungeon backgrounds: generic rooms, idk what else exactly
 music: at least one battle track and one event track would be nice.
 
--code-
-overworld: switching overworld backgrounds when backstreets is clicked.
-ai: healing. human squads usually have a healer in the group.
-units: yve and friday need leveling from 1 to 10. yve starts at a higher level than friday.
-write: all the story, the room events too.
-
-design the whole dungeon. create all the event labels. then fill them up.
-
-
 
 ------the very next thing(s)------
 
-each unit has two passives: gear passive and intrinsic passive.
-intrinsic passive can only come from learned passive list/pool. These can be to represent the handler. [0]
-gear passive can only come from gear. much more mundane passives. [1]
+yvette and friday switch loadouts? switch combat roles?
+it fits the more idea of friday being berserker or whatnot. also of friday being a fighter while yve not.
+on the other hand, friday's controller fighting style makes her bloodlust more real. she's making conscious decisions as she fights, it's just that she decides to keep killing.
 
-combat lanes. a unit in row x can only target a hex in rows x-1, x, x+1. is this even a good change, though?
+
+continue with story.
+
+who are the operatives?
+what do they have in common:
+ -almost all women
+ -all sensitives
+
+change the names of stats:
+ p_atk -> str?
+ p_def -> con?
+ m_atk -> sen(se)?
+ m_def -> ret(icence)?
+
+unit's actual focuses:
+-yve: scout
+-friday: fighter
+unit's learnsets to level 10
+stat increases to level 10.
+
+dungeon:
+-rooms with different shapes and sizes. given from an image in self.shape or whatever. to make the room's imgbutton the proper shape, give it the property: focus_mask True
+-rooms are at different distances from each other.
+
+intrinsic passives.
+    - payton (bloodhungry): on kill, regain all able? 1 able? stam?
+
+
+
+beastiary. data on monsters, etc.
+convert the glossary.
+#-stats
+#short biodata: life expectancy, habitat, prey, predators (no known predators),
+#latin name:
+# -jowler: lupus eruo. destroying/digging wolf
 
 inventory:
     -using items in battle
